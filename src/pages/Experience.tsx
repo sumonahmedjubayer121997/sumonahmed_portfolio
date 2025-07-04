@@ -76,7 +76,7 @@ const Experience = () => {
             </div>
 
             <div
-              className="absolute  -right-5 sm:right-0 md:right-0 lg:right-0 -top-8"
+              className="absolute  -right-28 sm:right-0 md:right-0 lg:right-0 -top-8"
               // style={{
               //   position: "absolute",
               //   right: 0,
