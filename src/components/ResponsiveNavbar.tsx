@@ -131,15 +131,19 @@ const ResponsiveNavbar = () => {
         className={`fixed left-0 top-0 h-full ${getNavbarWidth()} z-40 navbar-transition blur-navbar`}
       >
         <div className="h-full w-full bg-sidebar-background border-r border-sidebar-border shadow-sm">
-          <div className="p-4 flex flex-col h-full">
+          <div className="p-2 flex flex-col h-full">
             {/* Logo/Profile Section */}
             <div
               className="text-center mb-6 cursor-pointer transition-all duration-200 hover:bg-sidebar-accent rounded-lg p-2"
               onClick={handleLogoClick}
             >
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 mx-auto mb-2 flex items-center justify-center">
-                <span className="text-foreground font-semibold text-sm">S</span>
+              <div className="w-10 h-10 rounded-full bg-black mx-auto mb-2 flex items-center justify-center border border-black">
+                <img
+                  src="../../public/logo.png"
+                  className="w-6 h-6 object-contain"
+                />
               </div>
+
               {shouldShowLabels() && (
                 <>
                   <h2 className="text-sm font-semibold text-foreground mb-1">

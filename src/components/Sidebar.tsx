@@ -126,7 +126,8 @@ const Sidebar = () => {
             {/* Profile Section */}
             <div className="text-center mb-6">
               <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 mx-auto mb-3 flex items-center justify-center backdrop-blur-sm">
-                <span className="text-foreground font-semibold">S</span>
+                {/* <span className="text-foreground font-semibold">S</span> */}
+                <img src="../../public/logo.png" />
               </div>
               <h2 className="text-lg font-semibold text-foreground mb-1">
                 {" "}
