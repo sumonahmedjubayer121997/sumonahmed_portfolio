@@ -8,9 +8,9 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   return (
-    <div className="min-h-screen bg-white flex">
+    <div className="min-h-screen bg-background text-foreground flex transition-colors duration-300">
       <Sidebar />
-      <main className="flex-1 lg:ml-80">
+      <main className="flex-1 lg:ml-72">
         {children}
       </main>
     </div>
