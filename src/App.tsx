@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,14 +12,18 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Tools from "./pages/Tools";
 import NotFound from "./pages/NotFound";
+import InteractiveBackground from "./components/InteractiveBackground";
+import FluidCursor from "./components/FluidCursor";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <InteractiveBackground />
     <TooltipProvider>
       <Toaster />
       <Sonner />
+
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
@@ -35,6 +38,7 @@ const App = () => (
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
+    <FluidCursor />
   </QueryClientProvider>
 );
 

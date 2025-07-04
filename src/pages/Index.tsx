@@ -1,4 +1,4 @@
-
+import FluidCursor from "@/components/FluidCursor";
 import Layout from "../components/Layout";
 import ProfileSection from "../components/ProfileSection";
 
