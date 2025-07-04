@@ -1,4 +1,3 @@
-
 const ProfileSection = () => {
   return (
     <div className="max-w-4xl mx-auto px-6 py-12 lg:py-24">
@@ -25,7 +24,9 @@ const ProfileSection = () => {
           >
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
           </svg>
-          <span className="font-medium">Connect with me on X for AI engineering insights & more</span>
+          <span className="font-medium">
+            Connect with me on X for AI engineering insights & more
+          </span>
         </a>
       </div>
 
@@ -46,8 +47,11 @@ const ProfileSection = () => {
           >
             kay.ai
           </a>{" "}
-          building AI Agents for Insurances. I have built multiple products in past 5 years.{" "}
-          <span className="text-gray-900 font-medium">Raised $100K funding</span>{" "}
+          building AI Agents for Insurances. I have built multiple products in
+          past 5 years.{" "}
+          <span className="text-gray-900 font-medium">
+            Raised $100K funding
+          </span>{" "}
           for my startup{" "}
           <a
             href="https://dreamboat.ai"
@@ -84,14 +88,17 @@ const ProfileSection = () => {
         <p className="text-lg text-gray-700 mb-4">
           My Go-to stack is{" "}
           <span className="font-semibold text-gray-900">
-            ReactJS, TypeScript, Python, Flask, NodeJS, Ruby on Rails, PostgreSQL, Redis, ShadCN,
+            ReactJS, TypeScript, Python, Flask, NodeJS, Ruby on Rails,
+            PostgreSQL, Redis, ShadCN,
           </span>{" "}
-          and{" "}
-          <span className="font-semibold text-gray-900">Tailwind CSS</span>.
+          and <span className="font-semibold text-gray-900">Tailwind CSS</span>.
         </p>
         <p className="text-lg text-gray-700">
           You can talk to me about{" "}
-          <span className="font-semibold text-gray-900">AI, new ideas, life, or anything else</span>.
+          <span className="font-semibold text-gray-900">
+            AI, new ideas, life, or anything else
+          </span>
+          .
         </p>
       </div>
     </div>
