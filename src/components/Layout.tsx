@@ -1,6 +1,6 @@
 
 import { ReactNode } from "react";
-import Sidebar from "./Sidebar";
+import ResponsiveNavbar from "./ResponsiveNavbar";
 
 interface LayoutProps {
   children: ReactNode;
@@ -9,9 +9,11 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="min-h-screen bg-background text-foreground flex transition-colors duration-300">
-      <Sidebar />
-      <main className="flex-1 lg:ml-72">
-        {children}
+      <ResponsiveNavbar />
+      <main className="flex-1 ml-16 lg:ml-56 transition-all duration-300">
+        <div className="p-6">
+          {children}
+        </div>
       </main>
     </div>
   );

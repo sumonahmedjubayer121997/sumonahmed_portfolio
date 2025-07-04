@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { X, Keyboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -7,8 +7,6 @@ import { Switch } from '@/components/ui/switch';
 interface ShortcutsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  isDarkMode: boolean;
-  onToggleDarkMode: () => void;
   isFocusMode: boolean;
   onToggleFocusMode: () => void;
 }
@@ -16,14 +14,12 @@ interface ShortcutsModalProps {
 const ShortcutsModal = ({
   isOpen,
   onClose,
-  isDarkMode,
-  onToggleDarkMode,
   isFocusMode,
   onToggleFocusMode,
 }: ShortcutsModalProps) => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (!isOpen) return; // Only handle keys when modal is open
+      if (!isOpen) return;
       
       if (event.key === 'Escape') {
         onClose();
@@ -56,15 +52,15 @@ const ShortcutsModal = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm"
       onClick={handleOverlayClick}
     >
-      <div className="relative w-full max-w-2xl mx-4 bg-background rounded-xl shadow-2xl border text-foreground">
+      <div className="relative w-full max-w-2xl mx-4 bg-background rounded-xl shadow-xl border border-border text-foreground">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
+        <div className="flex items-center justify-between p-6 border-b border-border">
           <div className="flex items-center gap-3">
             <Keyboard className="w-6 h-6" />
-            <h2 className="text-xl font-semibold text-foreground">TIP: Shortcuts</h2>
+            <h2 className="text-xl font-semibold text-foreground">Quick Access</h2>
           </div>
           <Button
             variant="ghost"
@@ -86,30 +82,22 @@ const ShortcutsModal = ({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-foreground">Open Quick Access</span>
-                <kbd className="px-2 py-1 text-xs bg-muted rounded border">Q</kbd>
+                <kbd className="px-2 py-1 text-xs bg-muted rounded border border-border">Q</kbd>
               </div>
               
               <div className="flex items-center justify-between">
                 <span className="text-sm text-foreground">Close Quick Access</span>
                 <div className="flex gap-2">
-                  <kbd className="px-2 py-1 text-xs bg-muted rounded border">Q</kbd>
+                  <kbd className="px-2 py-1 text-xs bg-muted rounded border border-border">Q</kbd>
                   <span className="text-xs text-muted-foreground">or</span>
-                  <kbd className="px-2 py-1 text-xs bg-muted rounded border">Esc</kbd>
+                  <kbd className="px-2 py-1 text-xs bg-muted rounded border border-border">Esc</kbd>
                 </div>
               </div>
               
               <div className="flex items-center justify-between">
-                <span className="text-sm text-foreground">Toggle Dark Mode</span>
+                <span className="text-sm text-foreground">Toggle Focus Mode</span>
                 <div className="flex items-center gap-2">
-                  <kbd className="px-2 py-1 text-xs bg-muted rounded border">D</kbd>
-                  <span className="text-xs text-muted-foreground">(works globally)</span>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-foreground">Toggle Focus</span>
-                <div className="flex items-center gap-2">
-                  <kbd className="px-2 py-1 text-xs bg-muted rounded border">F</kbd>
+                  <kbd className="px-2 py-1 text-xs bg-muted rounded border border-border">F</kbd>
                   <span className="text-xs text-muted-foreground">(when open)</span>
                 </div>
               </div>
@@ -118,28 +106,15 @@ const ShortcutsModal = ({
 
           {/* Action Center */}
           <div>
-            <h3 className="text-lg font-semibold mb-6 text-foreground">Action Center</h3>
+            <h3 className="text-lg font-semibold mb-6 text-foreground">Settings</h3>
             
             <div className="space-y-6">
-              <div className="flex items-center justify-between p-4 bg-accent/50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                    <span className="text-xs">🌙</span>
-                  </div>
-                  <span className="font-medium text-foreground">Dark Mode: {isDarkMode ? 'On' : 'Off'}</span>
-                </div>
-                <Switch
-                  checked={isDarkMode}
-                  onCheckedChange={onToggleDarkMode}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between p-4 bg-accent/50 rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-accent/30 rounded-lg border border-border/50">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
                     <span className="text-xs">🎯</span>
                   </div>
-                  <span className="font-medium text-foreground">Focus: {isFocusMode ? 'On' : 'Off'}</span>
+                  <span className="font-medium text-foreground">Focus Mode: {isFocusMode ? 'On' : 'Off'}</span>
                 </div>
                 <Switch
                   checked={isFocusMode}
@@ -148,7 +123,7 @@ const ShortcutsModal = ({
               </div>
             </div>
 
-            <div className="mt-6 pt-6 border-t">
+            <div className="mt-6 pt-6 border-t border-border">
               <h4 className="text-sm font-semibold mb-3 text-foreground">Recent Activities</h4>
               <div className="space-y-3 text-sm text-muted-foreground">
                 <div className="flex justify-between">
