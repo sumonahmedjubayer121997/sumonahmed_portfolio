@@ -1,24 +1,55 @@
+import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+const roles = [
+  "Software Engineer",
+  "Full Stack Developer",
+  "DevOps Enthusiast",
+];
+
 const ProfileSection = () => {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % roles.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12 lg:py-24">
+    <div className="max-w-4xl mx-auto px-6 py-12 lg:py-24 space-y-12">
       {/* Main Heading */}
-      <div className="mb-12">
+      <div>
         <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-4">
-          Hey, I'm Aman
+          Hey, I'm Sumon
         </h1>
-        <h2 className="text-2xl lg:text-3xl text-gray-600 font-light mb-8">
-          AI Product Engineer
-        </h2>
+        <div className="relative h-10">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={roles[index]}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+              className="absolute"
+            >
+              <h2 className="text-2xl lg:text-3xl text-gray-600 font-light">
+                {roles[index]}
+              </h2>
+            </motion.div>
+          </AnimatePresence>
+        </div>
 
         {/* Twitter Follow Button */}
         <a
           href="https://twitter.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center px-6 py-3 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition-colors duration-200 group"
+          className="inline-flex items-center mt-8 px-6 py-3 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition-colors duration-200 group"
         >
           <svg
-            className="w-4 h-4 mr-3 group-hover:scale-110 transition-transform duration-200"
+            className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform duration-200"
             fill="currentColor"
             viewBox="0 0 24 24"
           >
@@ -31,13 +62,14 @@ const ProfileSection = () => {
       </div>
 
       {/* Bio Section */}
-      <div className="mb-12 space-y-6 text-lg text-gray-700 leading-relaxed">
+      <div className="space-y-6 text-lg text-gray-700 leading-relaxed">
         <p>
-          I turn fuzzy ideas into live AI Products{" "}
-          <span className="italic text-gray-900 font-medium">(quickly)</span>{" "}
-          full-stack, shipping-first, metrics-driven.
+          I bring ideas to life through thoughtful engineering{" "}
+          <span className="italic text-gray-900 font-medium">(quickly)</span> —
+          combining modern frameworks, cloud technologies, and a shipping-first
+          mindset, always backed by data and metrics.
         </p>
-        <p>
+        {/* <p>
           Currently I am working as a Founding Engineer at{" "}
           <a
             href="https://kay.ai"
@@ -80,12 +112,12 @@ const ProfileSection = () => {
             Influencerbit
           </a>
           .
-        </p>
+        </p> */}
       </div>
 
       {/* Tech Stack */}
-      <div>
-        <p className="text-lg text-gray-700 mb-4">
+      <div className="space-y-4">
+        <p className="text-lg text-gray-700">
           My Go-to stack is{" "}
           <span className="font-semibold text-gray-900">
             ReactJS, TypeScript, Python, Flask, NodeJS, Ruby on Rails,

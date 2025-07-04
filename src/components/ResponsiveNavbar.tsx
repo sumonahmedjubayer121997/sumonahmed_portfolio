@@ -1,9 +1,25 @@
-
 import { NavLink } from "react-router-dom";
-import { Home, Briefcase, Smartphone, FolderOpen, BookOpen, User, Mail, Wrench, Keyboard } from "lucide-react";
+import {
+  Home,
+  Briefcase,
+  Smartphone,
+  FolderOpen,
+  BookOpen,
+  User,
+  Mail,
+  Wrench,
+  Keyboard,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import ShortcutsModal from "./ShortcutsModal";
+
+const roles = [
+  "Software Engineer",
+  "Full Stack Developer",
+  "DevOps Enthusiast",
+];
 
 const ResponsiveNavbar = () => {
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
@@ -11,10 +27,19 @@ const ResponsiveNavbar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % roles.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
   const navItems = [
     { name: "Home", path: "/", icon: Home },
     { name: "Experience", path: "/experience", icon: Briefcase },
-    { name: "Apps", path: "/apps", icon: Smartphone },  
+    { name: "Apps", path: "/apps", icon: Smartphone },
     { name: "Projects", path: "/projects", icon: FolderOpen },
     { name: "Blogs", path: "/blogs", icon: BookOpen },
     { name: "About", path: "/about", icon: User },
@@ -27,18 +52,18 @@ const ResponsiveNavbar = () => {
     const checkIsMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
-    
+
     checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
-    return () => window.removeEventListener('resize', checkIsMobile);
+    window.addEventListener("resize", checkIsMobile);
+    return () => window.removeEventListener("resize", checkIsMobile);
   }, []);
 
   // Initialize focus mode from localStorage
   useEffect(() => {
-    const savedFocusMode = localStorage.getItem('focusMode');
-    if (savedFocusMode === 'true') {
+    const savedFocusMode = localStorage.getItem("focusMode");
+    if (savedFocusMode === "true") {
       setIsFocusMode(true);
-      document.body.classList.add('focus-mode');
+      document.body.classList.add("focus-mode");
     }
   }, []);
 
@@ -46,39 +71,39 @@ const ResponsiveNavbar = () => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
-      
-      if (key === 'q') {
+
+      if (key === "q") {
         event.preventDefault();
-        setIsShortcutsOpen(prev => !prev);
-      } else if (isShortcutsOpen && key === 'escape') {
+        setIsShortcutsOpen((prev) => !prev);
+      } else if (isShortcutsOpen && key === "escape") {
         event.preventDefault();
         setIsShortcutsOpen(false);
-      } else if (isShortcutsOpen && key === 'f') {
+      } else if (isShortcutsOpen && key === "f") {
         event.preventDefault();
         toggleFocusMode();
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isShortcutsOpen]);
 
   const toggleFocusMode = () => {
     const newFocusMode = !isFocusMode;
     setIsFocusMode(newFocusMode);
-    
+
     if (newFocusMode) {
-      document.body.classList.add('focus-mode');
-      localStorage.setItem('focusMode', 'true');
+      document.body.classList.add("focus-mode");
+      localStorage.setItem("focusMode", "true");
     } else {
-      document.body.classList.remove('focus-mode');
-      localStorage.setItem('focusMode', 'false');
+      document.body.classList.remove("focus-mode");
+      localStorage.setItem("focusMode", "false");
     }
   };
 
   const handleLogoClick = () => {
     if (isMobile) {
-      setIsExpanded(prev => !prev);
+      setIsExpanded((prev) => !prev);
     }
   };
 
@@ -102,21 +127,27 @@ const ResponsiveNavbar = () => {
   return (
     <>
       {/* Vertical Navbar */}
-      <div className={`fixed left-0 top-0 h-full ${getNavbarWidth()} z-40 navbar-transition`}>
+      <div
+        className={`fixed left-0 top-0 h-full ${getNavbarWidth()} z-40 navbar-transition`}
+      >
         <div className="h-full w-full bg-sidebar-background border-r border-sidebar-border shadow-sm">
           <div className="p-4 flex flex-col h-full">
             {/* Logo/Profile Section */}
-            <div 
+            <div
               className="text-center mb-6 cursor-pointer transition-all duration-200 hover:bg-sidebar-accent rounded-lg p-2"
               onClick={handleLogoClick}
             >
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 mx-auto mb-2 flex items-center justify-center">
-                <span className="text-foreground font-semibold text-sm">A</span>
+                <span className="text-foreground font-semibold text-sm">S</span>
               </div>
               {shouldShowLabels() && (
                 <>
-                  <h2 className="text-sm font-semibold text-foreground mb-1">Aman</h2>
-                  <p className="text-xs text-muted-foreground">Pro | AI Product Engineer</p>
+                  <h2 className="text-sm font-semibold text-foreground mb-1">
+                    Sumon
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    {roles[index]}
+                  </p>
                 </>
               )}
             </div>
@@ -127,14 +158,16 @@ const ResponsiveNavbar = () => {
                 variant="outline"
                 onClick={() => setIsShortcutsOpen(true)}
                 className={`w-full justify-start gap-2 hover:bg-sidebar-accent border-sidebar-border bg-sidebar-background text-foreground text-sm py-2 ${
-                  !shouldShowLabels() ? 'px-2' : ''
+                  !shouldShowLabels() ? "px-2" : ""
                 }`}
               >
                 <Keyboard className="w-4 h-4 shrink-0" />
                 {shouldShowLabels() && (
                   <>
                     <span className="text-sm">Shortcuts</span>
-                    <kbd className="ml-auto px-1.5 py-0.5 text-xs bg-muted/50 rounded border border-border/50">Q</kbd>
+                    <kbd className="ml-auto px-1.5 py-0.5 text-xs bg-muted/50 rounded border border-border/50">
+                      Q
+                    </kbd>
                   </>
                 )}
               </Button>
@@ -151,13 +184,19 @@ const ResponsiveNavbar = () => {
                       className={({ isActive }) =>
                         `flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group text-sm ${
                           isActive
-                            ? "bg-primary text-primary-foreground shadow-sm"
-                            : "text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                        } ${!shouldShowLabels() ? 'justify-center' : ''}`
+                            ? "bg-gray-900 text-white shadow-sm"
+                            : "text-gray-900 hover:bg-gray-100 hover:text-sidebar-accent-foreground"
+                        } ${!shouldShowLabels() ? "justify-center" : ""}`
                       }
                     >
-                      <item.icon className={`w-4 h-4 shrink-0 ${shouldShowLabels() ? 'mr-3' : ''}`} />
-                      {shouldShowLabels() && <span className="font-medium">{item.name}</span>}
+                      <item.icon
+                        className={`w-4 h-4 shrink-0 ${
+                          shouldShowLabels() ? "mr-3" : ""
+                        }`}
+                      />
+                      {shouldShowLabels() && (
+                        <span className="font-medium">{item.name}</span>
+                      )}
                     </NavLink>
                   </li>
                 ))}
@@ -167,7 +206,9 @@ const ResponsiveNavbar = () => {
             {/* Connect Section */}
             {shouldShowLabels() && (
               <div className="mt-6 pt-4 border-t border-sidebar-border">
-                <h3 className="text-sm font-semibold text-foreground mb-2">Connect</h3>
+                <h3 className="text-sm font-semibold text-foreground mb-2">
+                  Connect
+                </h3>
                 <a
                   href="https://twitter.com"
                   target="_blank"
