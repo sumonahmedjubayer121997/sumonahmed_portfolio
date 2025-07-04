@@ -138,10 +138,7 @@ const ResponsiveNavbar = () => {
               onClick={handleLogoClick}
             >
               <div className="w-10 h-10 rounded-full bg-black mx-auto mb-2 flex items-center justify-center border border-black">
-                <img
-                  src="../../public/logo.png"
-                  className="w-6 h-6 object-contain"
-                />
+                <img src="/logo.png" className="w-6 h-6 object-contain" />
               </div>
 
               {shouldShowLabels() && (
