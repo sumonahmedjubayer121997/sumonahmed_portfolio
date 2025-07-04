@@ -76,7 +76,7 @@ const Experience = () => {
             </div>
 
             <div
-              className="absolute right-0 top-0  -top-8"
+              className="absolute  -right-5 sm:right-0 md:right-0 lg:right-0 -top-8"
               // style={{
               //   position: "absolute",
               //   right: 0,
@@ -91,7 +91,7 @@ const Experience = () => {
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="w-16 h-16 sm:w-20 sm:h-20 lg:w-full lg:h-full opacity-60"
+                className="sm:w-full sm:h-full w-3/5 h-3/5 md:w-full md:h-full lg:w-full lg:h-full opacity-60"
                 // style={{
                 //   height: "100%",
                 //   width: "100%",
