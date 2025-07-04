@@ -23,15 +23,17 @@ const ShortcutsModal = ({
 }: ShortcutsModalProps) => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isOpen) return; // Only handle keys when modal is open
+      
       if (event.key === 'Escape') {
         onClose();
       } else if (event.key.toLowerCase() === 'q') {
-        if (isOpen) {
-          onClose();
-        }
+        onClose();
       } else if (event.key.toLowerCase() === 'd') {
+        event.preventDefault();
         onToggleDarkMode();
       } else if (event.key.toLowerCase() === 'f') {
+        event.preventDefault();
         onToggleFocusMode();
       }
     };
@@ -60,18 +62,18 @@ const ShortcutsModal = ({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
       onClick={handleOverlayClick}
     >
-      <div className="relative w-full max-w-2xl mx-4 bg-background rounded-xl shadow-2xl border">
+      <div className="relative w-full max-w-2xl mx-4 bg-background rounded-xl shadow-2xl border text-foreground">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div className="flex items-center gap-3">
             <Keyboard className="w-6 h-6" />
-            <h2 className="text-xl font-semibold">TIP: Shortcuts</h2>
+            <h2 className="text-xl font-semibold text-foreground">TIP: Shortcuts</h2>
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="hover:bg-accent"
+            className="hover:bg-accent text-foreground"
           >
             <X className="w-5 h-5" />
           </Button>
@@ -86,12 +88,12 @@ const ShortcutsModal = ({
             
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm">Open Quick Access</span>
+                <span className="text-sm text-foreground">Open Quick Access</span>
                 <kbd className="px-2 py-1 text-xs bg-muted rounded border">Q</kbd>
               </div>
               
               <div className="flex items-center justify-between">
-                <span className="text-sm">Close Quick Access</span>
+                <span className="text-sm text-foreground">Close Quick Access</span>
                 <div className="flex gap-2">
                   <kbd className="px-2 py-1 text-xs bg-muted rounded border">Q</kbd>
                   <span className="text-xs text-muted-foreground">or</span>
@@ -100,20 +102,26 @@ const ShortcutsModal = ({
               </div>
               
               <div className="flex items-center justify-between">
-                <span className="text-sm">Toggle Dark Mode</span>
-                <kbd className="px-2 py-1 text-xs bg-muted rounded border">D</kbd>
+                <span className="text-sm text-foreground">Toggle Dark Mode</span>
+                <div className="flex items-center gap-2">
+                  <kbd className="px-2 py-1 text-xs bg-muted rounded border">D</kbd>
+                  <span className="text-xs text-muted-foreground">(when open)</span>
+                </div>
               </div>
               
               <div className="flex items-center justify-between">
-                <span className="text-sm">Toggle Focus</span>
-                <kbd className="px-2 py-1 text-xs bg-muted rounded border">F</kbd>
+                <span className="text-sm text-foreground">Toggle Focus</span>
+                <div className="flex items-center gap-2">
+                  <kbd className="px-2 py-1 text-xs bg-muted rounded border">F</kbd>
+                  <span className="text-xs text-muted-foreground">(when open)</span>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Action Center */}
           <div>
-            <h3 className="text-lg font-semibold mb-6">Action Center</h3>
+            <h3 className="text-lg font-semibold mb-6 text-foreground">Action Center</h3>
             
             <div className="space-y-6">
               <div className="flex items-center justify-between p-4 bg-accent/50 rounded-lg">
@@ -121,7 +129,7 @@ const ShortcutsModal = ({
                   <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
                     <span className="text-xs">🌙</span>
                   </div>
-                  <span className="font-medium">Dark Mode: {isDarkMode ? 'On' : 'Off'}</span>
+                  <span className="font-medium text-foreground">Dark Mode: {isDarkMode ? 'On' : 'Off'}</span>
                 </div>
                 <Switch
                   checked={isDarkMode}
@@ -134,7 +142,7 @@ const ShortcutsModal = ({
                   <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
                     <span className="text-xs">🎯</span>
                   </div>
-                  <span className="font-medium">Focus: {isFocusMode ? 'On' : 'Off'}</span>
+                  <span className="font-medium text-foreground">Focus: {isFocusMode ? 'On' : 'Off'}</span>
                 </div>
                 <Switch
                   checked={isFocusMode}
@@ -144,7 +152,7 @@ const ShortcutsModal = ({
             </div>
 
             <div className="mt-6 pt-6 border-t">
-              <h4 className="text-sm font-semibold mb-3">Recent Activities</h4>
+              <h4 className="text-sm font-semibold mb-3 text-foreground">Recent Activities</h4>
               <div className="space-y-3 text-sm text-muted-foreground">
                 <div className="flex justify-between">
                   <span>REACTION</span>

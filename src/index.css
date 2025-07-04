@@ -66,7 +66,7 @@ All colors MUST be HSL.
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted-foreground: 215 20.2% 75.1%;
 
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
@@ -95,6 +95,23 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground transition-colors duration-300;
+  }
+
+  /* Ensure proper text contrast in dark mode */
+  .dark {
+    color: hsl(var(--foreground));
+  }
+
+  .dark * {
+    color: inherit;
+  }
+
+  .dark .text-muted-foreground {
+    color: hsl(var(--muted-foreground));
+  }
+
+  .dark .text-foreground {
+    color: hsl(var(--foreground));
   }
 
   /* Smooth scrolling behavior */

@@ -37,12 +37,27 @@ const Sidebar = () => {
     }
   }, []);
 
-  // Handle keyboard shortcuts
+  // Handle keyboard shortcuts with correct logic
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key.toLowerCase() === 'q' && !isShortcutsOpen) {
+      const key = event.key.toLowerCase();
+      
+      if (key === 'q') {
         event.preventDefault();
-        setIsShortcutsOpen(true);
+        if (isShortcutsOpen) {
+          setIsShortcutsOpen(false); // Close if open
+        } else {
+          setIsShortcutsOpen(true); // Open if closed
+        }
+      }
+      // D and F only work when Quick Access is open
+      else if (isShortcutsOpen && key === 'd') {
+        event.preventDefault();
+        toggleDarkMode();
+      }
+      else if (isShortcutsOpen && key === 'f') {
+        event.preventDefault();
+        toggleFocusMode();
       }
     };
 
@@ -79,8 +94,8 @@ const Sidebar = () => {
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className="hidden lg:block fixed left-0 top-0 h-full w-72 z-40">
-        <div className="h-full w-full bg-background/80 backdrop-blur-xl border-r border-border/50 shadow-2xl">
+      <div className="hidden lg:block fixed left-0 top-0 h-full w-64 z-40">
+        <div className="h-full w-full glass">
           <div className="p-8 flex flex-col h-full">
             {/* Profile Section */}
             <div className="text-center mb-8">
@@ -96,7 +111,7 @@ const Sidebar = () => {
               <Button
                 variant="outline"
                 onClick={() => setIsShortcutsOpen(true)}
-                className="w-full justify-start gap-3 text-left hover:bg-accent/50 border-border/50 backdrop-blur-sm bg-background/50"
+                className="w-full justify-start gap-3 text-left hover:bg-accent/50 border-border/50 backdrop-blur-sm bg-background/50 text-foreground"
               >
                 <Keyboard className="w-4 h-4" />
                 <span className="text-sm">Shortcuts</span>
@@ -153,7 +168,7 @@ const Sidebar = () => {
 
       {/* Mobile Navigation */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50">
-        <div className="bg-background/80 backdrop-blur-xl border-b border-border/50 shadow-lg">
+        <div className="glass">
           <div className="flex items-center justify-between px-4 py-3">
             <div className="flex items-center">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center backdrop-blur-sm">
@@ -166,7 +181,7 @@ const Sidebar = () => {
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsShortcutsOpen(true)}
-                className="hover:bg-accent/50"
+                className="hover:bg-accent/50 text-foreground"
               >
                 <Keyboard className="w-4 h-4" />
               </Button>
