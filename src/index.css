@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -54,7 +53,8 @@
 
   body {
     @apply bg-background text-foreground transition-colors duration-300;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+      sans-serif;
   }
 
   /* Smooth scrolling behavior */
@@ -80,7 +80,7 @@
   .card {
     @apply bg-card border border-border/50 shadow-sm rounded-lg;
   }
-  
+
   .card-subtle {
     @apply bg-card/60 border border-border/30 shadow-sm rounded-lg;
   }
@@ -91,9 +91,16 @@
   transition: width 0.3s ease-in-out, padding 0.3s ease-in-out;
 }
 
+.blur-navbar {
+  background-color: rgba(255, 255, 255, 0.7); /* Light translucent background */
+  backdrop-filter: blur(5px); /* The blur effect */
+  -webkit-backdrop-filter: blur(5px); /* For Safari support */
+}
+
 /* Keyboard shortcut styles */
 kbd {
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas,
+    "Liberation Mono", Menlo, monospace;
   font-size: 0.75rem;
   font-weight: 500;
   line-height: 1;

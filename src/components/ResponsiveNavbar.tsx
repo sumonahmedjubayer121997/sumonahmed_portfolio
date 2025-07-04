@@ -128,7 +128,7 @@ const ResponsiveNavbar = () => {
     <>
       {/* Vertical Navbar */}
       <div
-        className={`fixed left-0 top-0 h-full ${getNavbarWidth()} z-40 navbar-transition`}
+        className={`fixed left-0 top-0 h-full ${getNavbarWidth()} z-40 navbar-transition blur-navbar`}
       >
         <div className="h-full w-full bg-sidebar-background border-r border-sidebar-border shadow-sm">
           <div className="p-4 flex flex-col h-full">
