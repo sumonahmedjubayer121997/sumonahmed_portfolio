@@ -29,9 +29,6 @@ const ShortcutsModal = ({
         onClose();
       } else if (event.key.toLowerCase() === 'q') {
         onClose();
-      } else if (event.key.toLowerCase() === 'd') {
-        event.preventDefault();
-        onToggleDarkMode();
       } else if (event.key.toLowerCase() === 'f') {
         event.preventDefault();
         onToggleFocusMode();
@@ -47,7 +44,7 @@ const ShortcutsModal = ({
       document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen, onClose, onToggleDarkMode, onToggleFocusMode]);
+  }, [isOpen, onClose, onToggleFocusMode]);
 
   if (!isOpen) return null;
 
@@ -105,7 +102,7 @@ const ShortcutsModal = ({
                 <span className="text-sm text-foreground">Toggle Dark Mode</span>
                 <div className="flex items-center gap-2">
                   <kbd className="px-2 py-1 text-xs bg-muted rounded border">D</kbd>
-                  <span className="text-xs text-muted-foreground">(when open)</span>
+                  <span className="text-xs text-muted-foreground">(works globally)</span>
                 </div>
               </div>
               

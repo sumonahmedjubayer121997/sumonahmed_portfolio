@@ -13,7 +13,7 @@ const Sidebar = () => {
   const navItems = [
     { name: "Home", path: "/", icon: Home },
     { name: "Experience", path: "/experience", icon: Briefcase },
-    { name: "Apps", path: "/apps", icon: Smartphone },
+    { name: "Apps", path: "/apps", icon: Smartphone },  
     { name: "Projects", path: "/projects", icon: FolderOpen },
     { name: "Blogs", path: "/blogs", icon: BookOpen },
     { name: "About", path: "/about", icon: User },
@@ -37,7 +37,7 @@ const Sidebar = () => {
     }
   }, []);
 
-  // Handle keyboard shortcuts with correct logic
+  // Handle keyboard shortcuts with updated logic
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
@@ -50,11 +50,12 @@ const Sidebar = () => {
           setIsShortcutsOpen(true); // Open if closed
         }
       }
-      // D and F only work when Quick Access is open
-      else if (isShortcutsOpen && key === 'd') {
+      // D works globally now (not just when Quick Access is open)
+      else if (key === 'd') {
         event.preventDefault();
         toggleDarkMode();
       }
+      // F only works when Quick Access is open
       else if (isShortcutsOpen && key === 'f') {
         event.preventDefault();
         toggleFocusMode();
@@ -94,48 +95,48 @@ const Sidebar = () => {
   return (
     <>
       {/* Desktop Sidebar */}
-      <div className="hidden lg:block fixed left-0 top-0 h-full w-64 z-40">
+      <div className="hidden lg:block fixed left-0 top-0 h-full w-56 z-40">
         <div className="h-full w-full glass">
-          <div className="p-8 flex flex-col h-full">
+          <div className="p-6 flex flex-col h-full">
             {/* Profile Section */}
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 mx-auto mb-4 flex items-center justify-center backdrop-blur-sm">
-                <span className="text-foreground font-semibold text-lg">A</span>
+            <div className="text-center mb-6">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 mx-auto mb-3 flex items-center justify-center backdrop-blur-sm">
+                <span className="text-foreground font-semibold">A</span>
               </div>
-              <h2 className="text-xl font-semibold text-foreground mb-1">Aman</h2>
-              <p className="text-sm text-muted-foreground">Pro | AI Product Engineer</p>
+              <h2 className="text-lg font-semibold text-foreground mb-1">Aman</h2>
+              <p className="text-xs text-muted-foreground">Pro | AI Product Engineer</p>
             </div>
 
             {/* Shortcuts Button */}
-            <div className="mb-6">
+            <div className="mb-4">
               <Button
                 variant="outline"
                 onClick={() => setIsShortcutsOpen(true)}
-                className="w-full justify-start gap-3 text-left hover:bg-accent/50 border-border/50 backdrop-blur-sm bg-background/50 text-foreground"
+                className="w-full justify-start gap-2 text-left hover:bg-accent/50 border-border/50 backdrop-blur-sm bg-background/50 text-foreground text-sm py-2"
               >
                 <Keyboard className="w-4 h-4" />
                 <span className="text-sm">Shortcuts</span>
-                <kbd className="ml-auto px-2 py-1 text-xs bg-muted/50 rounded border border-border/50">Q</kbd>
+                <kbd className="ml-auto px-1.5 py-0.5 text-xs bg-muted/50 rounded border border-border/50">Q</kbd>
               </Button>
             </div>
 
             {/* Navigation */}
             <nav className="flex-1">
-              <ul className="space-y-2">
+              <ul className="space-y-1">
                 {navItems.map((item) => (
                   <li key={item.name}>
                     <NavLink
                       to={item.path}
                       end={item.path === "/"}
                       className={({ isActive }) =>
-                        `flex items-center px-4 py-3 rounded-lg transition-all duration-200 group backdrop-blur-sm ${
+                        `flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group backdrop-blur-sm text-sm ${
                           isActive
                             ? "bg-primary text-primary-foreground shadow-lg"
                             : "text-foreground hover:bg-accent/50 hover:text-accent-foreground"
                         }`
                       }
                     >
-                      <item.icon className="w-5 h-5 mr-3" />
+                      <item.icon className="w-4 h-4 mr-3" />
                       <span className="font-medium">{item.name}</span>
                     </NavLink>
                   </li>
@@ -144,22 +145,22 @@ const Sidebar = () => {
             </nav>
 
             {/* Connect Section */}
-            <div className="mt-8 pt-6 border-t border-border/50">
-              <h3 className="text-sm font-semibold text-foreground mb-3">Connect</h3>
+            <div className="mt-6 pt-4 border-t border-border/50">
+              <h3 className="text-sm font-semibold text-foreground mb-2">Connect</h3>
               <a
                 href="https://twitter.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center px-4 py-2 text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground rounded-lg transition-colors duration-200 backdrop-blur-sm"
+                className="flex items-center px-3 py-2 text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground rounded-lg transition-colors duration-200 backdrop-blur-sm"
               >
                 <svg
-                  className="w-4 h-4 mr-3"
+                  className="w-4 h-4 mr-2"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                 </svg>
-                <span className="text-sm">X (Twitter)</span>
+                <span className="text-xs">X (Twitter)</span>
               </a>
             </div>
           </div>
