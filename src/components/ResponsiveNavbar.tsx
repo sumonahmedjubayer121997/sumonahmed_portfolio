@@ -9,15 +9,17 @@ import {
   Mail,
   Wrench,
   Keyboard,
+  Menu,
+  X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import ShortcutsModal from "./ShortcutsModal";
 
 const roles = [
   "Software Engineer",
-  "Full Stack Developer",
+  "Full Stack Developer", 
   "DevOps Enthusiast",
 ];
 
@@ -26,8 +28,10 @@ const ResponsiveNavbar = () => {
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [index, setIndex] = useState(0);
+  const mobileNavRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -67,12 +71,32 @@ const ResponsiveNavbar = () => {
     }
   }, []);
 
+  // Handle click outside for mobile menu
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isMobile &&
+        isMobileMenuOpen &&
+        mobileNavRef.current &&
+        !mobileNavRef.current.contains(event.target as Node)
+      ) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isMobile, isMobileMenuOpen]);
+
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
 
-      if (key === "q") {
+      if (key === "d") {
+        event.preventDefault();
+        toggleFocusMode();
+      } else if (key === "q") {
         event.preventDefault();
         setIsShortcutsOpen((prev) => !prev);
       } else if (isShortcutsOpen && key === "escape") {
@@ -107,7 +131,7 @@ const ResponsiveNavbar = () => {
     }
   };
 
-  // Determine navbar width and show labels
+  // Determine navbar width and show labels for desktop
   const shouldShowLabels = () => {
     if (isMobile) {
       return isExpanded;
@@ -124,6 +148,122 @@ const ResponsiveNavbar = () => {
     }
   };
 
+  // Mobile Horizontal Navbar
+  if (isMobile) {
+    return (
+      <>
+        {/* Mobile Horizontal Navbar */}
+        <div
+          ref={mobileNavRef}
+          className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm"
+        >
+          {/* Top Bar with Icons */}
+          <div className="flex items-center justify-between px-4 py-2 h-16">
+            {/* Logo */}
+            <div className="flex items-center">
+              <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center border border-black">
+                <img src="/logo.png" className="w-5 h-5 object-contain" />
+              </div>
+            </div>
+
+            {/* Navigation Icons */}
+            <div className="flex items-center space-x-1">
+              {navItems.slice(0, 6).map((item) => (
+                <NavLink
+                  key={item.name}
+                  to={item.path}
+                  end={item.path === "/"}
+                  className={({ isActive }) =>
+                    `p-2 rounded-lg transition-all duration-200 ${
+                      isActive
+                        ? "bg-gray-900 text-white"
+                        : "text-gray-600 hover:bg-gray-100"
+                    }`
+                  }
+                >
+                  <item.icon className="w-5 h-5" />
+                </NavLink>
+              ))}
+              
+              {/* Menu Toggle Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2 text-gray-600 hover:bg-gray-100"
+              >
+                {isMobileMenuOpen ? (
+                  <X className="w-5 h-5" />
+                ) : (
+                  <Menu className="w-5 h-5" />
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Expanded Menu */}
+          <AnimatePresence>
+            {isMobileMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="border-t border-gray-200 bg-white"
+              >
+                <div className="px-4 py-3 space-y-1">
+                  {navItems.map((item) => (
+                    <NavLink
+                      key={item.name}
+                      to={item.path}
+                      end={item.path === "/"}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={({ isActive }) =>
+                        `flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
+                          isActive
+                            ? "bg-gray-900 text-white"
+                            : "text-gray-700 hover:bg-gray-100"
+                        }`
+                      }
+                    >
+                      <item.icon className="w-5 h-5 mr-3" />
+                      <span className="font-medium">{item.name}</span>
+                    </NavLink>
+                  ))}
+                  
+                  {/* Shortcuts Button */}
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setIsShortcutsOpen(true);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full justify-start px-4 py-3 text-gray-700 hover:bg-gray-100"
+                  >
+                    <Keyboard className="w-5 h-5 mr-3" />
+                    <span className="font-medium">Shortcuts</span>
+                    <kbd className="ml-auto px-2 py-1 text-xs bg-gray-100 rounded border">
+                      Q
+                    </kbd>
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Shortcuts Modal */}
+        <ShortcutsModal
+          isOpen={isShortcutsOpen}
+          onClose={() => setIsShortcutsOpen(false)}
+          isFocusMode={isFocusMode}
+          onToggleFocusMode={toggleFocusMode}
+        />
+      </>
+    );
+  }
+
+  // Desktop Vertical Navbar
   return (
     <>
       {/* Vertical Navbar */}
