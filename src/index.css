@@ -1,10 +1,12 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Clean Light Theme Design System */
+/* Clean Design System with Dark Mode Support */
 @layer base {
   :root {
+    /* Light mode colors */
     --background: 0 0% 100%;
     --foreground: 0 0% 20%;
 
@@ -44,6 +46,46 @@
     --sidebar-border: 0 0% 90%;
     --sidebar-ring: 142 76% 36%;
   }
+
+  .dark {
+    /* Dark mode colors */
+    --background: 222 84% 5%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 84% 5%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 84% 5%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 142 76% 36%;
+    --primary-foreground: 222 84% 5%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 142 76% 36%;
+
+    --sidebar-background: 224 71% 4%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 142 76% 36%;
+    --sidebar-primary-foreground: 222 84% 5%;
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 17%;
+    --sidebar-ring: 142 76% 36%;
+  }
 }
 
 @layer base {
@@ -52,9 +94,9 @@
   }
 
   body {
-    @apply bg-background text-foreground transition-colors duration-300;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
-      sans-serif;
+    @apply bg-background text-foreground;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   /* Smooth scrolling behavior */
@@ -69,7 +111,6 @@
 
   body.focus-mode * {
     animation: none !important;
-    transition: none !important;
   }
 
   body.focus-mode .focus-exclude {
@@ -88,19 +129,47 @@
 
 /* Navbar transition animations */
 .navbar-transition {
-  transition: width 0.3s ease-in-out, padding 0.3s ease-in-out;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              padding 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .blur-navbar {
-  background-color: rgba(255, 255, 255, 0.7); /* Light translucent background */
-  backdrop-filter: blur(5px); /* The blur effect */
-  -webkit-backdrop-filter: blur(5px); /* For Safari support */
+  background-color: hsl(var(--sidebar-background) / 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-right: 1px solid hsl(var(--sidebar-border));
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Mobile navbar animations */
+.mobile-navbar-enter {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+.mobile-navbar-enter-active {
+  transform: translateY(0);
+  opacity: 1;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-navbar-exit {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.mobile-navbar-exit-active {
+  transform: translateY(-100%);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Keyboard shortcut styles */
 kbd {
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas,
-    "Liberation Mono", Menlo, monospace;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
   font-size: 0.75rem;
   font-weight: 500;
   line-height: 1;
@@ -110,4 +179,18 @@ kbd {
   border-radius: 0.375rem;
   padding: 0.25rem 0.5rem;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  transition: all 0.3s ease;
+}
+
+/* Smooth theme transitions */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 0.3s;
+}
+
+/* Focus mode modal positioning fix */
+.focus-mode .shortcuts-modal {
+  margin-top: 0;
+  transition: margin-top 0.3s ease;
 }

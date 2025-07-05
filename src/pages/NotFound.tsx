@@ -1,3 +1,4 @@
+
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 
@@ -12,7 +13,7 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="min-h-screen flex items-center justify-center bg-background transition-colors duration-300">
       <div className="text-center">
         <h1 className="text-4xl font-bold mb-4 text-foreground">404</h1>
         <p className="text-xl text-muted-foreground mb-4">
@@ -20,7 +21,7 @@ const NotFound = () => {
         </p>
         <a
           href="/"
-          className="text-primary hover:text-primary/80 underline transition-colors"
+          className="text-primary hover:text-primary/80 underline transition-colors duration-300"
         >
           Return to Home
         </a>
