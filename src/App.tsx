@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +13,10 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Tools from "./pages/Tools";
 import NotFound from "./pages/NotFound";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminContentManager from "./pages/AdminContentManager";
+import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import InteractiveBackground from "./components/InteractiveBackground";
 import FluidCursor from "./components/FluidCursor";
 
@@ -34,6 +39,26 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/tools" element={<Tools />} />
+            
+            {/* Admin Routes */}
+            <Route path="/myportadmin/login" element={<AdminLogin />} />
+            <Route 
+              path="/myportadmin/dashboard" 
+              element={
+                <AdminProtectedRoute>
+                  <AdminDashboard />
+                </AdminProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/myportadmin/dashboard/:pageType" 
+              element={
+                <AdminProtectedRoute>
+                  <AdminContentManager />
+                </AdminProtectedRoute>
+              } 
+            />
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

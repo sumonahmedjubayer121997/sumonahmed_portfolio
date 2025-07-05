@@ -9,16 +9,134 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      admin_sessions: {
+        Row: {
+          admin_user_id: string | null
+          created_at: string | null
+          expires_at: string
+          id: string
+          session_token: string
+        }
+        Insert: {
+          admin_user_id?: string | null
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          session_token: string
+        }
+        Update: {
+          admin_user_id?: string | null
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          session_token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_sessions_admin_user_id_fkey"
+            columns: ["admin_user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_users: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          password_hash: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          password_hash: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          password_hash?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      page_content: {
+        Row: {
+          content: Json
+          created_at: string | null
+          created_by: string | null
+          id: string
+          page_type: Database["public"]["Enums"]["content_type"]
+          status: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          content: Json
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          page_type: Database["public"]["Enums"]["content_type"]
+          status?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: Json
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          page_type?: Database["public"]["Enums"]["content_type"]
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_content_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_admin_session: {
+        Args: { user_email: string; user_password: string }
+        Returns: {
+          session_token: string
+          admin_id: string
+          expires_at: string
+        }[]
+      }
+      hash_password: {
+        Args: { password: string }
+        Returns: string
+      }
+      verify_password: {
+        Args: { password: string; hash: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      content_type:
+        | "home"
+        | "experience"
+        | "apps"
+        | "projects"
+        | "blogs"
+        | "about"
+        | "contact"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +251,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      content_type: [
+        "home",
+        "experience",
+        "apps",
+        "projects",
+        "blogs",
+        "about",
+        "contact",
+      ],
+    },
   },
 } as const
