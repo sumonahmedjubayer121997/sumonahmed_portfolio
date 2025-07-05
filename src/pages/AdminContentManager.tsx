@@ -9,6 +9,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Save, X } from "lucide-react";
+import type { Database } from "@/integrations/supabase/types";
+
+type ContentType = Database["public"]["Enums"]["content_type"];
 
 interface ContentItem {
   id: string;
@@ -31,18 +34,28 @@ const AdminContentManager = () => {
   });
   const { toast } = useToast();
 
+  // Validate pageType
+  const validPageTypes: ContentType[] = ['home', 'experience', 'apps', 'projects', 'blogs', 'about', 'contact'];
+  const isValidPageType = (type: string | undefined): type is ContentType => {
+    return type !== undefined && validPageTypes.includes(type as ContentType);
+  };
+
+  const currentPageType = isValidPageType(pageType) ? pageType : null;
+
   useEffect(() => {
-    if (pageType) {
+    if (currentPageType) {
       fetchContents();
     }
-  }, [pageType]);
+  }, [currentPageType]);
 
   const fetchContents = async () => {
+    if (!currentPageType) return;
+    
     try {
       const { data, error } = await supabase
         .from('page_content')
         .select('*')
-        .eq('page_type', pageType)
+        .eq('page_type', currentPageType)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -57,6 +70,8 @@ const AdminContentManager = () => {
   };
 
   const handleSave = async () => {
+    if (!currentPageType) return;
+
     try {
       if (editingId) {
         // Update existing content
@@ -77,7 +92,7 @@ const AdminContentManager = () => {
         const { error } = await supabase
           .from('page_content')
           .insert({
-            page_type: pageType,
+            page_type: currentPageType,
             title: formData.title,
             content: { text: formData.content },
             status: formData.status
@@ -137,12 +152,23 @@ const AdminContentManager = () => {
     setFormData({ title: '', content: '', status: 'draft' });
   };
 
+  if (!currentPageType) {
+    return (
+      <AdminLayout>
+        <div className="text-center py-8">
+          <h1 className="text-2xl font-bold text-red-600">Invalid Page Type</h1>
+          <p className="text-gray-600 mt-2">The requested page type is not valid.</p>
+        </div>
+      </AdminLayout>
+    );
+  }
+
   return (
     <AdminLayout>
       <div>
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 capitalize">
-            Manage {pageType}
+            Manage {currentPageType}
           </h1>
           <Button
             onClick={() => setIsEditing(true)}
@@ -208,7 +234,7 @@ const AdminContentManager = () => {
           {contents.length === 0 ? (
             <Card>
               <CardContent className="text-center py-8">
-                <p className="text-gray-500">No content found for {pageType}</p>
+                <p className="text-gray-500">No content found for {currentPageType}</p>
               </CardContent>
             </Card>
           ) : (
