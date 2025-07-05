@@ -130,7 +130,7 @@ const ResponsiveNavbar = () => {
       <div
         className={`fixed left-0 top-0 h-full ${getNavbarWidth()} z-40 navbar-transition blur-navbar`}
       >
-        <div className="h-full w-full border-r border-sidebar-border shadow-sm" style={{ backgroundColor: '#f8fafc' }}>
+        <div className="h-full w-full bg-sidebar-background border-r border-sidebar-border shadow-sm">
           <div className="p-2 flex flex-col h-full">
             {/* Logo/Profile Section */}
             <div
