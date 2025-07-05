@@ -131,10 +131,10 @@ const ResponsiveNavbar = () => {
         className={`fixed left-0 top-0 h-full ${getNavbarWidth()} z-40 navbar-transition blur-navbar`}
       >
         <div className="h-full w-full bg-sidebar-background border-r border-sidebar-border shadow-sm">
-          <div className="p-2 flex flex-col h-full">
+          <div className="p-1 md:p-2 lg:p-2 flex flex-col h-full">
             {/* Logo/Profile Section */}
             <div
-              className="text-center mb-6 cursor-pointer transition-all duration-200 hover:bg-sidebar-accent rounded-lg p-2"
+              className="text-center mb-6 cursor-pointer transition-all duration-200 hover:bg-sidebar-accent rounded-lg pt-1 sm:p-2 md:p-2 lg:p-2"
               onClick={handleLogoClick}
             >
               <div className="w-10 h-10 rounded-full bg-black mx-auto mb-2 flex items-center justify-center border border-black">
