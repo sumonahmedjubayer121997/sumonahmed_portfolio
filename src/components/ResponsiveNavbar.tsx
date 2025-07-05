@@ -1,4 +1,3 @@
-
 import { NavLink } from "react-router-dom";
 import {
   Home,
@@ -14,6 +13,8 @@ import {
   X,
   Sun,
   Moon,
+  MoreVertical,
+  MoreHorizontal,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,7 @@ import ShortcutsModal from "./ShortcutsModal";
 
 const roles = [
   "Software Engineer",
-  "Full Stack Developer",
+  "Full Stack Developer", 
   "DevOps Enthusiast",
 ];
 
@@ -36,6 +37,7 @@ const ResponsiveNavbar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isVerticalNavExpanded, setIsVerticalNavExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [navbarType, setNavbarType] = useState<'horizontal' | 'vertical'>('horizontal');
   const [index, setIndex] = useState(0);
   const mobileNavRef = useRef<HTMLDivElement>(null);
   const verticalNavRef = useRef<HTMLDivElement>(null);
@@ -65,6 +67,7 @@ const ResponsiveNavbar = () => {
       if (window.innerWidth > 768) {
         setIsExpanded(false);
         setIsVerticalNavExpanded(false);
+        setNavbarType('horizontal');
       }
     };
 
@@ -150,7 +153,7 @@ const ResponsiveNavbar = () => {
   };
 
   const handleLogoClick = () => {
-    if (isMobile) {
+    if (isMobile && navbarType === 'vertical') {
       setIsVerticalNavExpanded((prev) => !prev);
     }
   };
@@ -160,6 +163,12 @@ const ResponsiveNavbar = () => {
       setIsExpanded(false);
       setIsVerticalNavExpanded(false);
     }
+  };
+
+  const toggleNavbarType = () => {
+    setNavbarType(prev => prev === 'horizontal' ? 'vertical' : 'horizontal');
+    setIsExpanded(false);
+    setIsVerticalNavExpanded(false);
   };
 
   // Determine navbar width and show labels
@@ -182,155 +191,195 @@ const ResponsiveNavbar = () => {
   if (isMobile) {
     return (
       <>
-        {/* Mobile Horizontal Top Bar */}
-        <div className="fixed top-0 left-0 right-0 h-16 z-50 bg-sidebar-background/80 backdrop-blur-md border-b border-sidebar-border shadow-sm">
-          <div className="flex items-center justify-between h-full px-4">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleLogoClick}
-                className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors duration-200"
-              >
-                <img src="/logo.png" className="w-6 h-6 object-contain" alt="Logo" />
-              </button>
-              {!isExpanded && (
-                <div>
-                  <h2 className="text-sm font-semibold text-foreground">Sumon</h2>
-                  <p className="text-xs text-muted-foreground">{roles[index]}</p>
+        {/* Mobile Horizontal Top Bar - Only show when horizontal navbar is active */}
+        {navbarType === 'horizontal' && (
+          <div className="fixed top-0 left-0 right-0 h-16 z-50 bg-sidebar-background/80 backdrop-blur-md border-b border-sidebar-border shadow-sm">
+            <div className="flex items-center justify-between h-full px-4">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => {}}
+                  className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors duration-200"
+                >
+                  <img src="/logo.png" className="w-6 h-6 object-contain" alt="Logo" />
+                </button>
+                {!isExpanded && (
+                  <div>
+                    <h2 className="text-sm font-semibold text-foreground">Sumon</h2>
+                    <p className="text-xs text-muted-foreground">{roles[index]}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleDarkMode}
+                  className="hover:bg-sidebar-accent text-foreground"
+                >
+                  {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleNavbarType}
+                  className="hover:bg-sidebar-accent text-foreground"
+                  title="Switch to vertical navbar"
+                >
+                  <MoreVertical className="w-4 h-4" />
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="hover:bg-sidebar-accent text-foreground"
+                >
+                  {isExpanded ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Mobile Vertical Sidebar - Only show when vertical navbar is active */}
+        {navbarType === 'vertical' && (
+          <div
+            ref={verticalNavRef}
+            className={`fixed left-0 top-0 bottom-0 ${getNavbarWidth()} z-50 bg-sidebar-background/95 backdrop-blur-md border-r border-sidebar-border shadow-lg transform transition-all duration-300 ease-in-out navbar-transition`}
+          >
+            <div className="p-2 flex flex-col h-full">
+              {/* Logo section with click handler */}
+              <div className="text-center mb-4 p-2">
+                <button
+                  onClick={handleLogoClick}
+                  className="w-10 h-10 rounded-full bg-primary/10 mx-auto flex items-center justify-center hover:bg-primary/20 transition-colors duration-200"
+                >
+                  <img src="/logo.png" className="w-6 h-6 object-contain" alt="Logo" />
+                </button>
+                {shouldShowLabels() && (
+                  <div className="mt-2">
+                    <h2 className="text-sm font-semibold text-foreground mb-1">Sumon</h2>
+                    <p className="text-xs text-muted-foreground">{roles[index]}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Switch to horizontal button */}
+              <div className="mb-4">
+                <Button
+                  variant="outline"
+                  onClick={toggleNavbarType}
+                  className={`w-full justify-center gap-2 hover:bg-sidebar-accent border-sidebar-border bg-sidebar-background text-foreground ${
+                    !shouldShowLabels() ? "px-2" : ""
+                  }`}
+                  title="Switch to horizontal navbar"
+                >
+                  <MoreHorizontal className="w-4 h-4 shrink-0" />
+                  {shouldShowLabels() && <span className="text-sm">Horizontal</span>}
+                </Button>
+              </div>
+
+              {/* Navigation items */}
+              <nav className="flex-1">
+                <ul className="space-y-1">
+                  {navItems.map((item) => (
+                    <li key={item.name}>
+                      <NavLink
+                        to={item.path}
+                        end={item.path === "/"}
+                        onClick={handleNavItemClick}
+                        className={({ isActive }) =>
+                          `flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 ${
+                            isActive
+                              ? "bg-primary text-primary-foreground shadow-sm"
+                              : "text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                          } ${!shouldShowLabels() ? "justify-center" : ""}`
+                        }
+                      >
+                        <item.icon className={`w-4 h-4 shrink-0 ${shouldShowLabels() ? "mr-3" : ""}`} />
+                        {shouldShowLabels() && <span className="font-medium">{item.name}</span>}
+                      </NavLink>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+
+              {/* Close button when expanded */}
+              {shouldShowLabels() && (
+                <div className="pt-4 mt-4 border-t border-sidebar-border">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsVerticalNavExpanded(false)}
+                    className="w-full justify-center gap-2 hover:bg-sidebar-accent border-sidebar-border bg-sidebar-background text-foreground"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
                 </div>
               )}
             </div>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleDarkMode}
-                className="hover:bg-sidebar-accent text-foreground"
-              >
-                {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="hover:bg-sidebar-accent text-foreground"
-              >
-                {isExpanded ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-              </Button>
-            </div>
           </div>
-        </div>
+        )}
 
-        {/* Mobile Vertical Sidebar */}
-        <div
-          ref={verticalNavRef}
-          className={`fixed left-0 top-16 bottom-0 ${getNavbarWidth()} z-40 bg-sidebar-background/95 backdrop-blur-md border-r border-sidebar-border shadow-lg transform transition-all duration-300 ease-in-out navbar-transition`}
-        >
-          <div className="p-2 flex flex-col h-full">
-            {/* Profile in vertical navbar */}
-            {shouldShowLabels() && (
+        {/* Mobile Horizontal Expanded Menu - Only show when horizontal navbar is active and expanded */}
+        {navbarType === 'horizontal' && (
+          <div
+            ref={mobileNavRef}
+            className={`fixed top-16 right-0 z-40 bg-sidebar-background/95 backdrop-blur-md border-l border-sidebar-border shadow-lg transform transition-all duration-300 ease-in-out ${
+              isExpanded
+                ? "translate-x-0 opacity-100 w-[70%]"
+                : "translate-x-full opacity-0 pointer-events-none w-[70%]"
+            }`}
+            style={{ height: 'calc(100vh - 4rem)' }}
+          >
+            <div className="p-4 space-y-2 h-full overflow-y-auto">
+              {/* Profile in expanded view */}
               <div className="text-center mb-4 p-3 bg-sidebar-accent/50 rounded-lg">
                 <h2 className="text-sm font-semibold text-foreground mb-1">Sumon</h2>
                 <p className="text-xs text-muted-foreground">{roles[index]}</p>
               </div>
-            )}
 
-            {/* Navigation items */}
-            <nav className="flex-1">
-              <ul className="space-y-1">
-                {navItems.map((item) => (
-                  <li key={item.name}>
-                    <NavLink
-                      to={item.path}
-                      end={item.path === "/"}
-                      onClick={handleNavItemClick}
-                      className={({ isActive }) =>
-                        `flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 ${
-                          isActive
-                            ? "bg-primary text-primary-foreground shadow-sm"
-                            : "text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                        } ${!shouldShowLabels() ? "justify-center" : ""}`
-                      }
-                    >
-                      <item.icon className={`w-4 h-4 shrink-0 ${shouldShowLabels() ? "mr-3" : ""}`} />
-                      {shouldShowLabels() && <span className="font-medium">{item.name}</span>}
-                    </NavLink>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+              {/* Navigation items */}
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.name}
+                  to={item.path}
+                  end={item.path === "/"}
+                  onClick={handleNavItemClick}
+                  className={({ isActive }) =>
+                    `flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
+                      isActive
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    }`
+                  }
+                >
+                  <item.icon className="w-5 h-5 mr-3 shrink-0" />
+                  <span className="font-medium">{item.name}</span>
+                </NavLink>
+              ))}
 
-            {/* Close button when expanded */}
-            {shouldShowLabels() && (
-              <div className="pt-4 mt-4 border-t border-sidebar-border">
+              {/* Actions */}
+              <div className="pt-4 mt-4 border-t border-sidebar-border space-y-2">
                 <Button
                   variant="outline"
-                  onClick={() => setIsVerticalNavExpanded(false)}
-                  className="w-full justify-center gap-2 hover:bg-sidebar-accent border-sidebar-border bg-sidebar-background text-foreground"
+                  onClick={() => {
+                    setIsShortcutsOpen(true);
+                    setIsExpanded(false);
+                  }}
+                  className="w-full justify-start gap-3 hover:bg-sidebar-accent border-sidebar-border bg-sidebar-background text-foreground"
                 >
-                  <X className="w-4 h-4" />
+                  <Keyboard className="w-4 h-4" />
+                  <span>Shortcuts</span>
+                  <kbd className="ml-auto px-1.5 py-0.5 text-xs bg-muted/50 rounded border border-border/50">
+                    Q
+                  </kbd>
                 </Button>
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Mobile Horizontal Expanded Menu */}
-        <div
-          ref={mobileNavRef}
-          className={`fixed top-16 left-0 right-0 z-40 bg-sidebar-background/95 backdrop-blur-md border-b border-sidebar-border shadow-lg transform transition-all duration-300 ease-in-out ${
-            isExpanded
-              ? "translate-y-0 opacity-100"
-              : "-translate-y-full opacity-0 pointer-events-none"
-          }`}
-        >
-          <div className="p-4 space-y-2 max-h-[calc(100vh-4rem)] overflow-y-auto">
-            {/* Profile in expanded view */}
-            <div className="text-center mb-4 p-3 bg-sidebar-accent/50 rounded-lg">
-              <h2 className="text-sm font-semibold text-foreground mb-1">Sumon</h2>
-              <p className="text-xs text-muted-foreground">{roles[index]}</p>
-            </div>
-
-            {/* Navigation items */}
-            {navItems.map((item) => (
-              <NavLink
-                key={item.name}
-                to={item.path}
-                end={item.path === "/"}
-                onClick={handleNavItemClick}
-                className={({ isActive }) =>
-                  `flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${
-                    isActive
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  }`
-                }
-              >
-                <item.icon className="w-5 h-5 mr-3 shrink-0" />
-                <span className="font-medium">{item.name}</span>
-              </NavLink>
-            ))}
-
-            {/* Actions */}
-            <div className="pt-4 mt-4 border-t border-sidebar-border space-y-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsShortcutsOpen(true);
-                  setIsExpanded(false);
-                }}
-                className="w-full justify-start gap-3 hover:bg-sidebar-accent border-sidebar-border bg-sidebar-background text-foreground"
-              >
-                <Keyboard className="w-4 h-4" />
-                <span>Shortcuts</span>
-                <kbd className="ml-auto px-1.5 py-0.5 text-xs bg-muted/50 rounded border border-border/50">
-                  Q
-                </kbd>
-              </Button>
             </div>
           </div>
-        </div>
+        )}
       </>
     );
   }
