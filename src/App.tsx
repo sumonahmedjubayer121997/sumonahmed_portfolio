@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminContentManager from "./pages/AdminContentManager";
+import AdminHomeManager from "./pages/AdminHomeManager";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import InteractiveBackground from "./components/InteractiveBackground";
 import FluidCursor from "./components/FluidCursor";
@@ -47,6 +48,14 @@ const App = () => (
               element={
                 <AdminProtectedRoute>
                   <AdminDashboard />
+                </AdminProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/myportadmin/dashboard/home" 
+              element={
+                <AdminProtectedRoute>
+                  <AdminHomeManager />
                 </AdminProtectedRoute>
               } 
             />

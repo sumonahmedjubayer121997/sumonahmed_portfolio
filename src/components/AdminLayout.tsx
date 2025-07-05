@@ -19,8 +19,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { path: "/myportadmin/dashboard/experience", label: "Experience", icon: User },
     { path: "/myportadmin/dashboard/apps", label: "Apps", icon: Briefcase },
     { path: "/myportadmin/dashboard/projects", label: "Projects", icon: FolderOpen },
-    { path: "/myportladmin/dashboard/blogs", label: "Blogs", icon: BookOpen },
-    { path: "/myportladmin/dashboard/about", label: "About", icon: Info },
+    { path: "/myportadmin/dashboard/blogs", label: "Blogs", icon: BookOpen },
+    { path: "/myportadmin/dashboard/about", label: "About", icon: Info },
     { path: "/myportadmin/dashboard/contact", label: "Contact", icon: Mail },
   ];
 
