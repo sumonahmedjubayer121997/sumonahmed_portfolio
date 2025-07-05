@@ -11,7 +11,7 @@ const Layout = ({ children }: LayoutProps) => {
     <div className="min-h-screen bg-white text-gray-900 flex transition-colors duration-300">
       <ResponsiveNavbar />
       <main className="flex-1 ml-0 md:ml-72 transition-all duration-300 pt-16 md:pt-0">
-        <div className="p-2 sm:p-4 md:p-6 lg:p-6 overflow-x-hidden">{children}</div>
+        <div className="p-4 md:p-6 lg:p-6">{children}</div>
       </main>
     </div>
   );
