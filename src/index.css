@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -55,6 +56,11 @@
     @apply bg-background text-foreground transition-colors duration-300;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
       sans-serif;
+    background-image: 
+      linear-gradient(to right, #dbe3eb 1px, transparent 1px),
+      linear-gradient(to bottom, #dbe3eb 1px, transparent 1px);
+    background-size: 50px 50px;
+    background-attachment: fixed;
   }
 
   /* Smooth scrolling behavior */
