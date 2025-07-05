@@ -8,26 +8,15 @@ const Index = () => {
     return localStorage.getItem("theme") || "light";
   });
   const [highlightedItem, setHighlightedItem] = useState<string | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     localStorage.setItem("theme", theme);
     document.documentElement.classList.toggle("dark", theme === "dark");
   }, [theme]);
 
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
   };
-
-  const gridAlpha = isMobile ? 0.02 : 0.05;
 
   return (
     <Layout>
@@ -41,9 +30,9 @@ const Index = () => {
           zIndex: 0,
           backgroundColor: "#f8fafc",
           backgroundImage: `
-            linear-gradient(to right, rgba(0,0,0,${gridAlpha}) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(0,0,0,${gridAlpha}) 1px, transparent 1px)
-          `,
+    linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px)
+  `,
           backgroundSize: "40px 40px",
           maskImage: "linear-gradient(to bottom, black 60%, transparent 100%)",
           WebkitMaskImage:

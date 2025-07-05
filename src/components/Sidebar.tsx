@@ -1,4 +1,3 @@
-
 import { NavLink } from "react-router-dom";
 import {
   Home,
@@ -24,12 +23,8 @@ const roles = [
 
 const Sidebar = () => {
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    return localStorage.getItem("theme") === "dark";
-  });
-  const [isFocusMode, setIsFocusMode] = useState(() => {
-    return localStorage.getItem("focusMode") === "true";
-  });
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isFocusMode, setIsFocusMode] = useState(false);
 
   const [index, setIndex] = useState(0);
 
@@ -53,9 +48,19 @@ const Sidebar = () => {
 
   // Initialize theme from localStorage
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", isDarkMode);
-    document.body.classList.toggle("focus-mode", isFocusMode);
-  }, [isDarkMode, isFocusMode]);
+    const savedTheme = localStorage.getItem("theme");
+    const savedFocusMode = localStorage.getItem("focusMode");
+
+    if (savedTheme === "dark") {
+      setIsDarkMode(true);
+      document.documentElement.classList.add("dark");
+    }
+
+    if (savedFocusMode === "true") {
+      setIsFocusMode(true);
+      document.body.classList.add("focus-mode");
+    }
+  }, []);
 
   // Handle keyboard shortcuts with updated logic
   useEffect(() => {
@@ -89,15 +94,27 @@ const Sidebar = () => {
   const toggleDarkMode = () => {
     const newDarkMode = !isDarkMode;
     setIsDarkMode(newDarkMode);
-    localStorage.setItem("theme", newDarkMode ? "dark" : "light");
-    document.documentElement.classList.toggle("dark", newDarkMode);
+
+    if (newDarkMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
   };
 
   const toggleFocusMode = () => {
     const newFocusMode = !isFocusMode;
     setIsFocusMode(newFocusMode);
-    localStorage.setItem("focusMode", newFocusMode.toString());
-    document.body.classList.toggle("focus-mode", newFocusMode);
+
+    if (newFocusMode) {
+      document.body.classList.add("focus-mode");
+      localStorage.setItem("focusMode", "true");
+    } else {
+      document.body.classList.remove("focus-mode");
+      localStorage.setItem("focusMode", "false");
+    }
   };
 
   return (
@@ -229,8 +246,6 @@ const Sidebar = () => {
       <ShortcutsModal
         isOpen={isShortcutsOpen}
         onClose={() => setIsShortcutsOpen(false)}
-        isDarkMode={isDarkMode}
-        onToggleDarkMode={toggleDarkMode}
         isFocusMode={isFocusMode}
         onToggleFocusMode={toggleFocusMode}
       />
