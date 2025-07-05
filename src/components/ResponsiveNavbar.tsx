@@ -63,8 +63,8 @@ const ResponsiveNavbar = () => {
   // Check if device is mobile
   useEffect(() => {
     const checkIsMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-      if (window.innerWidth > 768) {
+      setIsMobile(window.innerWidth <= 1024); // Changed to lg breakpoint for better tablet handling
+      if (window.innerWidth > 1024) {
         setIsExpanded(false);
         setIsVerticalNavExpanded(false);
         setNavbarType('horizontal');
@@ -76,13 +76,11 @@ const ResponsiveNavbar = () => {
     return () => window.removeEventListener("resize", checkIsMobile);
   }, []);
 
-  // Initialize theme and focus mode
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDarkMode);
     document.body.classList.toggle("focus-mode", isFocusMode);
   }, [isDarkMode, isFocusMode]);
 
-  // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
@@ -108,7 +106,6 @@ const ResponsiveNavbar = () => {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isShortcutsOpen, isExpanded, isVerticalNavExpanded]);
 
-  // Handle click outside for mobile menus
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isMobile) {
@@ -171,7 +168,6 @@ const ResponsiveNavbar = () => {
     setIsVerticalNavExpanded(false);
   };
 
-  // Determine navbar width and show labels
   const shouldShowLabels = () => {
     if (isMobile) {
       return isVerticalNavExpanded;
@@ -191,7 +187,7 @@ const ResponsiveNavbar = () => {
   if (isMobile) {
     return (
       <>
-        {/* Mobile Horizontal Top Bar - Only show when horizontal navbar is active */}
+        {/* Mobile Horizontal Top Bar */}
         {navbarType === 'horizontal' && (
           <div className="fixed top-0 left-0 right-0 h-16 z-50 bg-sidebar-background/80 backdrop-blur-md border-b border-sidebar-border shadow-sm">
             <div className="flex items-center justify-between h-full px-4">
@@ -243,14 +239,13 @@ const ResponsiveNavbar = () => {
           </div>
         )}
 
-        {/* Mobile Vertical Sidebar - Only show when vertical navbar is active */}
+        {/* Mobile Vertical Sidebar - Fixed overlay positioning */}
         {navbarType === 'vertical' && (
           <div
             ref={verticalNavRef}
-            className={`fixed left-0 top-0 bottom-0 ${getNavbarWidth()} z-50 bg-sidebar-background/95 backdrop-blur-md border-r border-sidebar-border shadow-lg transform transition-all duration-300 ease-in-out navbar-transition`}
+            className={`fixed left-0 top-0 bottom-0 ${getNavbarWidth()} z-50 bg-sidebar-background/95 backdrop-blur-md border-r border-sidebar-border shadow-lg transform transition-all duration-300 ease-in-out`}
           >
             <div className="p-2 flex flex-col h-full">
-              {/* Logo section with click handler */}
               <div className="text-center mb-4 p-2">
                 <button
                   onClick={handleLogoClick}
@@ -266,7 +261,6 @@ const ResponsiveNavbar = () => {
                 )}
               </div>
 
-              {/* Switch to horizontal button */}
               <div className="mb-4">
                 <Button
                   variant="outline"
@@ -281,7 +275,6 @@ const ResponsiveNavbar = () => {
                 </Button>
               </div>
 
-              {/* Navigation items */}
               <nav className="flex-1">
                 <ul className="space-y-1">
                   {navItems.map((item) => (
@@ -306,7 +299,6 @@ const ResponsiveNavbar = () => {
                 </ul>
               </nav>
 
-              {/* Close button when expanded */}
               {shouldShowLabels() && (
                 <div className="pt-4 mt-4 border-t border-sidebar-border">
                   <Button
@@ -322,25 +314,23 @@ const ResponsiveNavbar = () => {
           </div>
         )}
 
-        {/* Mobile Horizontal Expanded Menu - Only show when horizontal navbar is active and expanded */}
+        {/* Mobile Horizontal Expanded Menu - Fixed width and positioning */}
         {navbarType === 'horizontal' && (
           <div
             ref={mobileNavRef}
-            className={`fixed top-16 right-0 z-40 bg-sidebar-background/95 backdrop-blur-md border-l border-sidebar-border shadow-lg transform transition-all duration-300 ease-in-out ${
+            className={`fixed top-16 right-0 z-40 bg-sidebar-background/95 backdrop-blur-md border-l border-sidebar-border shadow-lg transform transition-all duration-300 ease-in-out w-[70%] ${
               isExpanded
-                ? "translate-x-0 opacity-100 w-[70%]"
-                : "translate-x-full opacity-0 pointer-events-none w-[70%]"
+                ? "translate-x-0 opacity-100"
+                : "translate-x-full opacity-0 pointer-events-none"
             }`}
             style={{ height: 'calc(100vh - 4rem)' }}
           >
             <div className="p-4 space-y-2 h-full overflow-y-auto">
-              {/* Profile in expanded view */}
               <div className="text-center mb-4 p-3 bg-sidebar-accent/50 rounded-lg">
                 <h2 className="text-sm font-semibold text-foreground mb-1">Sumon</h2>
                 <p className="text-xs text-muted-foreground">{roles[index]}</p>
               </div>
 
-              {/* Navigation items */}
               {navItems.map((item) => (
                 <NavLink
                   key={item.name}
@@ -360,7 +350,6 @@ const ResponsiveNavbar = () => {
                 </NavLink>
               ))}
 
-              {/* Actions */}
               <div className="pt-4 mt-4 border-t border-sidebar-border space-y-2">
                 <Button
                   variant="outline"
@@ -384,9 +373,9 @@ const ResponsiveNavbar = () => {
     );
   }
 
+  // Desktop Vertical Navbar - unchanged
   return (
     <>
-      {/* Desktop Vertical Navbar */}
       <div className={`fixed left-0 top-0 h-full ${getNavbarWidth()} z-40 navbar-transition bg-sidebar-background/95 backdrop-blur-md border-r border-sidebar-border shadow-sm`}>
         <div className="h-full w-full">
           <div className="p-2 flex flex-col h-full">
@@ -488,7 +477,6 @@ const ResponsiveNavbar = () => {
         </div>
       </div>
 
-      {/* Shortcuts Modal */}
       <ShortcutsModal
         isOpen={isShortcutsOpen}
         onClose={() => setIsShortcutsOpen(false)}
