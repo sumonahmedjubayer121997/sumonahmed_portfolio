@@ -73,7 +73,15 @@ const ProfileSection = () => {
           <span className="italic text-gray-900 font-medium">(quickly)</span> —
           combining modern frameworks, cloud technologies, and a shipping-first
           mindset, always backed by data and metrics.
+          <p className="text-lg text-gray-700">
+          You can talk to me about {" "}
+          <span className="font-semibold text-gray-900">
+            AI, new ideas, life, or anything else
+          </span>
+          .
         </p>
+        </p>
+         
         {/* <p>
           Currently I am working as a Founding Engineer at{" "}
           <a
@@ -121,7 +129,7 @@ const ProfileSection = () => {
       </div>
 
       {/* Tech Stack */}
-      <div className="space-y-4">
+      {/* <div className="space-y-4">
         <p className="text-lg text-gray-700">
           My Go-to stack is{" "}
           <span className="font-semibold text-gray-900">
@@ -137,7 +145,7 @@ const ProfileSection = () => {
           </span>
           .
         </p>
-      </div>
+      </div> */}
       <div className="space-y-4">
         <TechStack/>
       </div>
