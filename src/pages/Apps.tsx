@@ -1,59 +1,51 @@
 
 import Layout from "../components/Layout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 const Apps = () => {
   const apps = [
     {
-      name: "Blood Donation Guide",
-      description: "Get information about blood donation",
-      image: "/lovable-uploads/db9b8af0-d481-4774-82d1-b8e2e96e6de0.png",
-      altText: "Blood Donation Guide App Interface"
+      name: "Dreamboat.ai",
+      description: "AI-powered platform for automated content generation and management.",
+      status: "Live",
+      tech: ["React", "Python", "AI/ML"]
     },
     {
-      name: "Anonymizer", 
-      description: "Anonymize your data",
-      image: "/lovable-uploads/db9b8af0-d481-4774-82d1-b8e2e96e6de0.png",
-      altText: "Text Anonymizer App Interface"
+      name: "Engagebud",
+      description: "Social media engagement platform with analytics and automation.",
+      status: "Live",
+      tech: ["React", "Node.js", "PostgreSQL"]
+    },
+    {
+      name: "Influencerbit",
+      description: "Influencer marketing platform connecting brands with creators.",
+      status: "Live",
+      tech: ["React", "Ruby on Rails", "Redis"]
     }
   ];
 
   return (
     <Layout>
-      <div className="pt-16 lg:pt-0 px-6 py-12 lg:py-16 max-w-6xl mx-auto">
-        {/* Header Section */}
-        <div className="mb-12 text-center lg:text-left">
-          <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-4">
-            Apps
-          </h1>
-          <p className="text-xl text-gray-600 font-light">
-            Apps - Tools and Services that come in handy
-          </p>
-        </div>
+      <div className="pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-4xl mx-auto">
+        <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-12">Apps</h1>
         
-        {/* App Cards Section */}
-        <div className="grid gap-8 md:grid-cols-2 max-w-5xl mx-auto">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {apps.map((app, index) => (
-            <Card key={index} className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-300 rounded-2xl overflow-hidden">
-              {/* App Screenshot */}
-              <div className="aspect-[4/3] bg-gray-50 overflow-hidden">
-                <img 
-                  src={app.image}
-                  alt={app.altText}
-                  className="w-full h-full object-cover object-top"
-                />
+            <div key={index} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow duration-200">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-semibold text-gray-900">{app.name}</h3>
+                <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">
+                  {app.status}
+                </span>
               </div>
-              
-              {/* App Info */}
-              <CardHeader className="p-6 pb-4">
-                <CardTitle className="text-2xl font-bold text-gray-900 mb-2">
-                  {app.name}
-                </CardTitle>
-                <CardDescription className="text-gray-600 text-base leading-relaxed">
-                  {app.description}
-                </CardDescription>
-              </CardHeader>
-            </Card>
+              <p className="text-gray-600 mb-4">{app.description}</p>
+              <div className="flex flex-wrap gap-2">
+                {app.tech.map((tech, techIndex) => (
+                  <span key={techIndex} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">
+                    {tech}
+                  </span>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       </div>
