@@ -38,6 +38,7 @@ const AdminHomeManager = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [existingContent, setExistingContent] = useState<ContentItem | null>(null);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -46,7 +47,11 @@ const AdminHomeManager = () => {
 
   const fetchExistingContent = async () => {
     try {
+      setIsInitialLoading(true);
+      console.log('Fetching existing content...');
       const contents = await getContentByPageType('home');
+      console.log('Fetched contents:', contents);
+      
       if (contents.length > 0) {
         const content = contents[0];
         setExistingContent(content);
@@ -58,35 +63,39 @@ const AdminHomeManager = () => {
           aboutMe: data.aboutMe || '',
           selectedIcons: data.selectedIcons || []
         });
+        console.log('Form data set:', data);
       }
     } catch (error: any) {
       console.error('Error fetching content:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load existing content. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsInitialLoading(false);
     }
   };
 
   const validateForm = (): boolean => {
+    const errors: string[] = [];
+
     if (!formData.name.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Name is required",
-        variant: "destructive",
-      });
-      return false;
+      errors.push("Name is required");
     }
 
     if (!formData.position.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Position is required",
-        variant: "destructive",
-      });
-      return false;
+      errors.push("Position is required");
     }
 
     if (formData.onlineLink && !isValidUrl(formData.onlineLink)) {
+      errors.push("Please enter a valid URL for the online link");
+    }
+
+    if (errors.length > 0) {
       toast({
         title: "Validation Error",
-        description: "Please enter a valid URL",
+        description: errors.join(". "),
         variant: "destructive",
       });
       return false;
@@ -105,20 +114,37 @@ const AdminHomeManager = () => {
   };
 
   const handleSave = async () => {
-    if (!validateForm()) return;
+    console.log('Save button clicked, form data:', formData);
+    
+    if (!validateForm()) {
+      console.log('Validation failed');
+      return;
+    }
 
     setIsLoading(true);
     try {
+      console.log('Starting save process...');
+      
       if (existingContent) {
+        console.log('Updating existing content with ID:', existingContent.id);
         const { error } = await updateContent(existingContent.id, {
           title: 'Portfolio Information',
           content: formData,
           status: 'published',
         });
 
-        if (error) throw new Error(error);
-        toast({ title: "Portfolio updated successfully!" });
+        if (error) {
+          console.error('Update error:', error);
+          throw new Error(error);
+        }
+        
+        console.log('Content updated successfully');
+        toast({ 
+          title: "Success!", 
+          description: "Portfolio updated successfully!",
+        });
       } else {
+        console.log('Creating new content...');
         const { error } = await createContent({
           page_type: 'home',
           title: 'Portfolio Information',
@@ -126,14 +152,25 @@ const AdminHomeManager = () => {
           status: 'published'
         });
 
-        if (error) throw new Error(error);
-        toast({ title: "Portfolio created successfully!" });
-        fetchExistingContent();
+        if (error) {
+          console.error('Create error:', error);
+          throw new Error(error);
+        }
+        
+        console.log('Content created successfully');
+        toast({ 
+          title: "Success!", 
+          description: "Portfolio created successfully!",
+        });
+        
+        // Refresh the content to get the new ID
+        await fetchExistingContent();
       }
     } catch (error: any) {
+      console.error('Save error:', error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to save portfolio. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -142,11 +179,27 @@ const AdminHomeManager = () => {
   };
 
   const handleInputChange = (field: keyof PortfolioData, value: string | string[]) => {
+    console.log(`Updating field ${field} with value:`, value);
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
   };
+
+  if (isInitialLoading) {
+    return (
+      <AdminLayout>
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading portfolio information...</p>
+            </div>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
@@ -160,6 +213,7 @@ const AdminHomeManager = () => {
             onClick={() => setShowPreview(!showPreview)}
             variant="outline"
             className="flex items-center space-x-2"
+            disabled={isLoading}
           >
             {showPreview ? <EyeOff size={16} /> : <Eye size={16} />}
             <span>{showPreview ? 'Hide Preview' : 'Show Preview'}</span>
@@ -195,6 +249,7 @@ const AdminHomeManager = () => {
                     onChange={(e) => handleInputChange('name', e.target.value)}
                     placeholder="e.g. Sumon"
                     className="w-full"
+                    disabled={isLoading}
                   />
                 </div>
 
@@ -217,6 +272,7 @@ const AdminHomeManager = () => {
                     onChange={(e) => handleInputChange('position', e.target.value)}
                     placeholder="e.g. Software Engineer"
                     className="w-full"
+                    disabled={isLoading}
                   />
                 </div>
 
@@ -240,6 +296,7 @@ const AdminHomeManager = () => {
                     onChange={(e) => handleInputChange('onlineLink', e.target.value)}
                     placeholder="e.g. https://x.com/username"
                     className="w-full"
+                    disabled={isLoading}
                   />
                 </div>
 
@@ -289,7 +346,7 @@ const AdminHomeManager = () => {
                   className="w-full flex items-center space-x-2"
                 >
                   <Save size={16} />
-                  <span>{isLoading ? 'Saving...' : 'Save Portfolio'}</span>
+                  <span>{isLoading ? 'Saving...' : (existingContent ? 'Update Portfolio' : 'Save Portfolio')}</span>
                 </Button>
               </TooltipProvider>
             </CardContent>
