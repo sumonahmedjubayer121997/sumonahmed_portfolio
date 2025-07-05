@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
+import { signInAdmin } from "@/integrations/firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 
 const AdminLogin = () => {
@@ -19,23 +19,13 @@ const AdminLogin = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.rpc('create_admin_session', {
-        user_email: email,
-        user_password: password
-      });
+      const { user, error } = await signInAdmin(email, password);
 
       if (error) {
-        throw error;
+        throw new Error(error);
       }
 
-      if (data && data.length > 0) {
-        const session = data[0];
-        localStorage.setItem('admin_session', JSON.stringify({
-          token: session.session_token,
-          admin_id: session.admin_id,
-          expires_at: session.expires_at
-        }));
-        
+      if (user) {
         toast({
           title: "Login successful",
           description: "Welcome to the admin panel!",
@@ -88,9 +78,8 @@ const AdminLogin = () => {
             </Button>
           </form>
           <div className="mt-4 text-sm text-gray-600">
-            <p>Default credentials:</p>
-            <p>Email: admin@example.com</p>
-            <p>Password: admin123</p>
+            <p>Create an admin account in Firebase Authentication</p>
+            <p>Use your Firebase admin credentials to login</p>
           </div>
         </CardContent>
       </Card>

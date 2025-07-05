@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import AdminLayout from "@/components/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
+import { getContentCounts } from '@/integrations/firebase/firestore';
 import { Home, User, Briefcase, FolderOpen, BookOpen, Info, Mail } from "lucide-react";
 
 const AdminDashboard = () => {
@@ -14,17 +14,7 @@ const AdminDashboard = () => {
 
   const fetchContentCounts = async () => {
     try {
-      const { data, error } = await supabase
-        .from('page_content')
-        .select('page_type');
-
-      if (error) throw error;
-
-      const counts = data.reduce((acc: Record<string, number>, item) => {
-        acc[item.page_type] = (acc[item.page_type] || 0) + 1;
-        return acc;
-      }, {});
-
+      const counts = await getContentCounts();
       setContentCounts(counts);
     } catch (error) {
       console.error('Error fetching content counts:', error);

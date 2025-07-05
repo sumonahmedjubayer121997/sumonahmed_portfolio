@@ -1,61 +1,55 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
-interface AdminSession {
-  token: string;
-  admin_id: string;
-  expires_at: string;
-}
+import { onAuthStateChange, signOutAdmin } from "@/integrations/firebase/auth";
+import { User } from "firebase/auth";
 
 export const useAdminAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [adminId, setAdminId] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    checkAuth();
+    const unsubscribe = onAuthStateChange((user) => {
+      if (user) {
+        setIsAuthenticated(true);
+        setAdminId(user.uid);
+        setUser(user);
+      } else {
+        setIsAuthenticated(false);
+        setAdminId(null);
+        setUser(null);
+      }
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const checkAuth = () => {
+  const logout = async () => {
     try {
-      const sessionData = localStorage.getItem('admin_session');
-      if (!sessionData) {
-        setIsAuthenticated(false);
-        setIsLoading(false);
-        return;
-      }
-
-      const session: AdminSession = JSON.parse(sessionData);
-      const now = new Date();
-      const expiresAt = new Date(session.expires_at);
-
-      if (now >= expiresAt) {
-        logout();
-        return;
-      }
-
-      setIsAuthenticated(true);
-      setAdminId(session.admin_id);
+      await signOutAdmin();
+      setIsAuthenticated(false);
+      setAdminId(null);
+      setUser(null);
+      navigate('/myportadmin/login');
     } catch (error) {
-      logout();
-    } finally {
-      setIsLoading(false);
+      console.error('Logout error:', error);
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('admin_session');
-    setIsAuthenticated(false);
-    setAdminId(null);
-    navigate('/myportadmin/login');
+  const checkAuth = () => {
+    // Firebase handles auth state automatically
+    return isAuthenticated;
   };
 
   return {
     isAuthenticated,
     isLoading,
     adminId,
+    user,
     logout,
     checkAuth
   };

@@ -6,21 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Save, X } from "lucide-react";
-import type { Database } from "@/integrations/supabase/types";
-
-type ContentType = Database["public"]["Enums"]["content_type"];
-
-interface ContentItem {
-  id: string;
-  title: string;
-  content: any;
-  status: string;
-  created_at: string;
-  updated_at: string;
-}
+import { 
+  getContentByPageType, 
+  createContent, 
+  updateContent, 
+  deleteContent,
+  ContentType,
+  ContentItem 
+} from '@/integrations/firebase/firestore';
 
 const AdminContentManager = () => {
   const { pageType } = useParams();
@@ -52,14 +47,8 @@ const AdminContentManager = () => {
     if (!currentPageType) return;
     
     try {
-      const { data, error } = await supabase
-        .from('page_content')
-        .select('*')
-        .eq('page_type', currentPageType)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setContents(data || []);
+      const data = await getContentByPageType(currentPageType);
+      setContents(data);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -75,30 +64,24 @@ const AdminContentManager = () => {
     try {
       if (editingId) {
         // Update existing content
-        const { error } = await supabase
-          .from('page_content')
-          .update({
-            title: formData.title,
-            content: { text: formData.content },
-            status: formData.status,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', editingId);
+        const { error } = await updateContent(editingId, {
+          title: formData.title,
+          content: { text: formData.content },
+          status: formData.status,
+        });
 
-        if (error) throw error;
+        if (error) throw new Error(error);
         toast({ title: "Content updated successfully!" });
       } else {
         // Create new content
-        const { error } = await supabase
-          .from('page_content')
-          .insert({
-            page_type: currentPageType,
-            title: formData.title,
-            content: { text: formData.content },
-            status: formData.status
-          });
+        const { error } = await createContent({
+          page_type: currentPageType,
+          title: formData.title,
+          content: { text: formData.content },
+          status: formData.status
+        });
 
-        if (error) throw error;
+        if (error) throw new Error(error);
         toast({ title: "Content created successfully!" });
       }
 
@@ -129,12 +112,9 @@ const AdminContentManager = () => {
     if (!confirm('Are you sure you want to delete this content?')) return;
 
     try {
-      const { error } = await supabase
-        .from('page_content')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
+      const { error } = await deleteContent(id);
+      if (error) throw new Error(error);
+      
       toast({ title: "Content deleted successfully!" });
       fetchContents();
     } catch (error: any) {
