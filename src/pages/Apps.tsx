@@ -1,52 +1,78 @@
 
 import Layout from "../components/Layout";
+import { Card, CardContent } from "@/components/ui/card";
 
 const Apps = () => {
   const apps = [
     {
-      name: "Dreamboat.ai",
-      description: "AI-powered platform for automated content generation and management.",
-      status: "Live",
-      tech: ["React", "Python", "AI/ML"]
+      name: "Blood Donation Guide",
+      description: "Get information about blood donation",
+      image: "/placeholder.svg",
+      alt: "Blood donation guide app interface showing blood type compatibility"
     },
     {
-      name: "Engagebud",
-      description: "Social media engagement platform with analytics and automation.",
-      status: "Live",
-      tech: ["React", "Node.js", "PostgreSQL"]
-    },
-    {
-      name: "Influencerbit",
-      description: "Influencer marketing platform connecting brands with creators.",
-      status: "Live",
-      tech: ["React", "Ruby on Rails", "Redis"]
+      name: "Anonymizer",
+      description: "Anonymize your data",
+      image: "/placeholder.svg", 
+      alt: "Text anonymizer app interface with highlighted entities"
     }
   ];
 
   return (
     <Layout>
-      <div className="pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-4xl mx-auto">
-        <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-12">Apps</h1>
-        
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {apps.map((app, index) => (
-            <div key={index} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow duration-200">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-semibold text-gray-900">{app.name}</h3>
-                <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">
-                  {app.status}
-                </span>
-              </div>
-              <p className="text-gray-600 mb-4">{app.description}</p>
-              <div className="flex flex-wrap gap-2">
-                {app.tech.map((tech, techIndex) => (
-                  <span key={techIndex} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">
-                    {tech}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ))}
+      <div className="min-h-screen bg-white">
+        {/* Header Section */}
+        <div className="pt-8 pb-16 px-6 max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-4">
+              Apps
+            </h1>
+            <p className="text-xl text-gray-600 font-medium">
+              Apps - Tools and Services that come in handy
+            </p>
+          </div>
+
+          {/* App Cards Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-5xl mx-auto">
+            {apps.map((app, index) => (
+              <Card key={index} className="bg-white border-0 shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-2xl overflow-hidden">
+                <CardContent className="p-0">
+                  {/* App Screenshot/Illustration */}
+                  <div className="aspect-[4/3] bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-hidden">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-full h-full bg-gray-200 rounded-lg m-6 flex items-center justify-center">
+                        <div className="w-16 h-16 bg-gray-300 rounded-lg flex items-center justify-center">
+                          <svg 
+                            className="w-8 h-8 text-gray-400" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path 
+                              strokeLinecap="round" 
+                              strokeLinejoin="round" 
+                              strokeWidth={2} 
+                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" 
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* App Information */}
+                  <div className="p-8">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                      {app.name}
+                    </h3>
+                    <p className="text-gray-600 text-lg leading-relaxed">
+                      {app.description}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
     </Layout>
