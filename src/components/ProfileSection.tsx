@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import PythonIcon from "./icon/PythonIcon";
+import FlaskIcon from "./icon/FlaskIcon";
+import DjangoIcon from "./icon/DjangoIcon";
+import JavaScriptIcon from "./icon/JavascriptIcon";
+import TechStack from "./icon/TechStack";
 
 const roles = [
   "Software Engineer",
@@ -132,6 +137,9 @@ const ProfileSection = () => {
           </span>
           .
         </p>
+      </div>
+      <div className="space-y-4">
+        <TechStack/>
       </div>
     </div>
   );
