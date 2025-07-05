@@ -118,7 +118,7 @@ const ResponsiveNavbar = () => {
 
   const getNavbarWidth = () => {
     if (isMobile) {
-      return isExpanded ? "w-56" : "w-16";
+      return isExpanded ? "w-56" : "w-12";
     } else {
       return isFocusMode ? "w-16" : "w-56";
     }
@@ -154,25 +154,21 @@ const ResponsiveNavbar = () => {
             </div>
 
             {/* Shortcuts Button */}
-            <div className="mb-4">
-              <Button
-                variant="outline"
-                onClick={() => setIsShortcutsOpen(true)}
-                className={`w-full justify-start gap-2 hover:bg-sidebar-accent border-sidebar-border bg-sidebar-background text-foreground text-sm py-2 ${
-                  !shouldShowLabels() ? "px-2" : ""
-                }`}
-              >
-                <Keyboard className="w-4 h-4 shrink-0" />
-                {shouldShowLabels() && (
-                  <>
-                    <span className="text-sm">Shortcuts</span>
-                    <kbd className="ml-auto px-1.5 py-0.5 text-xs bg-muted/50 rounded border border-border/50">
-                      Q
-                    </kbd>
-                  </>
-                )}
-              </Button>
-            </div>
+            {shouldShowLabels() && (
+              <div className="mb-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsShortcutsOpen(true)}
+                  className="w-full justify-start gap-2 hover:bg-sidebar-accent border-sidebar-border bg-sidebar-background text-foreground text-sm py-2"
+                >
+                  <Keyboard className="w-4 h-4 shrink-0" />
+                  <span className="text-sm">Shortcuts</span>
+                  <kbd className="ml-auto px-1.5 py-0.5 text-xs bg-muted/50 rounded border border-border/50">
+                    Q
+                  </kbd>
+                </Button>
+              </div>
+            )}
 
             {/* Navigation */}
             <nav className="flex-1">
