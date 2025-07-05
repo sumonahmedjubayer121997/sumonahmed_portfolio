@@ -178,13 +178,10 @@ const ResponsiveNavbar = () => {
   if (isMobile) {
     return (
       <>
-        {/* Mobile Horizontal Navbar */}
-        <div
-          ref={mobileNavRef}
-          className="fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-200 shadow-sm"
-        >
-          {/* Mobile Top Bar - Always Visible */}
-          <div className="flex items-center justify-between p-3 h-16">
+        {/* Mobile Navbar - Fixed at top */}
+        <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between p-4 h-16">
+            {/* Profile Info */}
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
                 <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
@@ -195,62 +192,90 @@ const ResponsiveNavbar = () => {
               </div>
             </div>
             
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsMobileExpanded(!isMobileExpanded)}
-              className="h-10 w-10 text-gray-600"
-            >
-              {isMobileExpanded ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
-            </Button>
-          </div>
-
-          {/* Mobile Navigation Icons - Always Visible */}
-          <div className="flex items-center justify-center gap-1 px-2 pb-2">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.name}
-                to={item.path}
-                end={item.path === "/"}
-                className={({ isActive }) =>
-                  `flex items-center justify-center p-2 rounded-lg transition-all duration-200 ${
-                    isActive
-                      ? "bg-gray-900 text-white shadow-sm"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`
-                }
-                onClick={() => setIsMobileExpanded(false)}
+            {/* Navigation Icons */}
+            <div className="flex items-center gap-2">
+              {/* Quick Navigation Icons */}
+              {navItems.slice(0, 4).map((item) => (
+                <NavLink
+                  key={item.name}
+                  to={item.path}
+                  end={item.path === "/"}
+                  className={({ isActive }) =>
+                    `flex items-center justify-center p-2 rounded-lg transition-all duration-200 ${
+                      isActive
+                        ? "bg-gray-900 text-white shadow-sm"
+                        : "text-gray-600 hover:bg-gray-100"
+                    }`
+                  }
+                >
+                  <item.icon className="w-4 h-4" />
+                </NavLink>
+              ))}
+              
+              {/* Hamburger Menu Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMobileExpanded(!isMobileExpanded)}
+                className="h-10 w-10 text-gray-600"
               >
-                <item.icon className="w-4 h-4" />
-              </NavLink>
-            ))}
+                {isMobileExpanded ? (
+                  <X className="w-5 h-5" />
+                ) : (
+                  <Menu className="w-5 h-5" />
+                )}
+              </Button>
+            </div>
           </div>
+        </div>
 
-          {/* Mobile Expanded Menu */}
-          <AnimatePresence>
-            {isMobileExpanded && (
+        {/* Mobile Expanded Sidebar - 50% width */}
+        <AnimatePresence>
+          {isMobileExpanded && (
+            <>
+              {/* Backdrop */}
               <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="border-t border-gray-200 bg-white overflow-hidden"
+                className="fixed inset-0 bg-black bg-opacity-50 z-40"
+                onClick={() => setIsMobileExpanded(false)}
+              />
+              
+              {/* Sidebar */}
+              <motion.div
+                ref={mobileNavRef}
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="fixed top-0 right-0 h-full w-1/2 bg-white shadow-lg z-50 overflow-y-auto"
               >
-                <div className="p-4 space-y-4">
-                  {/* Navigation with Labels */}
-                  <nav>
-                    <ul className="space-y-1">
+                <div className="p-6 flex flex-col h-full">
+                  {/* Header with Close Button */}
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setIsMobileExpanded(false)}
+                      className="h-8 w-8 text-gray-400"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  {/* Navigation */}
+                  <nav className="flex-1">
+                    <ul className="space-y-2">
                       {navItems.map((item) => (
                         <li key={item.name}>
                           <NavLink
                             to={item.path}
                             end={item.path === "/"}
                             className={({ isActive }) =>
-                              `flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 text-sm ${
+                              `flex items-center px-3 py-3 rounded-lg transition-all duration-200 text-sm ${
                                 isActive
                                   ? "bg-gray-900 text-white shadow-sm"
                                   : "text-gray-700 hover:bg-gray-100"
@@ -267,11 +292,11 @@ const ResponsiveNavbar = () => {
                   </nav>
 
                   {/* Connect Section */}
-                  <div className="pt-4 border-t border-gray-200">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                  <div className="mt-8 pt-6 border-t border-gray-200">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-4">
                       Connect
                     </h3>
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                       {socialLinks.map((link) => (
                         <a
                           key={link.name}
@@ -291,9 +316,9 @@ const ResponsiveNavbar = () => {
                   </div>
                 </div>
               </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+            </>
+          )}
+        </AnimatePresence>
 
         {/* Shortcuts Modal */}
         <ShortcutsModal
@@ -318,14 +343,6 @@ const ResponsiveNavbar = () => {
               <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
                 <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsMobileExpanded(!isMobileExpanded)}
-                className="h-8 w-8 text-gray-400 ml-auto"
-              >
-                <X className="w-4 h-4" />
-              </Button>
             </div>
             <h2 className="text-lg font-semibold text-gray-900 mb-1">Aman</h2>
             <p className="text-sm text-gray-600">{roles[index]}</p>
