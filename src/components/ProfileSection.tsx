@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import TechStack from "./icon/TechStack";
 
 const roles = [
   "Software Engineer",
@@ -132,6 +133,9 @@ const ProfileSection = () => {
           </span>
           .
         </p>
+      </div>
+      <div className="space-y-4">
+        <TechStack/>
       </div>
     </div>
   );
