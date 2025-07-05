@@ -34,9 +34,11 @@ const ResponsiveNavbar = () => {
     return localStorage.getItem("focusMode") === "true";
   });
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isVerticalNavExpanded, setIsVerticalNavExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [index, setIndex] = useState(0);
   const mobileNavRef = useRef<HTMLDivElement>(null);
+  const verticalNavRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -62,6 +64,7 @@ const ResponsiveNavbar = () => {
       setIsMobile(window.innerWidth <= 768);
       if (window.innerWidth > 768) {
         setIsExpanded(false);
+        setIsVerticalNavExpanded(false);
       }
     };
 
@@ -84,10 +87,11 @@ const ResponsiveNavbar = () => {
       if (key === "q") {
         event.preventDefault();
         setIsShortcutsOpen((prev) => !prev);
-      } else if (key === "escape" && (isShortcutsOpen || isExpanded)) {
+      } else if (key === "escape" && (isShortcutsOpen || isExpanded || isVerticalNavExpanded)) {
         event.preventDefault();
         setIsShortcutsOpen(false);
         setIsExpanded(false);
+        setIsVerticalNavExpanded(false);
       } else if (key === "d") {
         event.preventDefault();
         toggleDarkMode();
@@ -99,29 +103,37 @@ const ResponsiveNavbar = () => {
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isShortcutsOpen, isExpanded]);
+  }, [isShortcutsOpen, isExpanded, isVerticalNavExpanded]);
 
-  // Handle click outside for mobile menu
+  // Handle click outside for mobile menus
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        isMobile &&
-        isExpanded &&
-        mobileNavRef.current &&
-        !mobileNavRef.current.contains(event.target as Node)
-      ) {
-        setIsExpanded(false);
+      if (isMobile) {
+        if (
+          isExpanded &&
+          mobileNavRef.current &&
+          !mobileNavRef.current.contains(event.target as Node)
+        ) {
+          setIsExpanded(false);
+        }
+        if (
+          isVerticalNavExpanded &&
+          verticalNavRef.current &&
+          !verticalNavRef.current.contains(event.target as Node)
+        ) {
+          setIsVerticalNavExpanded(false);
+        }
       }
     };
 
-    if (isExpanded) {
+    if (isExpanded || isVerticalNavExpanded) {
       document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isExpanded, isMobile]);
+  }, [isExpanded, isVerticalNavExpanded, isMobile]);
 
   const toggleDarkMode = () => {
     const newDarkMode = !isDarkMode;
@@ -139,20 +151,21 @@ const ResponsiveNavbar = () => {
 
   const handleLogoClick = () => {
     if (isMobile) {
-      setIsExpanded((prev) => !prev);
+      setIsVerticalNavExpanded((prev) => !prev);
     }
   };
 
   const handleNavItemClick = () => {
-    if (isMobile && isExpanded) {
+    if (isMobile) {
       setIsExpanded(false);
+      setIsVerticalNavExpanded(false);
     }
   };
 
   // Determine navbar width and show labels
   const shouldShowLabels = () => {
     if (isMobile) {
-      return isExpanded;
+      return isVerticalNavExpanded;
     } else {
       return !isFocusMode;
     }
@@ -160,7 +173,7 @@ const ResponsiveNavbar = () => {
 
   const getNavbarWidth = () => {
     if (isMobile) {
-      return isExpanded ? "w-56" : "w-16";
+      return isVerticalNavExpanded ? "w-56" : "w-16";
     } else {
       return isFocusMode ? "w-16" : "w-56";
     }
@@ -169,8 +182,8 @@ const ResponsiveNavbar = () => {
   if (isMobile) {
     return (
       <>
-        {/* Mobile Top Bar */}
-        <div className="fixed top-0 left-0 right-0 h-16 z-50 bg-sidebar-background border-b border-sidebar-border shadow-sm">
+        {/* Mobile Horizontal Top Bar */}
+        <div className="fixed top-0 left-0 right-0 h-16 z-50 bg-sidebar-background/80 backdrop-blur-md border-b border-sidebar-border shadow-sm">
           <div className="flex items-center justify-between h-full px-4">
             <div className="flex items-center gap-3">
               <button
@@ -200,7 +213,7 @@ const ResponsiveNavbar = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={handleLogoClick}
+                onClick={() => setIsExpanded(!isExpanded)}
                 className="hover:bg-sidebar-accent text-foreground"
               >
                 {isExpanded ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -209,10 +222,64 @@ const ResponsiveNavbar = () => {
           </div>
         </div>
 
-        {/* Mobile Expanded Menu */}
+        {/* Mobile Vertical Sidebar */}
+        <div
+          ref={verticalNavRef}
+          className={`fixed left-0 top-16 bottom-0 ${getNavbarWidth()} z-40 bg-sidebar-background/95 backdrop-blur-md border-r border-sidebar-border shadow-lg transform transition-all duration-300 ease-in-out navbar-transition`}
+        >
+          <div className="p-2 flex flex-col h-full">
+            {/* Profile in vertical navbar */}
+            {shouldShowLabels() && (
+              <div className="text-center mb-4 p-3 bg-sidebar-accent/50 rounded-lg">
+                <h2 className="text-sm font-semibold text-foreground mb-1">Sumon</h2>
+                <p className="text-xs text-muted-foreground">{roles[index]}</p>
+              </div>
+            )}
+
+            {/* Navigation items */}
+            <nav className="flex-1">
+              <ul className="space-y-1">
+                {navItems.map((item) => (
+                  <li key={item.name}>
+                    <NavLink
+                      to={item.path}
+                      end={item.path === "/"}
+                      onClick={handleNavItemClick}
+                      className={({ isActive }) =>
+                        `flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 ${
+                          isActive
+                            ? "bg-primary text-primary-foreground shadow-sm"
+                            : "text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                        } ${!shouldShowLabels() ? "justify-center" : ""}`
+                      }
+                    >
+                      <item.icon className={`w-4 h-4 shrink-0 ${shouldShowLabels() ? "mr-3" : ""}`} />
+                      {shouldShowLabels() && <span className="font-medium">{item.name}</span>}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            {/* Close button when expanded */}
+            {shouldShowLabels() && (
+              <div className="pt-4 mt-4 border-t border-sidebar-border">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsVerticalNavExpanded(false)}
+                  className="w-full justify-center gap-2 hover:bg-sidebar-accent border-sidebar-border bg-sidebar-background text-foreground"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile Horizontal Expanded Menu */}
         <div
           ref={mobileNavRef}
-          className={`fixed top-16 left-0 right-0 z-40 bg-sidebar-background border-b border-sidebar-border shadow-lg transform transition-all duration-300 ease-in-out ${
+          className={`fixed top-16 left-0 right-0 z-40 bg-sidebar-background/95 backdrop-blur-md border-b border-sidebar-border shadow-lg transform transition-all duration-300 ease-in-out ${
             isExpanded
               ? "translate-y-0 opacity-100"
               : "-translate-y-full opacity-0 pointer-events-none"
@@ -271,8 +338,8 @@ const ResponsiveNavbar = () => {
   return (
     <>
       {/* Desktop Vertical Navbar */}
-      <div className={`fixed left-0 top-0 h-full ${getNavbarWidth()} z-40 navbar-transition blur-navbar`}>
-        <div className="h-full w-full bg-sidebar-background">
+      <div className={`fixed left-0 top-0 h-full ${getNavbarWidth()} z-40 navbar-transition bg-sidebar-background/95 backdrop-blur-md border-r border-sidebar-border shadow-sm`}>
+        <div className="h-full w-full">
           <div className="p-2 flex flex-col h-full">
             {/* Logo/Profile Section */}
             <div className="text-center mb-6 transition-all duration-200 hover:bg-sidebar-accent rounded-lg p-2">
