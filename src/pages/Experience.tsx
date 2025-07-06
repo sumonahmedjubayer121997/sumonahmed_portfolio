@@ -139,7 +139,7 @@ const Experience = () => {
               <animate attributeName="stroke-dasharray" from="0,1000" to="1000,0" dur="3s" fill="freeze" begin="1.5s" />
             </rect>
           </svg>
-        </div>)}
+        </div>
 
           {/* Experience Cards */}
           <div className="space-y-8">
