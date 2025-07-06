@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import Layout from "../components/Layout";
+import { useIsMobile } from "@/hooks/use-mobile";
+
+const isMobile= useIsMobile();
 
 const Experience = () => {
   const [theme, setTheme] = useState(() => {
@@ -79,6 +82,7 @@ const Experience = () => {
               A timeline of my professional experiences.
             </p>
           </div>
+          {!isMobile && (
           <div className="absolute top-0 -mt-20 right-0 opacity-60 z-0">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -134,7 +138,7 @@ const Experience = () => {
               <animate attributeName="stroke-dasharray" from="0,1000" to="1000,0" dur="3s" fill="freeze" begin="1.5s" />
             </rect>
           </svg>
-        </div>
+        </div>)}
 
           {/* Experience Cards */}
           <div className="space-y-8">

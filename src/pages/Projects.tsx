@@ -79,16 +79,16 @@ const Projects = () => {
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        {/* Header Section */}
-        <div className="mb-12">
-          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-2">
-            Projects
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-lg">
-            Playground - Small MVP to Production Apps
-          </p>
-        </div>
+      <div className="relative pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-4xl mx-auto bg-background text-foreground transition-colors duration-300">
+          {/* Header Section */}
+          <div className="mb-12">
+            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+              Projects
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 text-lg">
+              Playground - Small MVP to Production Apps
+            </p>
+          </div>
 
         {/* Projects Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
