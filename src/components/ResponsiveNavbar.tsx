@@ -335,7 +335,7 @@ const ResponsiveNavbar = () => {
   return (
     <>
       {/* Vertical Navbar */}
-      <div className="fixed left-0 top-0 h-full w-72 z-40 bg-white border-r border-gray-200 shadow-sm">
+      <div className="fixed left-0 top-0 h-full w-64 z-40 bg-white border-r border-gray-200 shadow-sm">
         <div className="p-6 flex flex-col h-full">
           {/* Logo/Profile Section */}
           <div className="text-left mb-8">

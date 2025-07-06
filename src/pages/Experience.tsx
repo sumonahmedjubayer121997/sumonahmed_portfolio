@@ -69,7 +69,7 @@ const Experience = () => {
   return (
     <div className={theme === "dark" ? "dark" : ""}>
       <Layout>
-        <div className="pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-4xl mx-auto bg-background text-foreground transition-colors duration-300">
+        <div className="relative pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-4xl mx-auto bg-background text-foreground transition-colors duration-300">
           {/* Header Section */}
           <div className="mb-12">
             <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
@@ -79,101 +79,62 @@ const Experience = () => {
               A timeline of my professional experiences.
             </p>
           </div>
-          <div
-            className="absolute  -right-28 sm:right-0 md:right-0 lg:right-0 -top-8"
-            // style={{
-            //   position: "absolute",
-            //   right: 0,
-            //   top: "-6rem",
-            //   bottom: 0,
-            // }}
+          <div className="absolute top-0 -mt-20 right-0 opacity-60 z-0">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 631 620"
+            fill="none"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="w-full h-full max-w-[200px] sm:max-w-[300px] md:max-w-[400px]"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 631 620"
-              fill="none"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="sm:w-full sm:h-full w-3/5 h-3/5 md:w-full md:h-full lg:w-full lg:h-full opacity-60"
-              // style={{
-              //   height: "100%",
-              //   width: "100%",
-              //   opacity: 0.6,
-              // }}
+            {/* Rects with animation */}
+            <rect
+              x="254.558"
+              y="1.41421"
+              width="122"
+              height="358"
+              rx="61"
+              transform="rotate(45 254.558 1.41421)"
+              stroke="purple"
             >
-              <rect
-                x="254.558"
-                y="1.41421"
-                width="122"
-                height="358"
-                rx="61"
-                transform="rotate(45 254.558 1.41421)"
-                stroke="purple"
-              >
-                <animate
-                  attributeName="stroke-dasharray"
-                  from="0,1000"
-                  to="1000,0"
-                  dur="3s"
-                  fill="freeze"
-                />
-              </rect>
-              <rect
-                x="341.105"
-                y="421.087"
-                width="122"
-                height="358"
-                rx="61"
-                transform="rotate(135 341.105 421.087)"
-                stroke="purple"
-              >
-                <animate
-                  attributeName="stroke-dasharray"
-                  from="0,1000"
-                  to="1000,0"
-                  dur="3s"
-                  fill="freeze"
-                  begin="0.5s"
-                />
-              </rect>
-              <rect
-                y="1.41421"
-                width="122"
-                height="358"
-                rx="61"
-                transform="matrix(-0.707107 0.707107 0.707107 0.707107 374.96 111.414)"
-                stroke="purple"
-              >
-                <animate
-                  attributeName="stroke-dasharray"
-                  from="0,1000"
-                  to="1000,0"
-                  dur="3s"
-                  fill="freeze"
-                  begin="1s"
-                />
-              </rect>
-              <rect
-                x="1.41421"
-                y="-1.19209e-07"
-                width="122"
-                height="358"
-                rx="61"
-                transform="matrix(0.707107 0.707107 0.707107 -0.707107 288.414 531.087)"
-                stroke="purple"
-              >
-                <animate
-                  attributeName="stroke-dasharray"
-                  from="0,1000"
-                  to="1000,0"
-                  dur="3s"
-                  fill="freeze"
-                  begin="1.5s"
-                />
-              </rect>
-            </svg>
-          </div>
+              <animate attributeName="stroke-dasharray" from="0,1000" to="1000,0" dur="3s" fill="freeze" />
+            </rect>
+            <rect
+              x="341.105"
+              y="421.087"
+              width="122"
+              height="358"
+              rx="61"
+              transform="rotate(135 341.105 421.087)"
+              stroke="purple"
+            >
+              <animate attributeName="stroke-dasharray" from="0,1000" to="1000,0" dur="3s" fill="freeze" begin="0.5s" />
+            </rect>
+            <rect
+              y="1.41421"
+              width="122"
+              height="358"
+              rx="61"
+              transform="matrix(-0.707107 0.707107 0.707107 0.707107 374.96 111.414)"
+              stroke="purple"
+            >
+              <animate attributeName="stroke-dasharray" from="0,1000" to="1000,0" dur="3s" fill="freeze" begin="1s" />
+            </rect>
+            <rect
+              x="1.41421"
+              y="0"
+              width="122"
+              height="358"
+              rx="61"
+              transform="matrix(0.707107 0.707107 0.707107 -0.707107 288.414 531.087)"
+              stroke="purple"
+            >
+              <animate attributeName="stroke-dasharray" from="0,1000" to="1000,0" dur="3s" fill="freeze" begin="1.5s" />
+            </rect>
+          </svg>
+        </div>
 
           {/* Experience Cards */}
           <div className="space-y-8">
