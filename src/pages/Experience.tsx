@@ -3,12 +3,13 @@ import { Badge } from "@/components/ui/badge";
 import Layout from "../components/Layout";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-const isMobile= useIsMobile();
+
 
 const Experience = () => {
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem("theme") || "light";
   });
+
 
   useEffect(() => {
     localStorage.setItem("theme", theme);
@@ -82,8 +83,8 @@ const Experience = () => {
               A timeline of my professional experiences.
             </p>
           </div>
-          {!isMobile && (
-          <div className="absolute top-0 -mt-20 right-0 opacity-60 z-0">
+         
+          <div className="absolute top-0 -mt-20 right-0 opacity-60 z-0 hidden sm:block">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 631 620"
