@@ -138,6 +138,55 @@ const ProfileSection = () => {
       <div className="space-y-4">
         <TechStack/>
       </div>
+    {/* Contact and Email */}
+
+    <div className="flex items-center gap-3">
+  <a href="/contact">
+    <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-gray-600 shadow h-9 px-4 py-2 text-white dark:text-black bg-black dark:bg-oldsilver hover:text-black hover:bg-white dark:hover:bg-slate dark:hover:text-white">
+      <span className="text-sm pr-2">
+        <svg
+          stroke="currentColor"
+          fill="none"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="m-0"
+          height="12"
+          width="12"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M21 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"></path>
+          <path d="M12 7v5l3 3"></path>
+        </svg>
+      </span>
+      Contact
+    </button>
+  </a>
+  <a href="mailto:sumonahmedjubayer@gmail.com">
+    <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-gray-600 bg-primary shadow hover:bg-primary/90 h-9 px-4 py-2 text-white hover:text-oldsilver">
+      <span className="text-sm pr-2">
+        <svg
+          stroke="currentColor"
+          fill="none"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="m-0"
+          height="12"
+          width="12"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+      </span>
+      <span style={{ transition: '0.3s' }}>E-Mail</span>
+    </button>
+  </a>
+</div>
+
     </div>
   );
 };
