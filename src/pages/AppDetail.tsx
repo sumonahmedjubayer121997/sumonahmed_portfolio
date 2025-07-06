@@ -12,7 +12,7 @@ const appData = {
   "Blood Donation Guide": {
     id: "blood-donation-guide",
     name: "Blood Donation Guide",
-    description: "A comprehensive mobile application designed to educate users about blood donation processes, eligibility criteria, and help connect donors with recipients. The app provides essential information about blood types, donation procedures, and maintains a database of blood banks.",
+    description: "A comprehensive mobile application designed to educate users about blood donation processes, eligibility criteria, and help connect donors with recipients.",
     longDescription: "The Blood Donation Guide app serves as a bridge between blood donors and those in need. It features an intuitive interface that guides users through the donation process, provides real-time information about blood bank locations, and includes educational content about the importance of blood donation.",
     features: [
       "Blood type compatibility checker",
@@ -36,14 +36,14 @@ const appData = {
     challenges: "Implementing real-time blood bank data synchronization and ensuring HIPAA compliance for user data protection.",
     achievements: "Successfully connected over 500 donors with recipients in the first 6 months.",
     accessibility: "Designed with high contrast colors and screen reader compatibility for visually impaired users.",
-    demoLink: "#",
-    repoLink: "#",
-    downloadLink: "#"
+    demoLink: "https://example.com/demo",
+    repoLink: "https://github.com/example/blood-donation-guide",
+    downloadLink: "https://example.com/download"
   },
   "Anonymizer": {
     id: "anonymizer",
     name: "Anonymizer",
-    description: "A powerful web application that automatically detects and anonymizes sensitive information in text documents. Perfect for protecting privacy in documents before sharing or publishing.",
+    description: "A powerful web application that automatically detects and anonymizes sensitive information in text documents.",
     longDescription: "The Anonymizer tool uses advanced natural language processing to identify personally identifiable information (PII) such as names, addresses, phone numbers, and email addresses, then replaces them with generic placeholders while maintaining the document's readability and context.",
     features: [
       "Automatic PII detection using NLP",
@@ -67,20 +67,24 @@ const appData = {
     challenges: "Balancing accuracy in PII detection while maintaining document context and readability.",
     achievements: "Processed over 10,000 documents with 95% accuracy in PII detection.",
     accessibility: "Keyboard navigation support and clear visual indicators for anonymized content.",
-    demoLink: "#",
-    repoLink: "#",
-    downloadLink: "#"
+    demoLink: "https://example.com/anonymizer-demo",
+    repoLink: "https://github.com/example/anonymizer",
+    downloadLink: "https://example.com/anonymizer-download"
   }
 };
 
 const AppDetail = () => {
   const { appName } = useParams<{ appName: string }>();
   
+  console.log('AppDetail component rendered');
+  console.log('App name from URL:', appName);
+  
   if (!appName) {
+    console.log('No app name provided in URL');
     return (
       <Layout>
         <div className="max-w-4xl mx-auto px-6 py-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">App Not Found</h1>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">App Not Found</h1>
           <Link to="/apps">
             <Button variant="outline">
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -94,14 +98,19 @@ const AppDetail = () => {
 
   // Decode the app name from URL
   const decodedAppName = decodeURIComponent(appName);
+  console.log('Decoded app name:', decodedAppName);
+  console.log('Available apps:', Object.keys(appData));
+  
   const app = appData[decodedAppName as keyof typeof appData];
+  console.log('Found app data:', app ? 'Yes' : 'No');
 
   if (!app) {
+    console.log('App not found in data');
     return (
       <Layout>
         <div className="max-w-4xl mx-auto px-6 py-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">App Not Found</h1>
-          <p className="text-gray-600 mb-6">The app "{decodedAppName}" could not be found.</p>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">App Not Found</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">The app "{decodedAppName}" could not be found.</p>
           <Link to="/apps">
             <Button variant="outline">
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -129,14 +138,14 @@ const AppDetail = () => {
         {/* App Header */}
         <div className="mb-12">
           <div className="flex flex-wrap items-center gap-4 mb-4">
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900">{app.name}</h1>
+            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">{app.name}</h1>
             <Badge variant="secondary">{app.status}</Badge>
             <Badge variant="outline">{app.version}</Badge>
           </div>
-          <p className="text-xl text-gray-600 mb-6">{app.description}</p>
+          <p className="text-xl text-gray-600 dark:text-gray-400 mb-6">{app.description}</p>
           
           {/* Quick Info */}
-          <div className="flex flex-wrap gap-6 text-sm text-gray-500">
+          <div className="flex flex-wrap gap-6 text-sm text-gray-500 dark:text-gray-400">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />
               <span>Duration: {app.duration}</span>
@@ -204,7 +213,7 @@ const AppDetail = () => {
                 <CardTitle>About This Project</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-700 leading-relaxed">{app.longDescription}</p>
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{app.longDescription}</p>
               </CardContent>
             </Card>
 
@@ -221,7 +230,7 @@ const AppDetail = () => {
                   {app.features.map((feature, index) => (
                     <li key={index} className="flex items-start gap-2">
                       <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-                      <span className="text-gray-700">{feature}</span>
+                      <span className="text-gray-700 dark:text-gray-300">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -239,7 +248,7 @@ const AppDetail = () => {
               <CardContent>
                 <div className="flex flex-wrap gap-3">
                   {app.techUsed.map((tech, index) => (
-                    <div key={index} className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg">
+                    <div key={index} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-lg">
                       <TechIcon techName={tech} className="w-4 h-4" />
                       <span className="text-sm font-medium">{tech}</span>
                     </div>
@@ -255,7 +264,7 @@ const AppDetail = () => {
                   <CardTitle>Challenges & Solutions</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700 text-sm leading-relaxed">{app.challenges}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{app.challenges}</p>
                 </CardContent>
               </Card>
             )}
@@ -267,7 +276,7 @@ const AppDetail = () => {
                   <CardTitle>Achievements</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700 text-sm leading-relaxed">{app.achievements}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{app.achievements}</p>
                 </CardContent>
               </Card>
             )}
@@ -279,7 +288,7 @@ const AppDetail = () => {
                   <CardTitle>Accessibility</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700 text-sm leading-relaxed">{app.accessibility}</p>
+                  <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{app.accessibility}</p>
                 </CardContent>
               </Card>
             )}

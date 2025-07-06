@@ -25,10 +25,11 @@ const Apps = () => {
     }
   ];
 
+  console.log('Apps page rendered');
+
   return (
     <Layout>
       <div className="relative pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-4xl mx-auto text-foreground transition-colors duration-300">
-
         {/* SVG background */}
         <div className="absolute top-0 -mt-20 right-0 opacity-40 z-0 hidden sm:block">
           <svg
@@ -40,7 +41,6 @@ const Apps = () => {
             strokeLinejoin="round"
             className="w-full h-full max-w-[200px] sm:max-w-[300px] md:max-w-[400px]"
           >
-            {/* Rects with animation */}
             <rect
               x="254.558"
               y="1.41421"
@@ -93,40 +93,45 @@ const Apps = () => {
             Apps
           </h1>
           <p className="text-gray-600 dark:text-gray-400 text-lg">
-            A timeline of my apps projets.
+            A timeline of my apps projects.
           </p>
         </div>
 
         {/* App Cards Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-5xl mx-auto relative z-10">
-          {apps.map((app) => (
-            <Link 
-              key={app.id} 
-              to={`/apps/${encodeURIComponent(app.name)}`}
-              className="w-full group"
-            >
-              <div className="flex flex-col w-full h-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
-                <img
-                  src="https://firstnorth.org/wp-content/uploads/2020/10/Gen-Blood-Drive-web-1.jpg"
-                  alt={app.description}
-                  className="max-h-52 md:w-full mb-4 items-center justify-center rounded-md"
-                />
-                <div className="flex items-center justify-between">
-                  <h2 className="text-md font-bold group-hover:text-primary transition-colors duration-200">{app.name}</h2>
-                  <div className="flex mt-1 space-x-2">
-                    {app.techUsed.map((tech, index) => (
-                      <div key={index} title={tech}>
-                        <TechIcon techName={tech} />
-                      </div>
-                    ))}
+          {apps.map((app) => {
+            const appLink = `/apps/${encodeURIComponent(app.name)}`;
+            console.log(`Creating link for ${app.name}: ${appLink}`);
+            
+            return (
+              <Link 
+                key={app.id} 
+                to={appLink}
+                className="w-full group"
+                onClick={() => console.log(`Clicked on ${app.name}, navigating to ${appLink}`)}
+              >
+                <div className="flex flex-col w-full h-full p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+                  <img
+                    src="https://firstnorth.org/wp-content/uploads/2020/10/Gen-Blood-Drive-web-1.jpg"
+                    alt={app.description}
+                    className="max-h-52 md:w-full mb-4 items-center justify-center rounded-md"
+                  />
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-md font-bold group-hover:text-primary transition-colors duration-200">{app.name}</h2>
+                    <div className="flex mt-1 space-x-2">
+                      {app.techUsed.map((tech, index) => (
+                        <div key={index} title={tech}>
+                          <TechIcon techName={tech} />
+                        </div>
+                      ))}
+                    </div>
                   </div>
+                  <p className="mt-2 text-gray-600 dark:text-gray-400 text-sm">{app.description}</p>
                 </div>
-                <p className="mt-2 text-gray-600 text-sm">{app.description}</p>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
-
       </div>
     </Layout>
   );
