@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Experience from "./pages/Experience";
 import Apps from "./pages/Apps";
+import AppDetail from "./pages/AppDetail";
 import Projects from "./pages/Projects";
 import Blogs from "./pages/Blogs";
 import About from "./pages/About";
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/experience" element={<Experience />} />
             <Route path="/apps" element={<Apps />} />
+            <Route path="/apps/:appName" element={<AppDetail />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/blogs" element={<Blogs />} />
             <Route path="/about" element={<About />} />

@@ -1,3 +1,5 @@
+
+import { Link } from "react-router-dom";
 import TechIcon from "@/components/TechIcon";
 import Layout from "../components/Layout";
 
@@ -98,15 +100,19 @@ const Apps = () => {
         {/* App Cards Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-5xl mx-auto relative z-10">
           {apps.map((app) => (
-            <a key={app.id} className="w-full" href={`/apps/${app.name}`}>
-              <div className="flex flex-col w-full h-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md">
+            <Link 
+              key={app.id} 
+              to={`/apps/${encodeURIComponent(app.name)}`}
+              className="w-full group"
+            >
+              <div className="flex flex-col w-full h-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
                 <img
                   src="https://firstnorth.org/wp-content/uploads/2020/10/Gen-Blood-Drive-web-1.jpg"
                   alt={app.description}
-                  className="max-h-52 md:w-full mb-4 items-center justify-center"
+                  className="max-h-52 md:w-full mb-4 items-center justify-center rounded-md"
                 />
                 <div className="flex items-center justify-between">
-                  <h2 className="text-md font-bold">{app.name}</h2>
+                  <h2 className="text-md font-bold group-hover:text-primary transition-colors duration-200">{app.name}</h2>
                   <div className="flex mt-1 space-x-2">
                     {app.techUsed.map((tech, index) => (
                       <div key={index} title={tech}>
@@ -117,7 +123,7 @@ const Apps = () => {
                 </div>
                 <p className="mt-2 text-gray-600 text-sm">{app.description}</p>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
 
