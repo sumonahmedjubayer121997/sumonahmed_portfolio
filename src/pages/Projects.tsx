@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Youtube } from "lucide-react";
 import TechIcon from "@/components/TechIcon";
+import { Link } from "react-router-dom";
 
 const Projects = () => {
   const projects = [
@@ -88,7 +89,7 @@ const Projects = () => {
 
   return (
     <Layout>
-       <div className="relative pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-4xl mx-auto text-foreground transition-colors duration-300">
+      <div className="relative pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-4xl mx-auto text-foreground transition-colors duration-300">
 
         {/* SVG background */}
         <div className="absolute top-0 -mt-20 right-0 opacity-40 z-0 hidden sm:block">
@@ -148,7 +149,7 @@ const Projects = () => {
           </svg>
         </div>
 
-          {/* Header Section */}
+        {/* Header Section */}
         <div className="mb-12 relative z-10">
           <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             Projects
@@ -161,86 +162,88 @@ const Projects = () => {
         {/* Projects Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {projects.map((project) => (
-            <Card key={project.id} className="group hover:shadow-lg transition-all duration-300 border border-gray-200 bg-white">
-              <CardContent className="p-0">
-                {/* Project Image */}
-                <div className="relative overflow-hidden rounded-t-lg">
-                  <img
-                    src={project.image}
-                    alt={project.title}
-                    className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                  {/* Status Badge - positioned over image */}
-                  <div className="absolute top-4 right-4">
-                    <Badge 
-                      variant="outline" 
-                      className={`text-xs font-medium ${getStatusColor(project.status)}`}
-                    >
-                      {project.status}
-                    </Badge>
-                  </div>
-                </div>
-
-                {/* Project Content */}
-                <div className="p-6">
-                  {/* Title and Description */}
-                  <div className="mb-4">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      {project.title}
-                    </h3>
-                    <p className="text-gray-600 text-sm">
-                      {project.description}
-                    </p>
+            <Link 
+              key={project.id} 
+              to={`/projects/${encodeURIComponent(project.title)}`}
+              className="group block"
+            >
+              <Card className="group-hover:shadow-lg transition-all duration-300 border border-gray-200 bg-white h-full">
+                <CardContent className="p-0">
+                  {/* Project Image */}
+                  <div className="relative overflow-hidden rounded-t-lg">
+                    <img
+                      src={project.image}
+                      alt={project.title}
+                      className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    {/* Status Badge - positioned over image */}
+                    <div className="absolute top-4 right-4">
+                      <Badge 
+                        variant="outline" 
+                        className={`text-xs font-medium ${getStatusColor(project.status)}`}
+                      >
+                        {project.status}
+                      </Badge>
+                    </div>
                   </div>
 
-                 
+                  {/* Project Content */}
+                  <div className="p-6">
+                    {/* Title and Description */}
+                    <div className="mb-4">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary transition-colors">
+                        {project.title}
+                      </h3>
+                      <p className="text-gray-600 text-sm">
+                        {project.description}
+                      </p>
+                    </div>
 
-                   <div className="flex items-center justify-between">
-                       {/* Action Buttons */}
-                  <div className="mb-4">
+                    <div className="flex items-center justify-between">
+                      {/* Action Buttons */}
+                      <div className="mb-4">
+                        <div className="flex flex-wrap gap-2">
+                          {project.links.map((link, index) => (
+                            <Button
+                              key={index}
+                              variant="default"
+                              size="sm"
+                              className="bg-gray-900 text-white hover:bg-gray-800 transition-colors pointer-events-none"
+                            >
+                              <div className="flex items-center gap-2">
+                                {getButtonIcon(link.type)}
+                                {link.label}
+                              </div>
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      {/* TECH STACK */}
+                      <div className="flex mt-1 space-x-2">
+                        {project.techUsed.map((tech, index) => (
+                          <div key={index} title={tech}>
+                            <TechIcon techName={tech} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Tags */}
                     <div className="flex flex-wrap gap-2">
-                      {project.links.map((link, index) => (
-                        <Button
+                      {project.tags.map((tag, index) => (
+                        <Badge
                           key={index}
-                          variant="default"
-                          size="sm"
-                          className="bg-gray-900 text-white hover:bg-gray-800 transition-colors"
-                          asChild
+                          variant="secondary"
+                          className="text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
                         >
-                          <a href={link.url} className="flex items-center gap-2">
-                            {getButtonIcon(link.type)}
-                            {link.label}
-                          </a>
-                        </Button>
+                          {tag}
+                        </Badge>
                       ))}
                     </div>
                   </div>
-                  {/* TECH STACK */}
-                   <div className="flex mt-1 space-x-2">
-                    {project.techUsed.map((tech, index) => (
-                      <div key={index} title={tech}>
-                        <TechIcon techName={tech} />
-                      </div>
-                    ))}
-                  </div>
-
-                   </div>
-
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-2">
-                    {project.tags.map((tag, index) => (
-                      <Badge
-                        key={index}
-                        variant="secondary"
-                        className="text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
-                      >
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       </div>
