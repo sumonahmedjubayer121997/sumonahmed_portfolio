@@ -3,9 +3,12 @@ import { Badge } from "@/components/ui/badge";
 import Layout from "../components/Layout";
 
 const Experience = () => {
+
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem("theme") || "light";
   });
+
+ 
 
   useEffect(() => {
     localStorage.setItem("theme", theme);
@@ -69,9 +72,10 @@ const Experience = () => {
   return (
     <div className={theme === "dark" ? "dark" : ""}>
       <Layout>
-        <div className="relative pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-4xl mx-auto bg-background text-foreground transition-colors duration-300">
+        <div className="relative pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-4xl mx-auto  text-foreground transition-colors duration-300">
           {/* Header Section */}
-          <div className="mb-12">
+
+           <div className="mb-12">
             <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
               Experiences
             </h1>
@@ -79,7 +83,9 @@ const Experience = () => {
               A timeline of my professional experiences.
             </p>
           </div>
-          <div className="absolute top-0 -mt-20 right-0 opacity-60 z-0">
+          
+         
+          <div className="absolute top-0 -mt-20 right-0 opacity-40 z-0 hidden sm:block">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 631 620"
@@ -135,6 +141,7 @@ const Experience = () => {
             </rect>
           </svg>
         </div>
+ 
 
           {/* Experience Cards */}
           <div className="space-y-8">

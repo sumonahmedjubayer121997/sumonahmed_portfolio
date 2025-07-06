@@ -10,7 +10,7 @@ const About = () => {
         <div className="prose prose-lg max-w-none">
           <div className="space-y-6 text-lg text-gray-700 leading-relaxed">
             <p>
-              I'm Aman, an AI Product Engineer passionate about turning fuzzy ideas into live products. 
+              I'm Sumon Ahmed, an AI Product Engineer passionate about turning fuzzy ideas into live products. 
               With over 5 years of experience in the tech industry, I specialize in building full-stack 
               applications with a focus on AI and machine learning.
             </p>
@@ -18,11 +18,11 @@ const About = () => {
             <p>
               My journey started with a simple belief: great products should solve real problems quickly 
               and efficiently. This philosophy has guided me through building multiple successful startups, 
-              including Dreamboat.ai, which raised $100K in funding.
+              including DreamboatWithAi, which raised $100K in funding.
             </p>
             
             <p>
-              Currently, I'm working as a Founding Engineer at kay.ai, where we're building AI agents 
+              Currently, I'm working as a Founding Engineer at LetsStartUp, where we're building AI agents 
               specifically for the insurance industry. The challenge of making AI practical and accessible 
               to traditional industries fascinates me.
             </p>

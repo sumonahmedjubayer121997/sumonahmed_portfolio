@@ -25,10 +25,10 @@ const Apps = () => {
 
   return (
     <Layout>
-      <div className="relative pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-4xl mx-auto bg-background text-foreground transition-colors duration-300">
+      <div className="relative pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-4xl mx-auto text-foreground transition-colors duration-300">
 
         {/* SVG background */}
-        <div className="absolute top-0 -mt-20 right-0 opacity-60 z-0">
+        <div className="absolute top-0 -mt-20 right-0 opacity-40 z-0 hidden sm:block">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 631 620"
