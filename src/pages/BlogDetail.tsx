@@ -353,6 +353,65 @@ const BlogDetail = () => {
   return (
     <Layout>
       <div className="pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-7xl mx-auto">
+        <style>
+          {`
+            .blog-content h1 {
+              font-size: 2.5rem;
+              font-weight: 700;
+              color: #1f2937;
+              margin-bottom: 1.5rem;
+              line-height: 1.2;
+            }
+            .blog-content h2 {
+              font-size: 1.875rem;
+              font-weight: 600;
+              color: #374151;
+              margin-top: 3rem;
+              margin-bottom: 1.5rem;
+              padding-bottom: 0.5rem;
+              border-bottom: 2px solid #e5e7eb;
+            }
+            .blog-content h3 {
+              font-size: 1.5rem;
+              font-weight: 600;
+              color: #4b5563;
+              margin-top: 2rem;
+              margin-bottom: 1rem;
+            }
+            .blog-content p {
+              margin-bottom: 1.5rem;
+              line-height: 1.7;
+              color: #374151;
+            }
+            .blog-content .lead {
+              font-size: 1.125rem;
+              font-weight: 400;
+              color: #6b7280;
+              margin-bottom: 2rem;
+              padding: 1.5rem;
+              background-color: #f9fafb;
+              border-left: 4px solid #3b82f6;
+              border-radius: 0.5rem;
+            }
+            .blog-content ul, .blog-content ol {
+              margin-bottom: 1.5rem;
+              padding-left: 1.5rem;
+            }
+            .blog-content li {
+              margin-bottom: 0.5rem;
+              line-height: 1.6;
+            }
+            .blog-content strong {
+              font-weight: 600;
+              color: #1f2937;
+            }
+            .blog-content hr {
+              margin: 3rem 0;
+              border: none;
+              border-top: 1px solid #e5e7eb;
+            }
+          `}
+        </style>
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Main Content */}
           <div className="flex-1 max-w-4xl">
@@ -421,63 +480,6 @@ const BlogDetail = () => {
 
                 {/* Article Content with improved typography */}
                 <div className="prose prose-lg max-w-none">
-                  <style jsx>{`
-                    .blog-content h1 {
-                      font-size: 2.5rem;
-                      font-weight: 700;
-                      color: #1f2937;
-                      margin-bottom: 1.5rem;
-                      line-height: 1.2;
-                    }
-                    .blog-content h2 {
-                      font-size: 1.875rem;
-                      font-weight: 600;
-                      color: #374151;
-                      margin-top: 3rem;
-                      margin-bottom: 1.5rem;
-                      padding-bottom: 0.5rem;
-                      border-bottom: 2px solid #e5e7eb;
-                    }
-                    .blog-content h3 {
-                      font-size: 1.5rem;
-                      font-weight: 600;
-                      color: #4b5563;
-                      margin-top: 2rem;
-                      margin-bottom: 1rem;
-                    }
-                    .blog-content p {
-                      margin-bottom: 1.5rem;
-                      line-height: 1.7;
-                      color: #374151;
-                    }
-                    .blog-content .lead {
-                      font-size: 1.125rem;
-                      font-weight: 400;
-                      color: #6b7280;
-                      margin-bottom: 2rem;
-                      padding: 1.5rem;
-                      background-color: #f9fafb;
-                      border-left: 4px solid #3b82f6;
-                      border-radius: 0.5rem;
-                    }
-                    .blog-content ul, .blog-content ol {
-                      margin-bottom: 1.5rem;
-                      padding-left: 1.5rem;
-                    }
-                    .blog-content li {
-                      margin-bottom: 0.5rem;
-                      line-height: 1.6;
-                    }
-                    .blog-content strong {
-                      font-weight: 600;
-                      color: #1f2937;
-                    }
-                    .blog-content hr {
-                      margin: 3rem 0;
-                      border: none;
-                      border-top: 1px solid #e5e7eb;
-                    }
-                  `}</style>
                   <div dangerouslySetInnerHTML={{ __html: blog.content }} />
                 </div>
 
