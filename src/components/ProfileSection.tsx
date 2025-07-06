@@ -47,7 +47,7 @@ const ProfileSection = () => {
           href="https://twitter.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center mt-8 px-6 py-3 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition-colors duration-200 group"
+          className="inline-flex items-center mt-8 px-6 py-3 bg-gray-500 text-white rounded-full hover:bg-gray-800 transition-colors duration-200 group"
         >
           <svg
             className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform duration-200"
@@ -114,25 +114,26 @@ const ProfileSection = () => {
           </a>
           .
         </p> */}
-      </div>
-
-      {/* Tech Stack */}
-      <div className="space-y-4">
-        <p className="text-lg text-gray-700">
-          My Go-to stack is{" "}
-          <span className="font-semibold text-gray-900">
-            ReactJS, TypeScript, Python, Flask, NodeJS, Ruby on Rails,
-            PostgreSQL, Redis, ShadCN,
-          </span>{" "}
-          and <span className="font-semibold text-gray-900">Tailwind CSS</span>.
-        </p>
-        <p className="text-lg text-gray-700">
+         <p className="text-lg text-gray-700">
           You can talk to me about{" "}
           <span className="font-semibold text-gray-900">
             AI, new ideas, life, or anything else
           </span>
           .
         </p>
+      </div>
+
+      {/* Tech Stack */}
+      <div className="space-y-4">
+        {/* <p className="text-lg text-gray-700">
+          My Go-to stack is{" "}
+          <span className="font-semibold text-gray-900">
+            ReactJS, TypeScript, Python, Flask, NodeJS, Ruby on Rails,
+            PostgreSQL, Redis, ShadCN,
+          </span>{" "}
+          and <span className="font-semibold text-gray-900">Tailwind CSS</span>.
+        </p> */}
+       
       </div>
       <div className="space-y-4">
         <TechStack/>

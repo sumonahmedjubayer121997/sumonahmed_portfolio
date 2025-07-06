@@ -4,41 +4,48 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Youtube } from "lucide-react";
+import TechIcon from "@/components/TechIcon";
 
 const Projects = () => {
   const projects = [
     {
       id: 1,
-      title: "Katha - The Hindu Tales",
-      description: "Interactive storytelling platform featuring Hindu mythology",
-      image: "/lovable-uploads/c228c517-bfd2-4a2f-ae08-19cf7ccde212.png",
+      title: "Bongo - The bengali Tales",
+      description: "Interactive storytelling platform featuring Bengali mythology",
+      image: "/placeholder.svg",
       status: "active",
       links: [
         { type: "youtube", url: "#", label: "Youtube" }
       ],
-      tags: ["Youtube", "Videos"]
+      tags: ["Youtube", "Videos"],
+      type: "WebApp",
+      techUsed: ["React", "Javascript"]
     },
     {
       id: 2,
-      title: "Gitachat",
-      description: "Chat with Gita - AI-powered spiritual guidance",
+      title: "AiChat",
+      description: "Chat with Ai - AI-powered spiritual guidance",
       image: "/placeholder.svg",
       status: "active",
       links: [
         { type: "link", url: "#", label: "Link" }
       ],
-      tags: ["Personal", "AI", "LLM", "Chat"]
+      tags: ["Personal", "AI", "LLM", "Chat"],
+      type: "Portfolio",
+      techUsed: ["React", "Javascript"]
     },
     {
       id: 3,
       title: "Freelance Designer Platform",
-      description: "Top Indian Freelance Designers, Handpicked for D2Cs",
+      description: "Top Bangladeshi Freelance Designers, Handpicked for D2Cs",
       image: "/placeholder.svg",
       status: "development",
       links: [
         { type: "link", url: "#", label: "Preview" }
       ],
-      tags: ["Web", "Platform", "Business"]
+      tags: ["Web", "Platform", "Business"],
+      type: "NewsPaper",
+      techUsed: ["React", "Flask"]
     },
     {
       id: 4,
@@ -49,7 +56,9 @@ const Projects = () => {
       links: [
         { type: "link", url: "#", label: "Demo" }
       ],
-      tags: ["Tool", "Privacy", "AI"]
+      tags: ["Tool", "Privacy", "AI"],
+      type: "CMS",
+      techUsed: ["Typescript", "Angular"]
     }
   ];
 
@@ -184,7 +193,10 @@ const Projects = () => {
                     </p>
                   </div>
 
-                  {/* Action Buttons */}
+                 
+
+                   <div className="flex items-center justify-between">
+                       {/* Action Buttons */}
                   <div className="mb-4">
                     <div className="flex flex-wrap gap-2">
                       {project.links.map((link, index) => (
@@ -203,6 +215,16 @@ const Projects = () => {
                       ))}
                     </div>
                   </div>
+                  {/* TECH STACK */}
+                   <div className="flex mt-1 space-x-2">
+                    {project.techUsed.map((tech, index) => (
+                      <div key={index} title={tech}>
+                        <TechIcon techName={tech} />
+                      </div>
+                    ))}
+                  </div>
+
+                   </div>
 
                   {/* Tags */}
                   <div className="flex flex-wrap gap-2">

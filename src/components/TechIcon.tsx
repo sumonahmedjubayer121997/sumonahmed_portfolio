@@ -6,7 +6,8 @@ import {
   SiTailwindcss,
   SiNodedotjs,
   SiJavascript,
-  SiTypescript
+  SiTypescript,
+  SiAngular
 } from 'react-icons/si';
 
 // Map tech names (lowercased) to icon components
@@ -17,7 +18,8 @@ const techIconMap: Record<string, React.ComponentType<{ className?: string; titl
   'tailwind css': SiTailwindcss,
   nodejs: SiNodedotjs,
   javascript: SiJavascript,
-  typescript: SiTypescript
+  typescript: SiTypescript,
+  angular : SiAngular
   // Add more techs as needed
 };
 

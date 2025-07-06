@@ -183,11 +183,11 @@ const ResponsiveNavbar = () => {
           <div className="flex items-center justify-between p-4 h-16">
             {/* Profile Info */}
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
+              <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center overflow-hidden">
                 <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
               </div>
               <div>
-                <h2 className="text-sm font-semibold text-gray-900">Aman</h2>
+                <h2 className="text-sm font-semibold text-gray-900">Sumon</h2>
                 <p className="text-xs text-gray-600">{roles[index]}</p>
               </div>
             </div>
@@ -340,11 +340,11 @@ const ResponsiveNavbar = () => {
           {/* Logo/Profile Section */}
           <div className="text-left mb-8">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
+              <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center overflow-hidden">
                 <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
               </div>
             </div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-1">Aman</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-1">Sumon</h2>
             <p className="text-sm text-gray-600">{roles[index]}</p>
           </div>
 

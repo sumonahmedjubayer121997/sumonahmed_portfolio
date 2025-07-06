@@ -133,7 +133,7 @@ const TechStack = () => {
         className="mb-2.5 text-sm text-slate-600 dark:text-slate-400"
         style={itemStyle}
       >
-        current favorite tech stack/tools:
+        Current favorite tech stack/tools:
       </p>
       <ul className="flex flex-wrap items-center gap-3.5 text-slate-500 dark:text-slate-500">
 

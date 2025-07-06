@@ -17,21 +17,22 @@ const Contact = () => {
             </p>
             
             <div className="space-y-4">
-              <div className="flex items-center">
-                <div className="w-5 h-5 mr-3 text-gray-600">
-                  <svg fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                  </svg>
-                </div>
-                <a 
-                  href="https://twitter.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-gray-700 hover:text-gray-900 transition-colors duration-200"
-                >
-                  Follow me on X (Twitter)
-                </a>
-              </div>
+              <div className="flex items-center border border-gray-300 rounded-lg px-4 py-2 bg-white shadow-sm hover:shadow transition-shadow duration-200">
+  <div className="w-5 h-5 mr-2 text-gray-500">
+    <svg fill="currentColor" viewBox="0 0 24 24">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  </div>
+  <a 
+    href="https://twitter.com" 
+    target="_blank" 
+    rel="noopener noreferrer"
+    className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors duration-200"
+  >
+    Follow me on X (Twitter)
+  </a>
+</div>
+
             </div>
           </div>
           
