@@ -1,76 +1,21 @@
+
 import React, { useState, useEffect } from "react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import AdminLayout from "@/components/AdminLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { 
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import { 
-  Mail, 
-  Github, 
-  Linkedin, 
-  Phone, 
-  Plus,
-  Edit,
-  Trash2,
-  Eye,
-  EyeOff,
-  GripVertical,
-  Save,
-  X,
-  Twitter,
-  Clock
-} from "lucide-react";
-import { 
-  getDynamicContent, 
-  saveAndUpdateDynamicContent, 
-  deleteDynamicContent
-} from "@/integrations/firebase/firestore";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Mail, Plus, Save, Eye, Clock } from "lucide-react";
+import { getDynamicContent, saveAndUpdateDynamicContent, deleteDynamicContent } from "@/integrations/firebase/firestore";
 import { toast } from "sonner";
 
-import RichTextEditor from "@/components/RichTextEditor";
+// Import the new components
+import ContactForm from "@/components/admin/ContactForm";
+import ResponseTimeForm from "@/components/admin/ResponseTimeForm";
+import ContactPreview from "@/components/admin/ContactPreview";
+import ContactTable from "@/components/admin/ContactTable";
+import ResponseTimeTable from "@/components/admin/ResponseTimeTable";
 
 interface ContactItem {
   id: string;
@@ -142,18 +87,6 @@ const AdminContactManager = () => {
     sortOrder: 0,
     isVisible: true
   });
-
-  // Get icon for contact type
-  const getContactIcon = (type: string) => {
-    switch (type) {
-      case 'email': return <Mail className="w-4 h-4" />;
-      case 'phone': return <Phone className="w-4 h-4" />;
-      case 'twitter': return <Twitter className="w-4 h-4" />;
-      case 'linkedin': return <Linkedin className="w-4 h-4" />;
-      case 'github': return <Github className="w-4 h-4" />;
-      default: return <Mail className="w-4 h-4" />;
-    }
-  };
 
   // Fetch contacts from Firebase
   const fetchContacts = async () => {
@@ -599,100 +532,13 @@ const AdminContactManager = () => {
                       </Button>
                     </div>
                   ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-12">Order</TableHead>
-                          <TableHead>Type</TableHead>
-                          <TableHead>Display Text</TableHead>
-                          <TableHead>URL/Value</TableHead>
-                          <TableHead>Notes</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {contacts.map((contact, index) => (
-                          <TableRow key={contact.id}>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <GripVertical className="w-4 h-4 text-gray-400" />
-                                <Input
-                                  type="number"
-                                  value={contact.sortOrder}
-                                  onChange={(e) => reorderContact(contact.id, parseInt(e.target.value))}
-                                  className="w-16 h-8"
-                                  min="0"
-                                />
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                {getContactIcon(contact.type)}
-                                <span className="capitalize">{contact.type}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell className="font-medium">
-                              {contact.displayText}
-                            </TableCell>
-                            <TableCell>
-                              <div className="max-w-48 truncate text-sm text-gray-600">
-                                {contact.url || '-'}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="max-w-32 truncate text-sm text-gray-600">
-                                {contact.notes || '-'}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={contact.isVisible ? "default" : "secondary"}>
-                                {contact.isVisible ? 'Visible' : 'Hidden'}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex items-center justify-end gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => toggleVisibility(contact)}
-                                >
-                                  {contact.isVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => handleEditContact(contact)}
-                                >
-                                  <Edit className="w-4 h-4" />
-                                </Button>
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button size="sm" variant="ghost">
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Delete Contact</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Are you sure you want to delete "{contact.displayText}"? This action cannot be undone.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction onClick={() => handleDeleteContact(contact.id)}>
-                                        Delete
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                    <ContactTable
+                      contacts={contacts}
+                      onEditContact={handleEditContact}
+                      onDeleteContact={handleDeleteContact}
+                      onToggleVisibility={toggleVisibility}
+                      onReorderContact={reorderContact}
+                    />
                   )}
                 </CardContent>
               </Card>
@@ -751,91 +597,13 @@ const AdminContactManager = () => {
                       </Button>
                     </div>
                   ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-12">Order</TableHead>
-                          <TableHead>Platform</TableHead>
-                          <TableHead>Timeframe</TableHead>
-                          <TableHead>Description</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {responseTimes.map((responseTime) => (
-                          <TableRow key={responseTime.id}>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <GripVertical className="w-4 h-4 text-gray-400" />
-                                <Input
-                                  type="number"
-                                  value={responseTime.sortOrder}
-                                  onChange={(e) => reorderResponseTime(responseTime.id, parseInt(e.target.value))}
-                                  className="w-16 h-8"
-                                  min="0"
-                                />
-                              </div>
-                            </TableCell>
-                            <TableCell className="font-medium">
-                              {responseTime.platform}
-                            </TableCell>
-                            <TableCell>
-                              {responseTime.timeframe}
-                            </TableCell>
-                            <TableCell>
-                              <div className="max-w-48 truncate text-sm text-gray-600">
-                                {responseTime.description || '-'}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={responseTime.isVisible ? "default" : "secondary"}>
-                                {responseTime.isVisible ? 'Visible' : 'Hidden'}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex items-center justify-end gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => toggleResponseTimeVisibility(responseTime)}
-                                >
-                                  {responseTime.isVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => handleEditResponseTime(responseTime)}
-                                >
-                                  <Edit className="w-4 h-4" />
-                                </Button>
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button size="sm" variant="ghost">
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Delete Response Time</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Are you sure you want to delete the response time for "{responseTime.platform}"? This action cannot be undone.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction onClick={() => handleDeleteResponseTime(responseTime.id)}>
-                                        Delete
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                    <ResponseTimeTable
+                      responseTimes={responseTimes}
+                      onEditResponseTime={handleEditResponseTime}
+                      onDeleteResponseTime={handleDeleteResponseTime}
+                      onToggleVisibility={toggleResponseTimeVisibility}
+                      onReorderResponseTime={reorderResponseTime}
+                    />
                   )}
                 </CardContent>
               </Card>
@@ -904,233 +672,6 @@ const AdminContactManager = () => {
         </Dialog>
       </div>
     </AdminLayout>
-  );
-};
-
-// Contact Form Component
-const ContactForm = ({ formData, setFormData, contacts }: {
-  formData: ContactFormData;
-  setFormData: React.Dispatch<React.SetStateAction<ContactFormData>>;
-  contacts: ContactItem[];
-}) => {
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-2">Contact Type</label>
-          <Select value={formData.type} onValueChange={(value: any) => setFormData(prev => ({ ...prev, type: value }))}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="email">Email</SelectItem>
-              <SelectItem value="phone">Phone</SelectItem>
-              <SelectItem value="twitter">Twitter</SelectItem>
-              <SelectItem value="linkedin">LinkedIn</SelectItem>
-              <SelectItem value="github">GitHub</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-2">Sort Order</label>
-          <Input
-            type="number"
-            value={formData.sortOrder}
-            onChange={(e) => setFormData(prev => ({ ...prev, sortOrder: parseInt(e.target.value) || 0 }))}
-            min="0"
-          />
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-2">Display Text *</label>
-        <Input
-          value={formData.displayText}
-          onChange={(e) => setFormData(prev => ({ ...prev, displayText: e.target.value }))}
-          placeholder="e.g., Email, Phone, LinkedIn Profile"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-2">
-          {formData.type === 'email' ? 'Email Address' : 
-           formData.type === 'phone' ? 'Phone Number' : 'URL'}
-        </label>
-        <Input
-          value={formData.url}
-          onChange={(e) => setFormData(prev => ({ ...prev, url: e.target.value }))}
-          placeholder={
-            formData.type === 'email' ? 'user@email.com' :
-            formData.type === 'phone' ? '+1234567890' :
-            'https://example.com'
-          }
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-2">Notes</label>
-        <Textarea
-          value={formData.notes}
-          onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-          placeholder="e.g., Fastest response - usually within 24 hours"
-          rows={3}
-        />
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <input
-          type="checkbox"
-          id="isVisible"
-          checked={formData.isVisible}
-          onChange={(e) => setFormData(prev => ({ ...prev, isVisible: e.target.checked }))}
-        />
-        <label htmlFor="isVisible" className="text-sm font-medium">
-          Visible on website
-        </label>
-      </div>
-    </div>
-  );
-};
-
-// Response Time Form Component
-const ResponseTimeForm = ({ formData, setFormData, responseTimes }: {
-  formData: ResponseTimeFormData;
-  setFormData: React.Dispatch<React.SetStateAction<ResponseTimeFormData>>;
-  responseTimes: ResponseTimeItem[];
-}) => {
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-2">Platform *</label>
-          <Input
-            value={formData.platform}
-            onChange={(e) => setFormData(prev => ({ ...prev, platform: e.target.value }))}
-            placeholder="e.g., X (Twitter), Email, LinkedIn"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-2">Sort Order</label>
-          <Input
-            type="number"
-            value={formData.sortOrder}
-            onChange={(e) => setFormData(prev => ({ ...prev, sortOrder: parseInt(e.target.value) || 0 }))}
-            min="0"
-          />
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-2">Timeframe *</label>
-        <Input
-          value={formData.timeframe}
-          onChange={(e) => setFormData(prev => ({ ...prev, timeframe: e.target.value }))}
-          placeholder="e.g., Usually within 24 hours, Within 48 hours on weekdays"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-2">Description</label>
-        <Textarea
-          value={formData.description}
-          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-          placeholder="Additional details about response times or conditions"
-          rows={3}
-        />
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <input
-          type="checkbox"
-          id="responseTimeVisible"
-          checked={formData.isVisible}
-          onChange={(e) => setFormData(prev => ({ ...prev, isVisible: e.target.checked }))}
-        />
-        <label htmlFor="responseTimeVisible" className="text-sm font-medium">
-          Visible on website
-        </label>
-      </div>
-    </div>
-  );
-};
-
-// Contact Preview Component
-const ContactPreview = ({ contacts, responseTimes }: { 
-  contacts: ContactItem[];
-  responseTimes: ResponseTimeItem[];
-}) => {
-  const getContactIcon = (type: string) => {
-    switch (type) {
-      case 'email': return <Mail className="w-5 h-5" />;
-      case 'phone': return <Phone className="w-5 h-5" />;
-      case 'twitter': return <Twitter className="w-5 h-5" />;
-      case 'linkedin': return <Linkedin className="w-5 h-5" />;
-      case 'github': return <Github className="w-5 h-5" />;
-      default: return <Mail className="w-5 h-5" />;
-    }
-  };
-
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Contact Section Preview</CardTitle>
-          <p className="text-sm text-gray-600">This is how your contact section will appear on the website</p>
-        </CardHeader>
-        <CardContent>
-          <div className="bg-gray-50 p-6 rounded-lg">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6">Let's Connect</h2>
-            <div className="space-y-4 mb-8">
-              {contacts.map((contact) => (
-                <Card key={contact.id} className="hover:shadow-md transition-shadow duration-200">
-                  <CardContent className="flex items-center p-4">
-                    <div className="text-gray-500 mr-3">
-                      {getContactIcon(contact.type)}
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-900">{contact.displayText}</p>
-                      {contact.url && (
-                        <p className="text-gray-600 text-sm">{contact.url}</p>
-                      )}
-                      {contact.notes && (
-                        <p className="text-sm text-gray-500 mt-1">{contact.notes}</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {responseTimes.length > 0 && (
-              <div className="bg-white rounded-lg p-6 border">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  Response Times
-                </h3>
-                <div className="space-y-2 text-sm">
-                  {responseTimes.map((rt) => (
-                    <p key={rt.id} className="text-gray-700">
-                      <span className="font-medium">{rt.platform}:</span> {rt.timeframe}
-                    </p>
-                  ))}
-                  {responseTimes.some(rt => rt.description) && (
-                    <div className="mt-4 pt-2 border-t border-gray-200">
-                      {responseTimes
-                        .filter(rt => rt.description)
-                        .map((rt) => (
-                          <p key={`desc-${rt.id}`} className="text-gray-600 text-xs">
-                            {rt.description}
-                          </p>
-                        ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
   );
 };
 
