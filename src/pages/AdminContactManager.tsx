@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import AdminLayout from "@/components/AdminLayout";
@@ -43,6 +42,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { 
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import { 
   Mail, 
   Github, 
   Linkedin, 
@@ -55,7 +60,8 @@ import {
   GripVertical,
   Save,
   X,
-  Twitter
+  Twitter,
+  Clock
 } from "lucide-react";
 import { 
   getDynamicContent, 
@@ -88,19 +94,51 @@ interface ContactFormData {
   isVisible: boolean;
 }
 
+interface ResponseTimeItem {
+  id: string;
+  platform: string;
+  timeframe: string;
+  description?: string;
+  sortOrder: number;
+  isVisible: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+interface ResponseTimeFormData {
+  platform: string;
+  timeframe: string;
+  description: string;
+  sortOrder: number;
+  isVisible: boolean;
+}
+
 const AdminContactManager = () => {
   const { isAuthenticated } = useAdminAuth();
   const [contacts, setContacts] = useState<ContactItem[]>([]);
+  const [responseTimes, setResponseTimes] = useState<ResponseTimeItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [responseTimesLoading, setResponseTimesLoading] = useState(true);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isAddResponseTimeDialogOpen, setIsAddResponseTimeDialogOpen] = useState(false);
+  const [isEditResponseTimeDialogOpen, setIsEditResponseTimeDialogOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<ContactItem | null>(null);
+  const [editingResponseTime, setEditingResponseTime] = useState<ResponseTimeItem | null>(null);
   const [previewMode, setPreviewMode] = useState(false);
+  const [activeTab, setActiveTab] = useState("contacts");
   const [formData, setFormData] = useState<ContactFormData>({
     type: 'email',
     displayText: '',
     url: '',
     notes: '',
+    sortOrder: 0,
+    isVisible: true
+  });
+  const [responseTimeFormData, setResponseTimeFormData] = useState<ResponseTimeFormData>({
+    platform: '',
+    timeframe: '',
+    description: '',
     sortOrder: 0,
     isVisible: true
   });
@@ -142,6 +180,32 @@ const AdminContactManager = () => {
     }
   };
 
+  // Fetch response times from Firebase
+  const fetchResponseTimes = async () => {
+    try {
+      setResponseTimesLoading(true);
+      const { data, error } = await getDynamicContent('response_times');
+      if (error) {
+        console.error('Error fetching response times:', error);
+        toast.error('Failed to fetch response times');
+        return;
+      }
+      
+      const responseTimesArray = Array.isArray(data) ? data : [];
+      const sortedResponseTimes = responseTimesArray.sort((a, b) => a.sortOrder - b.sortOrder);
+      setResponseTimes(sortedResponseTimes.map(rt => ({
+        ...rt,
+        created_at: rt.created_at || new Date().toISOString(),
+        updated_at: rt.updated_at || new Date().toISOString(),
+      })));
+    } catch (error) {
+      console.error('Error fetching response times:', error);
+      toast.error('Failed to fetch response times');
+    } finally {
+      setResponseTimesLoading(false);
+    }
+  };
+
   // Reset form
   const resetForm = () => {
     setFormData({
@@ -150,6 +214,17 @@ const AdminContactManager = () => {
       url: '',
       notes: '',
       sortOrder: contacts.length,
+      isVisible: true
+    });
+  };
+
+  // Reset response time form
+  const resetResponseTimeForm = () => {
+    setResponseTimeFormData({
+      platform: '',
+      timeframe: '',
+      description: '',
+      sortOrder: responseTimes.length,
       isVisible: true
     });
   };
@@ -177,6 +252,19 @@ const AdminContactManager = () => {
     return true;
   };
 
+  // Validate response time form
+  const validateResponseTimeForm = () => {
+    if (!responseTimeFormData.platform.trim()) {
+      toast.error('Platform is required');
+      return false;
+    }
+    if (!responseTimeFormData.timeframe.trim()) {
+      toast.error('Timeframe is required');
+      return false;
+    }
+    return true;
+  };
+
   // Add new contact
   const handleAddContact = async () => {
     if (!validateForm()) return;
@@ -201,6 +289,30 @@ const AdminContactManager = () => {
     }
   };
 
+  // Add new response time
+  const handleAddResponseTime = async () => {
+    if (!validateResponseTimeForm()) return;
+
+    try {
+      const newResponseTime = {
+        ...responseTimeFormData,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      const { id, error } = await saveAndUpdateDynamicContent('response_times', newResponseTime);
+      if (error) throw new Error(error);
+
+      toast.success('Response time added successfully');
+      setIsAddResponseTimeDialogOpen(false);
+      resetResponseTimeForm();
+      fetchResponseTimes();
+    } catch (error) {
+      console.error('Error adding response time:', error);
+      toast.error('Failed to add response time');
+    }
+  };
+
   // Edit contact
   const handleEditContact = (contact: ContactItem) => {
     setEditingContact(contact);
@@ -213,6 +325,19 @@ const AdminContactManager = () => {
       isVisible: contact.isVisible
     });
     setIsEditDialogOpen(true);
+  };
+
+  // Edit response time
+  const handleEditResponseTime = (responseTime: ResponseTimeItem) => {
+    setEditingResponseTime(responseTime);
+    setResponseTimeFormData({
+      platform: responseTime.platform,
+      timeframe: responseTime.timeframe,
+      description: responseTime.description || '',
+      sortOrder: responseTime.sortOrder,
+      isVisible: responseTime.isVisible
+    });
+    setIsEditResponseTimeDialogOpen(true);
   };
 
   // Update contact
@@ -240,6 +365,31 @@ const AdminContactManager = () => {
     }
   };
 
+  // Update response time
+  const handleUpdateResponseTime = async () => {
+    if (!validateResponseTimeForm() || !editingResponseTime) return;
+
+    try {
+      const updatedResponseTime = {
+        ...editingResponseTime,
+        ...responseTimeFormData,
+        updated_at: new Date().toISOString(),
+      };
+
+      const { error } = await saveAndUpdateDynamicContent('response_times', updatedResponseTime, editingResponseTime.id);
+      if (error) throw new Error(error);
+
+      toast.success('Response time updated successfully');
+      setIsEditResponseTimeDialogOpen(false);
+      setEditingResponseTime(null);
+      resetResponseTimeForm();
+      fetchResponseTimes();
+    } catch (error) {
+      console.error('Error updating response time:', error);
+      toast.error('Failed to update response time');
+    }
+  };
+
   // Delete contact
   const handleDeleteContact = async (contactId: string) => {
     try {
@@ -249,6 +399,18 @@ const AdminContactManager = () => {
     } catch (error) {
       console.error('Error deleting contact:', error);
       toast.error('Failed to delete contact');
+    }
+  };
+
+  // Delete response time
+  const handleDeleteResponseTime = async (responseTimeId: string) => {
+    try {
+      await deleteDynamicContent('response_times', responseTimeId);
+      toast.success('Response time deleted successfully');
+      fetchResponseTimes();
+    } catch (error) {
+      console.error('Error deleting response time:', error);
+      toast.error('Failed to delete response time');
     }
   };
 
@@ -268,6 +430,26 @@ const AdminContactManager = () => {
       fetchContacts();
     } catch (error) {
       console.error('Error toggling visibility:', error);
+      toast.error('Failed to update visibility');
+    }
+  };
+
+  // Toggle response time visibility
+  const toggleResponseTimeVisibility = async (responseTime: ResponseTimeItem) => {
+    try {
+      const updatedResponseTime = {
+        ...responseTime,
+        isVisible: !responseTime.isVisible,
+        updated_at: new Date().toISOString(),
+      };
+
+      const { error } = await saveAndUpdateDynamicContent('response_times', updatedResponseTime, responseTime.id);
+      if (error) throw new Error(error);
+
+      toast.success(`Response time ${responseTime.isVisible ? 'hidden' : 'shown'} successfully`);
+      fetchResponseTimes();
+    } catch (error) {
+      console.error('Error toggling response time visibility:', error);
       toast.error('Failed to update visibility');
     }
   };
@@ -294,9 +476,32 @@ const AdminContactManager = () => {
     }
   };
 
+  // Reorder response times
+  const reorderResponseTime = async (responseTimeId: string, newOrder: number) => {
+    try {
+      const responseTime = responseTimes.find(rt => rt.id === responseTimeId);
+      if (!responseTime) return;
+
+      const updatedResponseTime = {
+        ...responseTime,
+        sortOrder: newOrder,
+        updated_at: new Date().toISOString(),
+      };
+
+      const { error } = await saveAndUpdateDynamicContent('response_times', updatedResponseTime, responseTimeId);
+      if (error) throw new Error(error);
+
+      fetchResponseTimes();
+    } catch (error) {
+      console.error('Error reordering response time:', error);
+      toast.error('Failed to reorder response time');
+    }
+  };
+
   useEffect(() => {
     if (isAuthenticated) {
       fetchContacts();
+      fetchResponseTimes();
     }
   }, [isAuthenticated]);
 
@@ -316,7 +521,7 @@ const AdminContactManager = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Contact Management</h1>
-            <p className="text-gray-600 mt-1">Manage contact information displayed on your portfolio</p>
+            <p className="text-gray-600 mt-1">Manage contact information and response times displayed on your portfolio</p>
           </div>
           <div className="flex gap-3">
             <Button 
@@ -327,161 +532,318 @@ const AdminContactManager = () => {
               <Eye className="w-4 h-4" />
               {previewMode ? 'Edit Mode' : 'Preview'}
             </Button>
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="flex items-center gap-2">
-                  <Plus className="w-4 h-4" />
-                  Add Contact
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                  <DialogTitle>Add New Contact</DialogTitle>
-                  <DialogDescription>
-                    Add a new contact method to display on your portfolio
-                  </DialogDescription>
-                </DialogHeader>
-                <ContactForm 
-                  formData={formData} 
-                  setFormData={setFormData} 
-                  contacts={contacts}
-                />
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => {
-                    setIsAddDialogOpen(false);
-                    resetForm();
-                  }}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleAddContact}>
-                    <Save className="w-4 h-4 mr-2" />
-                    Add Contact
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
           </div>
         </div>
 
         {previewMode ? (
-          <ContactPreview contacts={contacts.filter(c => c.isVisible)} />
+          <ContactPreview contacts={contacts.filter(c => c.isVisible)} responseTimes={responseTimes.filter(rt => rt.isVisible)} />
         ) : (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                Contact Items ({contacts.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {contacts.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-gray-500 mb-4">No contact items found</p>
-                  <Button onClick={() => setIsAddDialogOpen(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Your First Contact
-                  </Button>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-12">Order</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Display Text</TableHead>
-                      <TableHead>URL/Value</TableHead>
-                      <TableHead>Notes</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {contacts.map((contact, index) => (
-                      <TableRow key={contact.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <GripVertical className="w-4 h-4 text-gray-400" />
-                            <Input
-                              type="number"
-                              value={contact.sortOrder}
-                              onChange={(e) => reorderContact(contact.id, parseInt(e.target.value))}
-                              className="w-16 h-8"
-                              min="0"
-                            />
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            {getContactIcon(contact.type)}
-                            <span className="capitalize">{contact.type}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {contact.displayText}
-                        </TableCell>
-                        <TableCell>
-                          <div className="max-w-48 truncate text-sm text-gray-600">
-                            {contact.url || '-'}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="max-w-32 truncate text-sm text-gray-600">
-                            {contact.notes || '-'}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={contact.isVisible ? "default" : "secondary"}>
-                            {contact.isVisible ? 'Visible' : 'Hidden'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => toggleVisibility(contact)}
-                            >
-                              {contact.isVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleEditContact(contact)}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button size="sm" variant="ghost">
-                                  <Trash2 className="w-4 h-4" />
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="contacts" className="flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                Contact Items
+              </TabsTrigger>
+              <TabsTrigger value="response-times" className="flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                Response Times
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="contacts" className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">Contact Items ({contacts.length})</h2>
+                <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="flex items-center gap-2">
+                      <Plus className="w-4 h-4" />
+                      Add Contact
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                      <DialogTitle>Add New Contact</DialogTitle>
+                      <DialogDescription>
+                        Add a new contact method to display on your portfolio
+                      </DialogDescription>
+                    </DialogHeader>
+                    <ContactForm 
+                      formData={formData} 
+                      setFormData={setFormData} 
+                      contacts={contacts}
+                    />
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => {
+                        setIsAddDialogOpen(false);
+                        resetForm();
+                      }}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleAddContact}>
+                        <Save className="w-4 h-4 mr-2" />
+                        Add Contact
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              <Card>
+                <CardContent>
+                  {contacts.length === 0 ? (
+                    <div className="text-center py-12">
+                      <p className="text-gray-500 mb-4">No contact items found</p>
+                      <Button onClick={() => setIsAddDialogOpen(true)}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Your First Contact
+                      </Button>
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-12">Order</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Display Text</TableHead>
+                          <TableHead>URL/Value</TableHead>
+                          <TableHead>Notes</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {contacts.map((contact, index) => (
+                          <TableRow key={contact.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <GripVertical className="w-4 h-4 text-gray-400" />
+                                <Input
+                                  type="number"
+                                  value={contact.sortOrder}
+                                  onChange={(e) => reorderContact(contact.id, parseInt(e.target.value))}
+                                  className="w-16 h-8"
+                                  min="0"
+                                />
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                {getContactIcon(contact.type)}
+                                <span className="capitalize">{contact.type}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {contact.displayText}
+                            </TableCell>
+                            <TableCell>
+                              <div className="max-w-48 truncate text-sm text-gray-600">
+                                {contact.url || '-'}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="max-w-32 truncate text-sm text-gray-600">
+                                {contact.notes || '-'}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={contact.isVisible ? "default" : "secondary"}>
+                                {contact.isVisible ? 'Visible' : 'Hidden'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => toggleVisibility(contact)}
+                                >
+                                  {contact.isVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Contact</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to delete "{contact.displayText}"? This action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDeleteContact(contact.id)}>
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleEditContact(contact)}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button size="sm" variant="ghost">
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Delete Contact</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Are you sure you want to delete "{contact.displayText}"? This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleDeleteContact(contact.id)}>
+                                        Delete
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="response-times" className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">Response Times ({responseTimes.length})</h2>
+                <Dialog open={isAddResponseTimeDialogOpen} onOpenChange={setIsAddResponseTimeDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="flex items-center gap-2">
+                      <Plus className="w-4 h-4" />
+                      Add Response Time
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                      <DialogTitle>Add New Response Time</DialogTitle>
+                      <DialogDescription>
+                        Add response time information for different platforms
+                      </DialogDescription>
+                    </DialogHeader>
+                    <ResponseTimeForm 
+                      formData={responseTimeFormData} 
+                      setFormData={setResponseTimeFormData} 
+                      responseTimes={responseTimes}
+                    />
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => {
+                        setIsAddResponseTimeDialogOpen(false);
+                        resetResponseTimeForm();
+                      }}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleAddResponseTime}>
+                        <Save className="w-4 h-4 mr-2" />
+                        Add Response Time
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              <Card>
+                <CardContent>
+                  {responseTimesLoading ? (
+                    <div className="text-center py-12">
+                      <div className="text-lg">Loading response times...</div>
+                    </div>
+                  ) : responseTimes.length === 0 ? (
+                    <div className="text-center py-12">
+                      <p className="text-gray-500 mb-4">No response times found</p>
+                      <Button onClick={() => setIsAddResponseTimeDialogOpen(true)}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Your First Response Time
+                      </Button>
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-12">Order</TableHead>
+                          <TableHead>Platform</TableHead>
+                          <TableHead>Timeframe</TableHead>
+                          <TableHead>Description</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {responseTimes.map((responseTime) => (
+                          <TableRow key={responseTime.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <GripVertical className="w-4 h-4 text-gray-400" />
+                                <Input
+                                  type="number"
+                                  value={responseTime.sortOrder}
+                                  onChange={(e) => reorderResponseTime(responseTime.id, parseInt(e.target.value))}
+                                  className="w-16 h-8"
+                                  min="0"
+                                />
+                              </div>
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {responseTime.platform}
+                            </TableCell>
+                            <TableCell>
+                              {responseTime.timeframe}
+                            </TableCell>
+                            <TableCell>
+                              <div className="max-w-48 truncate text-sm text-gray-600">
+                                {responseTime.description || '-'}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={responseTime.isVisible ? "default" : "secondary"}>
+                                {responseTime.isVisible ? 'Visible' : 'Hidden'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => toggleResponseTimeVisibility(responseTime)}
+                                >
+                                  {responseTime.isVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleEditResponseTime(responseTime)}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button size="sm" variant="ghost">
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Delete Response Time</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Are you sure you want to delete the response time for "{responseTime.platform}"? This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleDeleteResponseTime(responseTime.id)}>
+                                        Delete
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         )}
 
-        {/* Edit Dialog */}
+        {/* Edit Contact Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
@@ -506,6 +868,36 @@ const AdminContactManager = () => {
               <Button onClick={handleUpdateContact}>
                 <Save className="w-4 h-4 mr-2" />
                 Update Contact
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Response Time Dialog */}
+        <Dialog open={isEditResponseTimeDialogOpen} onOpenChange={setIsEditResponseTimeDialogOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Edit Response Time</DialogTitle>
+              <DialogDescription>
+                Update response time information
+              </DialogDescription>
+            </DialogHeader>
+            <ResponseTimeForm 
+              formData={responseTimeFormData} 
+              setFormData={setResponseTimeFormData} 
+              responseTimes={responseTimes}
+            />
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setIsEditResponseTimeDialogOpen(false);
+                setEditingResponseTime(null);
+                resetResponseTimeForm();
+              }}>
+                Cancel
+              </Button>
+              <Button onClick={handleUpdateResponseTime}>
+                <Save className="w-4 h-4 mr-2" />
+                Update Response Time
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -601,8 +993,73 @@ const ContactForm = ({ formData, setFormData, contacts }: {
   );
 };
 
+// Response Time Form Component
+const ResponseTimeForm = ({ formData, setFormData, responseTimes }: {
+  formData: ResponseTimeFormData;
+  setFormData: React.Dispatch<React.SetStateAction<ResponseTimeFormData>>;
+  responseTimes: ResponseTimeItem[];
+}) => {
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-2">Platform *</label>
+          <Input
+            value={formData.platform}
+            onChange={(e) => setFormData(prev => ({ ...prev, platform: e.target.value }))}
+            placeholder="e.g., X (Twitter), Email, LinkedIn"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-2">Sort Order</label>
+          <Input
+            type="number"
+            value={formData.sortOrder}
+            onChange={(e) => setFormData(prev => ({ ...prev, sortOrder: parseInt(e.target.value) || 0 }))}
+            min="0"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-2">Timeframe *</label>
+        <Input
+          value={formData.timeframe}
+          onChange={(e) => setFormData(prev => ({ ...prev, timeframe: e.target.value }))}
+          placeholder="e.g., Usually within 24 hours, Within 48 hours on weekdays"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-2">Description</label>
+        <Textarea
+          value={formData.description}
+          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          placeholder="Additional details about response times or conditions"
+          rows={3}
+        />
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <input
+          type="checkbox"
+          id="responseTimeVisible"
+          checked={formData.isVisible}
+          onChange={(e) => setFormData(prev => ({ ...prev, isVisible: e.target.checked }))}
+        />
+        <label htmlFor="responseTimeVisible" className="text-sm font-medium">
+          Visible on website
+        </label>
+      </div>
+    </div>
+  );
+};
+
 // Contact Preview Component
-const ContactPreview = ({ contacts }: { contacts: ContactItem[] }) => {
+const ContactPreview = ({ contacts, responseTimes }: { 
+  contacts: ContactItem[];
+  responseTimes: ResponseTimeItem[];
+}) => {
   const getContactIcon = (type: string) => {
     switch (type) {
       case 'email': return <Mail className="w-5 h-5" />;
@@ -615,37 +1072,65 @@ const ContactPreview = ({ contacts }: { contacts: ContactItem[] }) => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Website Preview</CardTitle>
-        <p className="text-sm text-gray-600">This is how your contact section will appear on the website</p>
-      </CardHeader>
-      <CardContent>
-        <div className="bg-gray-50 p-6 rounded-lg">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Let's Connect</h2>
-          <div className="space-y-4">
-            {contacts.map((contact) => (
-              <Card key={contact.id} className="hover:shadow-md transition-shadow duration-200">
-                <CardContent className="flex items-center p-4">
-                  <div className="text-gray-500 mr-3">
-                    {getContactIcon(contact.type)}
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900">{contact.displayText}</p>
-                    {contact.url && (
-                      <p className="text-gray-600 text-sm">{contact.url}</p>
-                    )}
-                    {contact.notes && (
-                      <p className="text-sm text-gray-500 mt-1">{contact.notes}</p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Contact Section Preview</CardTitle>
+          <p className="text-sm text-gray-600">This is how your contact section will appear on the website</p>
+        </CardHeader>
+        <CardContent>
+          <div className="bg-gray-50 p-6 rounded-lg">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6">Let's Connect</h2>
+            <div className="space-y-4 mb-8">
+              {contacts.map((contact) => (
+                <Card key={contact.id} className="hover:shadow-md transition-shadow duration-200">
+                  <CardContent className="flex items-center p-4">
+                    <div className="text-gray-500 mr-3">
+                      {getContactIcon(contact.type)}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">{contact.displayText}</p>
+                      {contact.url && (
+                        <p className="text-gray-600 text-sm">{contact.url}</p>
+                      )}
+                      {contact.notes && (
+                        <p className="text-sm text-gray-500 mt-1">{contact.notes}</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {responseTimes.length > 0 && (
+              <div className="bg-white rounded-lg p-6 border">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                  Response Times
+                </h3>
+                <div className="space-y-2 text-sm">
+                  {responseTimes.map((rt) => (
+                    <p key={rt.id} className="text-gray-700">
+                      <span className="font-medium">{rt.platform}:</span> {rt.timeframe}
+                    </p>
+                  ))}
+                  {responseTimes.some(rt => rt.description) && (
+                    <div className="mt-4 pt-2 border-t border-gray-200">
+                      {responseTimes
+                        .filter(rt => rt.description)
+                        .map((rt) => (
+                          <p key={`desc-${rt.id}`} className="text-gray-600 text-xs">
+                            {rt.description}
+                          </p>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

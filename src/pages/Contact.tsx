@@ -7,11 +7,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Mail, Github, Linkedin, Send, Phone } from "lucide-react";
 import { useContactData } from "@/hooks/useContactData";
+import { useResponseTimeData } from "@/hooks/useResponseTimeData";
 import { saveAndUpdateDynamicContent } from "@/integrations/firebase/firestore";
 import { toast } from "sonner";
 
 const Contact = () => {
   const { contacts, loading } = useContactData();
+  const { responseTimes, loading: responseTimesLoading } = useResponseTimeData();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -282,23 +284,52 @@ const Contact = () => {
               </div>
             </div>
 
-            {/* Response Time Info */}
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                Response Times
-              </h3>
-              <div className="space-y-2 text-sm">
-                <p className="text-gray-700">
-                  <span className="font-medium">X (Twitter):</span> Usually within 24 hours
-                </p>
-                <p className="text-gray-700">
-                  <span className="font-medium">Email:</span> Within 48 hours on weekdays
-                </p>
-                <p className="text-gray-600">
-                  Weekends and holidays may take up to 48 hours for response.
-                </p>
+            {/* Dynamic Response Time Info */}
+            {!responseTimesLoading && responseTimes.length > 0 && (
+              <div className="bg-gray-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                  Response Times
+                </h3>
+                <div className="space-y-2 text-sm">
+                  {responseTimes.map((rt) => (
+                    <p key={rt.id} className="text-gray-700">
+                      <span className="font-medium">{rt.platform}:</span> {rt.timeframe}
+                    </p>
+                  ))}
+                  {responseTimes.some(rt => rt.description) && (
+                    <div className="mt-4 pt-2 border-t border-gray-200">
+                      {responseTimes
+                        .filter(rt => rt.description)
+                        .map((rt) => (
+                          <p key={`desc-${rt.id}`} className="text-gray-600">
+                            {rt.description}
+                          </p>
+                        ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Fallback Response Times if no dynamic data */}
+            {!responseTimesLoading && responseTimes.length === 0 && (
+              <div className="bg-gray-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                  Response Times
+                </h3>
+                <div className="space-y-2 text-sm">
+                  <p className="text-gray-700">
+                    <span className="font-medium">X (Twitter):</span> Usually within 24 hours
+                  </p>
+                  <p className="text-gray-700">
+                    <span className="font-medium">Email:</span> Within 48 hours on weekdays
+                  </p>
+                  <p className="text-gray-600">
+                    Weekends and holidays may take up to 48 hours for response.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Contact Form */}
