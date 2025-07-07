@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { X, Upload, Link as LinkIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '@/integrations/firebase/config';
 
 interface ScreenshotUploaderProps {
   screenshots: string[];
@@ -45,23 +47,34 @@ const ScreenshotUploader: React.FC<ScreenshotUploaderProps> = ({
 
     setUploading(true);
     try {
-      // For now, we'll use a placeholder implementation
-      // In a real app, you'd upload to Firebase Storage
       const newUrls: string[] = [];
       
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         
-        // Create a local URL for preview (in production, upload to Firebase Storage)
-        const localUrl = URL.createObjectURL(file);
-        newUrls.push(localUrl);
+        // Generate unique filename with timestamp
+        const timestamp = Date.now();
+        const fileName = `apps/screenshots/${timestamp}-${file.name}`;
+        
+        // Create Firebase Storage reference
+        const storageRef = ref(storage, fileName);
+        
+        // Upload file to Firebase Storage
+        console.log('Uploading file to Firebase Storage:', fileName);
+        const snapshot = await uploadBytes(storageRef, file);
+        
+        // Get the public download URL
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        console.log('File uploaded successfully, URL:', downloadURL);
+        
+        newUrls.push(downloadURL);
       }
       
       onScreenshotsChange([...screenshots, ...newUrls]);
-      toast.success(`${files.length} screenshot(s) added`);
+      toast.success(`${files.length} screenshot(s) uploaded to Firebase Storage`);
     } catch (error) {
-      console.error('Upload error:', error);
-      toast.error('Failed to upload screenshots');
+      console.error('Firebase upload error:', error);
+      toast.error('Failed to upload screenshots to Firebase Storage');
     } finally {
       setUploading(false);
     }
