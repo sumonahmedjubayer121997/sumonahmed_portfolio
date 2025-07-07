@@ -34,62 +34,6 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete, minDuration = 2000 })
     };
   }, [onComplete, minDuration]);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 },
-    exit: { 
-      opacity: 0,
-      scale: 0.8,
-      transition: { duration: 0.5, ease: [0.4, 0.0, 0.6, 1] }
-    }
-  };
-
-  const cubeVariants = {
-    animate: {
-      rotateX: [0, 360],
-      rotateY: [0, 360],
-      transition: {
-        duration: 4,
-        repeat: Infinity,
-        ease: "linear"
-      }
-    }
-  };
-
-  const orbitVariants = {
-    animate: {
-      rotate: 360,
-      transition: {
-        duration: 8,
-        repeat: Infinity,
-        ease: "linear"
-      }
-    }
-  };
-
-  const pulseVariants = {
-    animate: {
-      scale: [1, 1.2, 1],
-      opacity: [0.7, 1, 0.7],
-      transition: {
-        duration: 2,
-        repeat: Infinity,
-        ease: [0.4, 0.0, 0.6, 1]
-      }
-    }
-  };
-
-  const gridVariants = {
-    animate: {
-      opacity: [0.1, 0.3, 0.1],
-      transition: {
-        duration: 3,
-        repeat: Infinity,
-        ease: [0.4, 0.0, 0.6, 1]
-      }
-    }
-  };
-
   return (
     <AnimatePresence>
       {isVisible && (
@@ -98,16 +42,25 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete, minDuration = 2000 })
           style={{
             background: 'linear-gradient(135deg, #0f1419 0%, #1a1f2e 50%, #0f1419 100%)',
           }}
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ 
+            opacity: 0,
+            scale: 0.8,
+            transition: { duration: 0.5, ease: "easeInOut" }
+          }}
         >
           {/* Animated Grid Background */}
           <motion.div
             className="absolute inset-0 opacity-20"
-            variants={gridVariants}
-            animate="animate"
+            animate={{
+              opacity: [0.1, 0.3, 0.1],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
             style={{
               backgroundImage: `
                 linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
@@ -178,7 +131,7 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete, minDuration = 2000 })
                   transition={{
                     duration: 2,
                     repeat: Infinity,
-                    ease: [0.4, 0.0, 0.6, 1],
+                    ease: "easeInOut",
                     delay: index * 0.3
                   }}
                 />
@@ -196,7 +149,7 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete, minDuration = 2000 })
                 transition={{
                   duration: 2,
                   repeat: Infinity,
-                  ease: [0.4, 0.0, 0.6, 1]
+                  ease: "easeInOut"
                 }}
               />
             </div>
@@ -238,7 +191,7 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete, minDuration = 2000 })
                 animate={{ width: '100%' }}
                 transition={{ 
                   duration: minDuration / 1000 - 0.5, 
-                  ease: [0.4, 0.0, 0.6, 1]
+                  ease: "easeInOut" 
                 }}
               />
             </motion.div>
@@ -259,7 +212,7 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete, minDuration = 2000 })
                 transition={{
                   duration: 3 + (index * 0.5),
                   repeat: Infinity,
-                  ease: [0.4, 0.0, 0.6, 1]
+                  ease: "easeInOut"
                 }}
               />
             ))}
