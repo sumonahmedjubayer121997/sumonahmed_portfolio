@@ -40,7 +40,7 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete, minDuration = 2000 })
     exit: { 
       opacity: 0,
       scale: 0.8,
-      transition: { duration: 0.5, ease: "easeInOut" }
+      transition: { duration: 0.5, ease: [0.4, 0.0, 0.6, 1] }
     }
   };
 
@@ -74,7 +74,7 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete, minDuration = 2000 })
       transition: {
         duration: 2,
         repeat: Infinity,
-        ease: "easeInOut"
+        ease: [0.4, 0.0, 0.6, 1]
       }
     }
   };
@@ -85,7 +85,7 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete, minDuration = 2000 })
       transition: {
         duration: 3,
         repeat: Infinity,
-        ease: "easeInOut"
+        ease: [0.4, 0.0, 0.6, 1]
       }
     }
   };
@@ -122,8 +122,15 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete, minDuration = 2000 })
             <div className="relative mb-8">
               <motion.div
                 className="relative w-20 h-20"
-                variants={cubeVariants}
-                animate="animate"
+                animate={{
+                  rotateX: [0, 360],
+                  rotateY: [0, 360],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
                 style={{ transformStyle: 'preserve-3d' }}
               >
                 {/* Cube faces */}
@@ -144,8 +151,12 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete, minDuration = 2000 })
               {/* Orbiting Tech Icons */}
               <motion.div
                 className="absolute inset-0 w-32 h-32 -translate-x-6 -translate-y-6"
-                variants={orbitVariants}
-                animate="animate"
+                animate={{ rotate: 360 }}
+                transition={{
+                  duration: 8,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
               >
                 <Server className="absolute top-0 left-1/2 w-4 h-4 text-blue-400 -translate-x-2" />
                 <Cloud className="absolute top-1/2 right-0 w-4 h-4 text-gray-300 -translate-y-2" />
@@ -160,10 +171,15 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete, minDuration = 2000 })
                 <motion.div
                   key={index}
                   className="w-3 h-3 bg-blue-500 rounded-full"
-                  variants={pulseVariants}
-                  animate="animate"
-                  style={{
-                    animationDelay: `${index * 0.3}s`
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [0.7, 1, 0.7],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: [0.4, 0.0, 0.6, 1],
+                    delay: index * 0.3
                   }}
                 />
               ))}
@@ -180,7 +196,7 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete, minDuration = 2000 })
                 transition={{
                   duration: 2,
                   repeat: Infinity,
-                  ease: "easeInOut"
+                  ease: [0.4, 0.0, 0.6, 1]
                 }}
               />
             </div>
@@ -222,7 +238,7 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete, minDuration = 2000 })
                 animate={{ width: '100%' }}
                 transition={{ 
                   duration: minDuration / 1000 - 0.5, 
-                  ease: "easeInOut" 
+                  ease: [0.4, 0.0, 0.6, 1]
                 }}
               />
             </motion.div>
@@ -243,7 +259,7 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete, minDuration = 2000 })
                 transition={{
                   duration: 3 + (index * 0.5),
                   repeat: Infinity,
-                  ease: "easeInOut"
+                  ease: [0.4, 0.0, 0.6, 1]
                 }}
               />
             ))}
