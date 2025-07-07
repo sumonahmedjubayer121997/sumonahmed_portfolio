@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Mail, Github, Linkedin, Send } from "lucide-react";
+import { Mail, Github, Linkedin, Send, ContactIcon } from "lucide-react";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -61,11 +61,12 @@ const Contact = () => {
                     <div>
                       <p className="font-medium text-gray-900">Email</p>
                       <a 
-                        href="mailto:your@email.com" 
-                        className="text-gray-600 hover:text-gray-900 transition-colors"
-                      >
-                        your@email.com
-                      </a>
+          href="mailto:sumonahmedjubayer@email.com" 
+          className="text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          sumonahmedjubayer@email.com
+        </a>
+
                     </div>
                   </CardContent>
                 </Card>
@@ -137,6 +138,37 @@ const Contact = () => {
                     </div>
                   </CardContent>
                 </Card>
+                <Card className="hover:shadow-md transition-shadow duration-200">
+  <CardContent className="flex items-center justify-between p-4">
+    <div className="flex items-center">
+      <svg
+        className="w-5 h-5 text-gray-500 mr-3"
+        fill="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1.003 1.003 0 011.11-.21c1.12.45 2.33.69 3.58.69.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.07 21 3 13.93 3 5c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.24 2.46.69 3.58.13.27.07.6-.21 1.11l-2.2 2.2z" />
+      </svg>
+      <div>
+        <p className="font-medium text-gray-900">Phone</p>
+        <p className="text-sm text-gray-500">Call or text for a quick reply</p>
+      </div>
+    </div>
+    <Button
+      size="sm"
+      className="bg-gray-900 hover:bg-gray-800 text-white"
+      asChild
+    >
+      <a 
+        href="tel:+447405241663"
+      >
+        Call +447405241663
+      </a>
+    </Button>
+  </CardContent>
+</Card>
+
+
+                
               </div>
             </div>
 
