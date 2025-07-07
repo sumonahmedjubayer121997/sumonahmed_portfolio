@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import TechStack from "./icon/TechStack";
 import { listenDynamicContent } from "@/integrations/firebase/firestore"; // adjust your path
 import { getFirestore, doc, onSnapshot } from "firebase/firestore";
+import { Link } from "react-router-dom";
 
 
 const roles = [
@@ -25,7 +26,6 @@ useEffect(() => {
     'home', 
     '7E1fmebGEixv8p2mjJfy',   // or null to listen entire collection
     (data) => {
-      console.log("Realtime data:", data);
       setHomeData(data?.content || null);
       setIsLoading(false);
     },
@@ -116,7 +116,7 @@ useEffect(() => {
     {/* Contact and Email */}
 
     <div className="flex items-center gap-3">
-  <a href="/contact">
+  <Link to="/contact">
     <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-gray-600 shadow h-9 px-4 py-2 text-white dark:text-black bg-black dark:bg-oldsilver hover:text-black hover:bg-white dark:hover:bg-slate dark:hover:text-white">
       <span className="text-sm pr-2">
         <svg
@@ -137,7 +137,7 @@ useEffect(() => {
       </span>
       Contact
     </button>
-  </a>
+  </Link>
   <a href="mailto:sumonahmedjubayer@gmail.com">
     <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-gray-600 bg-neutral-500 shadow hover:bg-primary/90 h-9 px-4 py-2 text-white hover:text-oldsilver">
       <span className="text-sm pr-2">

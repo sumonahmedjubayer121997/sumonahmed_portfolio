@@ -130,67 +130,13 @@ export const deleteContent = async (id: string) => {
  * @param docId - optional docId; if provided, updates that document; else creates a new one
  * @returns result with id and error
  **/
+
+
+
 const dbFire = getFirestore();
-export const saveDynamicContent = async (
-  collectionName: string, 
-  data: any, 
-  docId?: string
-) => {
-  try {
-    if (docId) {
-      // Update existing document
-      const docRef = doc(dbFire, collectionName, docId);
-      await updateDoc(docRef, data);
-      return { id: docRef.id, error: null };
-    } else {
-      // Create new document
-      const docRef = await addDoc(collection(dbFire, collectionName), data);
-      return { id: docRef.id, error: null };
-    }
-  } catch (error: any) {
-    console.error(`Error saving to ${collectionName}:`, error);
-    return { id: null, error: error.message };
-  }
-};
 
 
-
-
-/**
- * Dynamically get content from Firestore
- * 
- * @param collectionName - Firestore collection name
- * @param docId - optional document ID to fetch a specific doc
- * @returns data (object or array), error (string or null)
- */
-export const getDynamicContent = async (
-  collectionName: string,
-  docId?: string
-) => {
-  try {
-    if (docId) {
-      // Get a single document
-      const docRef = doc(dbFire, collectionName, docId);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        return { data: { id: docSnap.id, ...docSnap.data() }, error: null };
-      } else {
-        return { data: null, error: `Document with ID ${docId} not found in ${collectionName}` };
-      }
-    } else {
-      // Get all documents in the collection
-      const querySnapshot = await getDocs(collection(dbFire, collectionName));
-      const docs = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      return { data: docs, error: null };
-    }
-  } catch (error: any) {
-    console.error(`Error fetching from ${collectionName}:`, error);
-    return { data: null, error: error.message };
-  }
-};
-
-
-
+//getting latest data using single id ,otherwise it will come with all of the data that belongs to the collection;
 export const listenDynamicContent = (
   collectionName: string,
   docId: string | null,
@@ -234,3 +180,85 @@ export const listenDynamicContent = (
     return () => {}; // return no-op unsubscribe on error
   }
 };
+
+
+//SaveAndUpdate
+
+export const saveAndUpdateDynamicContent = async (
+  collectionName: string, 
+  data: any, 
+  docId?: string
+) => {
+  try {
+    //if User provide any specific Id then it will update the content using the provided ID;
+    if (docId) {
+      // Update existing document
+      const docRef = doc(dbFire, collectionName, docId);
+      await updateDoc(docRef, data);
+      return { id: docRef.id, error: null };
+    } else {
+      // Create new document
+      const docRef = await addDoc(collection(dbFire, collectionName), data);
+      return { id: docRef.id, error: null };
+    }
+  } catch (error: any) {
+    console.error(`Error saving to ${collectionName}:`, error);
+    return { id: null, error: error.message };
+  }
+};
+
+
+
+export const deleteDynamicContent = async (
+  collectionName: string,
+  docId: string,
+  onSuccess?: () => void,
+  onError?: (error: any) => void
+) => {
+  try {
+    const docRef = doc(dbFire, collectionName, docId);
+    await deleteDoc(docRef);
+    console.log(`Deleted document ${collectionName}/${docId}`);
+    if (onSuccess) onSuccess();
+  } catch (error) {
+    console.error(`Error deleting ${collectionName}/${docId}:`, error);
+    if (onError) onError(error);
+  }
+};
+
+
+
+/**
+ * Dynamically get content from Firestore
+ * 
+ * @param collectionName - Firestore collection name
+ * @param docId - optional document ID to fetch a specific doc
+ * @returns data (object or array), error (string or null)
+ */
+export const getDynamicContent = async (
+  collectionName: string,
+  docId?: string
+) => {
+  try {
+    if (docId) {
+      // Get a single document
+      const docRef = doc(dbFire, collectionName, docId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return { data: { id: docSnap.id, ...docSnap.data() }, error: null };
+      } else {
+        return { data: null, error: `Document with ID ${docId} not found in ${collectionName}` };
+      }
+    } else {
+      // Get all documents in the collection
+      const querySnapshot = await getDocs(collection(dbFire, collectionName));
+      const docs = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      return { data: docs, error: null };
+    }
+  } catch (error: any) {
+    console.error(`Error fetching from ${collectionName}:`, error);
+    return { data: null, error: error.message };
+  }
+};
+
+

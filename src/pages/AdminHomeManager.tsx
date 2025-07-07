@@ -14,8 +14,8 @@ import {
   updateContent,
   ContentType,
   ContentItem ,
-  saveDynamicContent,
-  getDynamicContent
+  saveAndUpdateDynamicContent,
+  listenDynamicContent
 } from '@/integrations/firebase/firestore';
 import IconSelector from "@/components/IconSelector";
 import RichTextEditor from "@/components/RichTextEditor";
@@ -39,93 +39,110 @@ const AdminHomeManager = () => {
   });
   const [showPreview, setShowPreview] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [existingContent, setExistingContent] = useState<ContentItem | null>(null);
+  const [existingContent, setExistingContent] = useState(null);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchExistingContent();
-  }, []);
-
-  // const fetchExistingContent = async () => {
-  //   try {
-  //     setIsInitialLoading(true);
-  //     console.log('Fetching existing content...');
-  //     const contents = await getContentByPageType('home');
-  //     console.log('Fetched contents:', contents);
-      
-  //     if (contents.length > 0) {
-  //       const content = contents[0];
-  //       setExistingContent(content);
-  //       const data = content.content as PortfolioData;
-  //       setFormData({
-  //         name: data.name || '',
-  //         position: data.position || '',
-  //         onlineLink: data.onlineLink || '',
-  //         aboutMe: data.aboutMe || '',
-  //         selectedIcons: data.selectedIcons || []
-  //       });
-  //       console.log('Form data set:', data);
-  //     }
-  //   } catch (error: any) {
-  //     console.error('Error fetching content:', error);
-  //     toast({
-  //       title: "Error",
-  //       description: "Failed to load existing content. Please try again.",
-  //       variant: "destructive",
-  //     });
-  //   } finally {
-  //     setIsInitialLoading(false);
-  //   }
-  // };
-
-
-const fetchExistingContent = async () => {
-  try {
+    // Setup listener
+    console.log('Setting up listener...');
     setIsInitialLoading(true);
-    console.log('Fetching existing content...');
 
-    const { data, error } = await getDynamicContent('home', '7E1fmebGEixv8p2mjJfy');  // Fetch 'home/main'
+    const unsubscribe = listenDynamicContent(
+      'home',
+      '7E1fmebGEixv8p2mjJfy',
+      (data) => {
+        if (data) {
+          console.log('Live data received:', data);
+          setExistingContent(data);
 
-    if (error) {
-      console.error('Error fetching content:', error);
-      toast({
-        title: "Error",
-        description: error,
-        variant: "destructive",
-      });
-      return;
-    }
+          const portfolioData = data.content as PortfolioData;
+          setFormData({
+            name: portfolioData.name || '',
+            position: portfolioData.position || '',
+            onlineLink: portfolioData.onlineLink || '',
+            aboutMe: portfolioData.aboutMe || '',
+            selectedIcons: portfolioData.selectedIcons || []
+          });
+        } else {
+          console.log('Document does not exist or was deleted');
+          setExistingContent(null);
+          setFormData({
+            name: '',
+            position: '',
+            onlineLink: '',
+            aboutMe: '',
+            selectedIcons: []
+          });
+        }
+        setIsInitialLoading(false);
+      },
+      (error) => {
+        console.error('Error with listener:', error);
+        toast({
+          title: "Error",
+          description: "Failed to listen to content updates.",
+          variant: "destructive"
+        });
+        setIsInitialLoading(false);
+      }
+    );
 
-    if (data) {
-      console.log('Fetched content:', data);
-      setExistingContent(data);  // Includes id and content
+    // Cleanup listener on unmount
+    return () => {
+      console.log('Cleaning up listener...');
+      unsubscribe();
+    };
 
-      const portfolioData = data.content as PortfolioData;
-      setFormData({
-        name: portfolioData.name || '',
-        position: portfolioData.position || '',
-        onlineLink: portfolioData.onlineLink || '',
-        aboutMe: portfolioData.aboutMe || '',
-        selectedIcons: portfolioData.selectedIcons || []
-      });
+  }, []); // empty deps = runs once on mount
 
-      console.log('Form data set:', portfolioData);
-    } else {
-      console.log('No content found.');
-    }
 
-  } catch (error: any) {
-    console.error('Unexpected error fetching content:', error);
-    toast({
-      title: "Error",
-      description: "Failed to load existing content. Please try again.",
-      variant: "destructive",
-    });
-  } finally {
-    setIsInitialLoading(false);
-  }
-};
+// const fetchExistingContent = async () => {
+//   try {
+//     setIsInitialLoading(true);
+//     console.log('Fetching existing content...');
+
+//     const { data, error } = await getDynamicContent('home', '7E1fmebGEixv8p2mjJfy');  // Fetch 'home/main'
+
+//     if (error) {
+//       console.error('Error fetching content:', error);
+//       toast({
+//         title: "Error",
+//         description: error,
+//         variant: "destructive",
+//       });
+//       return;
+//     }
+
+//     if (data) {
+//       console.log('Fetched content:', data);
+//       setExistingContent(data);  // Includes id and content
+
+//       const portfolioData = data.content as PortfolioData;
+//       setFormData({
+//         name: portfolioData.name || '',
+//         position: portfolioData.position || '',
+//         onlineLink: portfolioData.onlineLink || '',
+//         aboutMe: portfolioData.aboutMe || '',
+//         selectedIcons: portfolioData.selectedIcons || []
+//       });
+
+//       console.log('Form data set:', portfolioData);
+//     } else {
+//       console.log('No content found.');
+//     }
+
+//   } catch (error: any) {
+//     console.error('Unexpected error fetching content:', error);
+//     toast({
+//       title: "Error",
+//       description: "Failed to load existing content. Please try again.",
+//       variant: "destructive",
+//     });
+//   } finally {
+//     setIsInitialLoading(false);
+//   }
+// };
 
   const validateForm = (): boolean => {
     const errors: string[] = [];
@@ -163,9 +180,9 @@ const fetchExistingContent = async () => {
     }
   };
 
-  const handleSave = async () => {
+const handleSave = async () => {
   console.log('Save button clicked, form data:', formData);
-  
+
   if (!validateForm()) {
     console.log('Validation failed');
     return;
@@ -174,12 +191,11 @@ const fetchExistingContent = async () => {
   setIsLoading(true);
   try {
     console.log('Starting save process...');
-
-    const collectionName = 'home';  // You can make this dynamic if needed!
+    const collectionName = 'home';
 
     if (existingContent) {
       console.log('Updating existing content with ID:', existingContent.id);
-      const { error } = await saveDynamicContent(collectionName, {
+      const { error } = await saveAndUpdateDynamicContent(collectionName, {
         title: 'Portfolio Information',
         content: formData,
         status: 'published',
@@ -195,9 +211,10 @@ const fetchExistingContent = async () => {
         title: 'Success!',
         description: 'Portfolio updated successfully!',
       });
+
     } else {
       console.log('Creating new content...');
-      const { error } = await saveDynamicContent(collectionName, {
+      const { error } = await saveAndUpdateDynamicContent(collectionName, {
         title: 'Portfolio Information',
         content: formData,
         status: 'published',
@@ -214,8 +231,7 @@ const fetchExistingContent = async () => {
         description: 'Portfolio created successfully!',
       });
 
-      // Refresh to load the new document
-      await fetchExistingContent();
+      // ✅ No need to call fetchExistingContent — listener will auto-update
     }
 
   } catch (error: any) {
