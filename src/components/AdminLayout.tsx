@@ -1,8 +1,9 @@
 import { ReactNode, useState } from "react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { Button } from "@/components/ui/button";
-import { LogOut, Home, User, Briefcase, FolderOpen, BookOpen, Info, Mail, Menu, X } from "lucide-react";
+import { LogOut, Home, User, Briefcase, FolderOpen, BookOpen, Info, Mail, Menu, X,HomeIcon } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -35,6 +36,13 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           >
             <Menu className="h-6 w-6" />
           </button>
+            <Link
+              to="/"
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 inline-flex items-center"
+              aria-label="Go to Dashboard"
+            >
+              <HomeIcon className="w-4 h-4 text-gray-600" />
+            </Link>
           <h1 className="text-lg md:text-xl font-bold text-gray-800">Admin Panel</h1>
         </div>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sun, Moon, Gauge } from 'lucide-react';
+import { Sun, Moon, ShieldPlusIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAdminAuth } from '@/hooks/useAdminAuth'; // adjust the import path to where your hook is
 
@@ -40,7 +40,7 @@ const Footer = () => {
               className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 inline-flex items-center"
               aria-label="Go to Dashboard"
             >
-              <Gauge className="w-4 h-4 text-gray-600" />
+              <ShieldPlusIcon className="w-4 h-4 text-gray-600" />
             </Link>
           ) : (
             <a 
