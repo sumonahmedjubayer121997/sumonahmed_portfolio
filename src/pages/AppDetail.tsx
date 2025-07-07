@@ -120,11 +120,11 @@ const AppDetail = () => {
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Back Button */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <Link to="/apps">
-            <Button variant="outline">
+            <Button variant="outline" size="sm" className="sm:size-default">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Apps
             </Button>
@@ -132,33 +132,35 @@ const AppDetail = () => {
         </div>
 
         {/* App Header */}
-        <div className="mb-12">
-          <div className="flex flex-wrap items-center gap-4 mb-4">
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">{app.title}</h1>
-            <Badge variant="secondary">{app.status || 'Active'}</Badge>
-            {app.version && <Badge variant="outline">{app.version}</Badge>}
+        <div className="mb-8 sm:mb-12">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-4 mb-4">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 dark:text-white break-words">{app.title}</h1>
+            <div className="flex gap-2">
+              <Badge variant="secondary">{app.status || 'Active'}</Badge>
+              {app.version && <Badge variant="outline">{app.version}</Badge>}
+            </div>
           </div>
-          <p className="text-xl text-gray-600 dark:text-gray-400 mb-6">{app.about || app.longDescription || 'No description available'}</p>
+          <p className="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 mb-4 sm:mb-6 leading-relaxed">{app.about || app.longDescription || 'No description available'}</p>
           
           {/* Quick Info */}
-          <div className="flex flex-wrap gap-6 text-sm text-gray-500 dark:text-gray-400">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-6 text-sm text-gray-500 dark:text-gray-400">
             {app.duration && (
               <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
+                <Calendar className="w-4 h-4 flex-shrink-0" />
                 <span>Duration: {app.duration}</span>
               </div>
             )}
             <div className="flex items-center gap-2">
-              <Code className="w-4 h-4" />
+              <Code className="w-4 h-4 flex-shrink-0" />
               <span>Type: {app.type}</span>
             </div>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap gap-4 mb-12">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mb-8 sm:mb-12">
           {app.demoLink && (
-            <Button asChild>
+            <Button asChild className="w-full sm:w-auto">
               <a href={app.demoLink} target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="w-4 h-4 mr-2" />
                 Live Demo
@@ -166,7 +168,7 @@ const AppDetail = () => {
             </Button>
           )}
           {app.codeLink && (
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild className="w-full sm:w-auto">
               <a href={app.codeLink} target="_blank" rel="noopener noreferrer">
                 <Github className="w-4 h-4 mr-2" />
                 View Code
@@ -174,7 +176,7 @@ const AppDetail = () => {
             </Button>
           )}
           {app.downloadLink && (
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild className="w-full sm:w-auto">
               <a href={app.downloadLink} target="_blank" rel="noopener noreferrer">
                 <Download className="w-4 h-4 mr-2" />
                 Download
@@ -184,23 +186,23 @@ const AppDetail = () => {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Left Column - Screenshots */}
           <div className="lg:col-span-2">
             {/* Screenshots */}
             {app.screenshots && app.screenshots.length > 0 && (
-              <Card className="mb-8">
+              <Card className="mb-6 sm:mb-8">
                 <CardHeader>
-                  <CardTitle>Screenshots</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl">Screenshots</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     {app.screenshots.map((screenshot, index) => (
                       <img
                         key={index}
                         src={screenshot}
                         alt={`${app.title} screenshot ${index + 1}`}
-                        className="rounded-lg shadow-md w-full h-64 object-cover"
+                        className="rounded-lg shadow-md w-full h-48 sm:h-64 object-cover"
                       />
                     ))}
                   </div>
@@ -210,31 +212,34 @@ const AppDetail = () => {
 
             {/* Detailed Description */}
             {(app.longDescription || app.about) && (
-              <Card className="mb-8">
+              <Card className="mb-6 sm:mb-8">
                 <CardHeader>
-                  <CardTitle>About This App</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl">About This App</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{app.longDescription || app.about}</p>
-                </CardContent>
+                 <CardContent>
+                   <div 
+                     className="text-gray-700 dark:text-gray-300 leading-relaxed prose prose-sm max-w-none dark:prose-invert"
+                     dangerouslySetInnerHTML={{ __html: app.longDescription || app.about || '' }}
+                   />
+                 </CardContent>
               </Card>
             )}
 
             {/* Features */}
             {app.features && app.features.length > 0 && (
-              <Card className="mb-8">
+              <Card className="mb-6 sm:mb-8">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                     <Zap className="w-5 h-5" />
                     Key Features
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {app.features.map((feature, index) => (
                       <li key={index} className="flex items-start gap-2">
                         <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-                        <span className="text-gray-700 dark:text-gray-300">{feature}</span>
+                        <span className="text-gray-700 dark:text-gray-300 text-sm sm:text-base">{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -244,19 +249,19 @@ const AppDetail = () => {
           </div>
 
           {/* Right Column - Technical Details */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Technologies Used */}
             {app.technologies && app.technologies.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Technologies Used</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl">Technologies Used</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-wrap gap-2 sm:gap-3">
                     {app.technologies.map((tech, index) => (
-                      <div key={index} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-lg">
-                        <TechIcon techName={tech} className="w-4 h-4" />
-                        <span className="text-sm font-medium">{tech}</span>
+                      <div key={index} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg">
+                        <TechIcon techName={tech} className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="text-xs sm:text-sm font-medium">{tech}</span>
                       </div>
                     ))}
                   </div>
@@ -268,11 +273,14 @@ const AppDetail = () => {
             {app.challenges && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Challenges & Solutions</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl">Challenges & Solutions</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{app.challenges}</p>
-                </CardContent>
+                 <CardContent>
+                   <div 
+                     className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert"
+                     dangerouslySetInnerHTML={{ __html: app.challenges || '' }}
+                   />
+                 </CardContent>
               </Card>
             )}
 
@@ -280,11 +288,14 @@ const AppDetail = () => {
             {app.achievements && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Achievements</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl">Achievements</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{app.achievements}</p>
-                </CardContent>
+                 <CardContent>
+                   <div 
+                     className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert"
+                     dangerouslySetInnerHTML={{ __html: app.achievements || '' }}
+                   />
+                 </CardContent>
               </Card>
             )}
 
@@ -292,11 +303,14 @@ const AppDetail = () => {
             {app.accessibility && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Accessibility</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl">Accessibility</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{app.accessibility}</p>
-                </CardContent>
+                 <CardContent>
+                   <div 
+                     className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert"
+                     dangerouslySetInnerHTML={{ __html: app.accessibility || '' }}
+                   />
+                 </CardContent>
               </Card>
             )}
           </div>
