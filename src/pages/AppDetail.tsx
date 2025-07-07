@@ -1,116 +1,112 @@
 
 import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, ExternalLink, Download, Github, Calendar, Code, Zap } from 'lucide-react';
 import Layout from '../components/Layout';
 import TechIcon from '@/components/TechIcon';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { getDynamicContent } from "@/integrations/firebase/firestore";
+import { toast } from "sonner";
 
-// App data - in a real app, this would come from an API or database
-const appData = {
-  "Blood Donation Guide": {
-    id: "blood-donation-guide",
-    name: "Blood Donation Guide",
-    description: "A comprehensive mobile application designed to educate users about blood donation processes, eligibility criteria, and help connect donors with recipients.",
-    longDescription: "The Blood Donation Guide app serves as a bridge between blood donors and those in need. It features an intuitive interface that guides users through the donation process, provides real-time information about blood bank locations, and includes educational content about the importance of blood donation.",
-    features: [
-      "Blood type compatibility checker",
-      "Nearby blood bank locator with maps integration",
-      "Donation eligibility assessment",
-      "Educational content about blood donation",
-      "Appointment scheduling system",
-      "Donation history tracking",
-      "Emergency blood request notifications",
-      "Multi-language support"
-    ],
-    techUsed: ["Python", "Flask", "SQLite", "HTML", "CSS", "JavaScript"],
-    screenshots: [
-      "https://firstnorth.org/wp-content/uploads/2020/10/Gen-Blood-Drive-web-1.jpg",
-      "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&h=600&fit=crop"
-    ],
-    duration: "3 months",
-    projectType: "Mobile App",
-    version: "v2.1",
-    status: "Active",
-    challenges: "Implementing real-time blood bank data synchronization and ensuring HIPAA compliance for user data protection.",
-    achievements: "Successfully connected over 500 donors with recipients in the first 6 months.",
-    accessibility: "Designed with high contrast colors and screen reader compatibility for visually impaired users.",
-    demoLink: "https://example.com/demo",
-    repoLink: "https://github.com/example/blood-donation-guide",
-    downloadLink: "https://example.com/download"
-  },
-  "Anonymizer": {
-    id: "anonymizer",
-    name: "Anonymizer",
-    description: "A powerful web application that automatically detects and anonymizes sensitive information in text documents.",
-    longDescription: "The Anonymizer tool uses advanced natural language processing to identify personally identifiable information (PII) such as names, addresses, phone numbers, and email addresses, then replaces them with generic placeholders while maintaining the document's readability and context.",
-    features: [
-      "Automatic PII detection using NLP",
-      "Custom anonymization rules",
-      "Batch processing for multiple documents",
-      "Support for various file formats (PDF, DOCX, TXT)",
-      "Real-time text analysis",
-      "Downloadable anonymized results",
-      "Privacy-first approach - no data stored",
-      "API integration capabilities"
-    ],
-    techUsed: ["React", "Javascript", "Node.js", "Python", "spaCy", "PDF.js"],
-    screenshots: [
-      "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop"
-    ],
-    duration: "2 months",
-    projectType: "Web App",
-    version: "v1.3",
-    status: "Active",
-    challenges: "Balancing accuracy in PII detection while maintaining document context and readability.",
-    achievements: "Processed over 10,000 documents with 95% accuracy in PII detection.",
-    accessibility: "Keyboard navigation support and clear visual indicators for anonymized content.",
-    demoLink: "https://example.com/anonymizer-demo",
-    repoLink: "https://github.com/example/anonymizer",
-    downloadLink: "https://example.com/anonymizer-download"
-  }
-};
+interface AppItem {
+  id: string;
+  title: string;
+  about?: string;
+  screenshots?: string[];
+  type: string;
+  technologies?: string[];
+  status?: string;
+  version?: string;
+  duration?: string;
+  demoLink?: string;
+  codeLink?: string;
+  downloadLink?: string;
+  features?: string[];
+  challenges?: string;
+  achievements?: string;
+  accessibility?: string;
+  longDescription?: string;
+}
 
 const AppDetail = () => {
   const { appName } = useParams<{ appName: string }>();
+  const [app, setApp] = useState<AppItem | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
   
   console.log('AppDetail component rendered');
   console.log('App name from URL:', appName);
   
-  if (!appName) {
-    console.log('No app name provided in URL');
+  useEffect(() => {
+    const fetchApp = async () => {
+      if (!appName) {
+        setNotFound(true);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const decodedAppName = decodeURIComponent(appName);
+        console.log('Decoded app name:', decodedAppName);
+        
+        const { data, error } = await getDynamicContent('apps');
+        
+        if (error) {
+          console.error('Error fetching apps:', error);
+          toast.error('Failed to load app data');
+          setNotFound(true);
+          return;
+        }
+
+        if (data && Array.isArray(data)) {
+          const foundApp = data.find((appItem: AppItem) => appItem.title === decodedAppName);
+          console.log('Found app:', foundApp ? 'Yes' : 'No');
+          
+          if (foundApp) {
+            setApp(foundApp);
+            setNotFound(false);
+          } else {
+            setNotFound(true);
+          }
+        } else {
+          setNotFound(true);
+        }
+      } catch (error) {
+        console.error('Error fetching app:', error);
+        toast.error('Failed to load app data');
+        setNotFound(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApp();
+  }, [appName]);
+
+  if (loading) {
     return (
       <Layout>
         <div className="max-w-4xl mx-auto px-6 py-12">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">App Not Found</h1>
-          <Link to="/apps">
-            <Button variant="outline">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Apps
-            </Button>
-          </Link>
+          <div className="flex justify-center items-center py-12">
+            <div className="text-lg text-gray-600 dark:text-gray-400">Loading app details...</div>
+          </div>
         </div>
       </Layout>
     );
   }
 
-  // Decode the app name from URL
-  const decodedAppName = decodeURIComponent(appName);
-  console.log('Decoded app name:', decodedAppName);
-  console.log('Available apps:', Object.keys(appData));
-  
-  const app = appData[decodedAppName as keyof typeof appData];
-  console.log('Found app data:', app ? 'Yes' : 'No');
-
-  if (!app) {
-    console.log('App not found in data');
+  if (!appName || notFound || !app) {
+    const decodedAppName = appName ? decodeURIComponent(appName) : '';
     return (
       <Layout>
         <div className="max-w-4xl mx-auto px-6 py-12">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">App Not Found</h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">The app "{decodedAppName}" could not be found.</p>
+          {decodedAppName && (
+            <p className="text-gray-600 dark:text-gray-400 mb-6">The app "{decodedAppName}" could not be found.</p>
+          )}
           <Link to="/apps">
             <Button variant="outline">
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -138,21 +134,23 @@ const AppDetail = () => {
         {/* App Header */}
         <div className="mb-12">
           <div className="flex flex-wrap items-center gap-4 mb-4">
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">{app.name}</h1>
-            <Badge variant="secondary">{app.status}</Badge>
-            <Badge variant="outline">{app.version}</Badge>
+            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">{app.title}</h1>
+            <Badge variant="secondary">{app.status || 'Active'}</Badge>
+            {app.version && <Badge variant="outline">{app.version}</Badge>}
           </div>
-          <p className="text-xl text-gray-600 dark:text-gray-400 mb-6">{app.description}</p>
+          <p className="text-xl text-gray-600 dark:text-gray-400 mb-6">{app.about || app.longDescription || 'No description available'}</p>
           
           {/* Quick Info */}
           <div className="flex flex-wrap gap-6 text-sm text-gray-500 dark:text-gray-400">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              <span>Duration: {app.duration}</span>
-            </div>
+            {app.duration && (
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                <span>Duration: {app.duration}</span>
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <Code className="w-4 h-4" />
-              <span>Type: {app.projectType}</span>
+              <span>Type: {app.type}</span>
             </div>
           </div>
         </div>
@@ -167,9 +165,9 @@ const AppDetail = () => {
               </a>
             </Button>
           )}
-          {app.repoLink && (
+          {app.codeLink && (
             <Button variant="outline" asChild>
-              <a href={app.repoLink} target="_blank" rel="noopener noreferrer">
+              <a href={app.codeLink} target="_blank" rel="noopener noreferrer">
                 <Github className="w-4 h-4 mr-2" />
                 View Code
               </a>
@@ -189,73 +187,82 @@ const AppDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Screenshots */}
           <div className="lg:col-span-2">
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle>Screenshots</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {app.screenshots.map((screenshot, index) => (
-                    <img
-                      key={index}
-                      src={screenshot}
-                      alt={`${app.name} screenshot ${index + 1}`}
-                      className="rounded-lg shadow-md w-full h-64 object-cover"
-                    />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            {/* Screenshots */}
+            {app.screenshots && app.screenshots.length > 0 && (
+              <Card className="mb-8">
+                <CardHeader>
+                  <CardTitle>Screenshots</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {app.screenshots.map((screenshot, index) => (
+                      <img
+                        key={index}
+                        src={screenshot}
+                        alt={`${app.title} screenshot ${index + 1}`}
+                        className="rounded-lg shadow-md w-full h-64 object-cover"
+                      />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Detailed Description */}
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle>About This Project</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{app.longDescription}</p>
-              </CardContent>
-            </Card>
+            {(app.longDescription || app.about) && (
+              <Card className="mb-8">
+                <CardHeader>
+                  <CardTitle>About This App</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{app.longDescription || app.about}</p>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Features */}
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Zap className="w-5 h-5" />
-                  Key Features
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {app.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-                      <span className="text-gray-700 dark:text-gray-300">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+            {app.features && app.features.length > 0 && (
+              <Card className="mb-8">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Zap className="w-5 h-5" />
+                    Key Features
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {app.features.map((feature, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+                        <span className="text-gray-700 dark:text-gray-300">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Right Column - Technical Details */}
           <div className="space-y-6">
             {/* Technologies Used */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Technologies Used</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-3">
-                  {app.techUsed.map((tech, index) => (
-                    <div key={index} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-lg">
-                      <TechIcon techName={tech} className="w-4 h-4" />
-                      <span className="text-sm font-medium">{tech}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            {app.technologies && app.technologies.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Technologies Used</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-3">
+                    {app.technologies.map((tech, index) => (
+                      <div key={index} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-lg">
+                        <TechIcon techName={tech} className="w-4 h-4" />
+                        <span className="text-sm font-medium">{tech}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Challenges & Solutions */}
             {app.challenges && (
