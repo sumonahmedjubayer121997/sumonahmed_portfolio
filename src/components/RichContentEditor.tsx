@@ -1,6 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import ReactQuill from 'react-quill';
+import ReactQuill, { Quill } from 'react-quill';
 import 'quill/dist/quill.snow.css';
+// @ts-ignore
+import ImageResize from 'quill-image-resize-module-react';
+
+// Register the ImageResize module
+Quill.register('modules/imageResize', ImageResize);
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/integrations/firebase/config';
 import { saveAndUpdateDynamicContent } from '@/integrations/firebase/firestore';
@@ -239,20 +244,26 @@ const RichContentEditor = ({
       ['bold', 'italic', 'underline', 'strike'],
       [{ 'list': 'ordered' }, { 'list': 'bullet' }],
       ['blockquote', 'code-block'],
-      ['link'],
+      ['link', 'image'],
       [{ 'align': [] }],
       [{ 'color': [] }, { 'background': [] }],
+      [{ 'size': ['small', false, 'large', 'huge'] }],
       ['clean']
     ],
     clipboard: {
       matchVisual: false,
+    },
+    imageResize: {
+      parchment: true,
+      modules: ['Resize', 'DisplaySize', 'Toolbar']
     }
   };
 
   const formats = [
     'header', 'bold', 'italic', 'underline', 'strike',
     'list', 'bullet', 'blockquote', 'code-block',
-    'link', 'image', 'align', 'color', 'background'
+    'link', 'image', 'align', 'color', 'background', 'size',
+    'width', 'height', 'style'
   ];
 
   return (

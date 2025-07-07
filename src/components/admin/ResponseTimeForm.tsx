@@ -38,7 +38,11 @@ const ResponseTimeForm: React.FC<ResponseTimeFormProps> = ({ formData, setFormDa
             value={formData.platform}
             onChange={(e) => setFormData(prev => ({ ...prev, platform: e.target.value }))}
             placeholder="e.g., X (Twitter), Email, LinkedIn"
+            className={!formData.platform ? "border-destructive focus-visible:ring-destructive" : ""}
           />
+          {!formData.platform && (
+            <p className="text-sm text-destructive mt-1">Platform is required</p>
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium mb-2">Sort Order</label>
