@@ -1,31 +1,57 @@
 
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import TechIcon from "@/components/TechIcon";
 import Layout from "../components/Layout";
+import { getDynamicContent } from "@/integrations/firebase/firestore";
+import { toast } from "sonner";
+
+interface AppItem {
+  id: string;
+  title: string;
+  about?: string;
+  screenshots?: string[];
+  type: string;
+  technologies?: string[];
+  status?: string;
+  version?: string;
+  duration?: string;
+  demoLink?: string;
+  codeLink?: string;
+  downloadLink?: string;
+}
 
 const Apps = () => {
-  const apps = [
-    {
-      name: "Blood Donation Guide",
-      description: "Get information about blood donation",
-      image: "/placeholder.svg",
-      alt: "Blood donation guide app interface showing blood type compatibility",
-      id: 1,
-      type: "MobileApp",
-      techUsed: ["Python", "Flask"]
-    },
-    {
-      name: "Anonymizer",
-      description: "Anonymize your data",
-      image: "/placeholder.svg",
-      alt: "Text anonymizer app interface with highlighted entities",
-      id: 2,
-      type: "WebApp",
-      techUsed: ["React", "Javascript"]
-    }
-  ];
+  const [apps, setApps] = useState<AppItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  console.log('Apps page rendered');
+  useEffect(() => {
+    const fetchApps = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await getDynamicContent('apps');
+        
+        if (error) {
+          console.error('Error fetching apps:', error);
+          toast.error('Failed to load apps');
+          return;
+        }
+
+        if (data && Array.isArray(data)) {
+          setApps(data as AppItem[]);
+        }
+      } catch (error) {
+        console.error('Error fetching apps:', error);
+        toast.error('Failed to load apps');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApps();
+  }, []);
+
+  console.log('Apps page rendered', { apps, loading });
 
   return (
     <Layout>
@@ -98,40 +124,50 @@ const Apps = () => {
         </div>
 
         {/* App Cards Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-5xl mx-auto relative z-10">
-          {apps.map((app) => {
-            const appLink = `/apps/${encodeURIComponent(app.name)}`;
-            console.log(`Creating link for ${app.name}: ${appLink}`);
-            
-            return (
-              <Link 
-                key={app.id} 
-                to={appLink}
-                className="w-full group"
-                onClick={() => console.log(`Clicked on ${app.name}, navigating to ${appLink}`)}
-              >
-                <div className="flex flex-col w-full h-full p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
-                  <img
-                    src="https://firstnorth.org/wp-content/uploads/2020/10/Gen-Blood-Drive-web-1.jpg"
-                    alt={app.description}
-                    className="max-h-52 md:w-full mb-4 items-center justify-center rounded-md"
-                  />
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-md font-bold group-hover:text-primary transition-colors duration-200">{app.name}</h2>
-                    <div className="flex mt-1 space-x-2">
-                      {app.techUsed.map((tech, index) => (
-                        <div key={index} title={tech}>
-                          <TechIcon techName={tech} />
-                        </div>
-                      ))}
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="text-lg text-gray-600 dark:text-gray-400">Loading apps...</div>
+          </div>
+        ) : apps.length === 0 ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="text-lg text-gray-600 dark:text-gray-400">No apps found</div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-5xl mx-auto relative z-10">
+            {apps.map((app) => {
+              const appLink = `/apps/${encodeURIComponent(app.title)}`;
+              console.log(`Creating link for ${app.title}: ${appLink}`);
+              
+              return (
+                <Link 
+                  key={app.id} 
+                  to={appLink}
+                  className="w-full group"
+                  onClick={() => console.log(`Clicked on ${app.title}, navigating to ${appLink}`)}
+                >
+                  <div className="flex flex-col w-full h-full p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+                    <img
+                      src={app.screenshots && app.screenshots.length > 0 ? app.screenshots[0] : "https://firstnorth.org/wp-content/uploads/2020/10/Gen-Blood-Drive-web-1.jpg"}
+                      alt={app.about || app.title}
+                      className="max-h-52 md:w-full mb-4 items-center justify-center rounded-md"
+                    />
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-md font-bold group-hover:text-primary transition-colors duration-200">{app.title}</h2>
+                      <div className="flex mt-1 space-x-2">
+                        {app.technologies?.map((tech, index) => (
+                          <div key={index} title={tech}>
+                            <TechIcon techName={tech} />
+                          </div>
+                        ))}
+                      </div>
                     </div>
+                    <p className="mt-2 text-gray-600 dark:text-gray-400 text-sm">{app.about || 'No description available'}</p>
                   </div>
-                  <p className="mt-2 text-gray-600 dark:text-gray-400 text-sm">{app.description}</p>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </div>
     </Layout>
   );
