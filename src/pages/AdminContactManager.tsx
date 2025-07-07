@@ -64,6 +64,8 @@ import {
 } from "@/integrations/firebase/firestore";
 import { toast } from "sonner";
 
+import RichTextEditor from "@/components/RichTextEditor";
+
 interface ContactItem {
   id: string;
   type: 'email' | 'phone' | 'twitter' | 'linkedin' | 'github' | 'other';
