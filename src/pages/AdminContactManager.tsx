@@ -42,7 +42,12 @@ import {
   Reply,
   Eye
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { 
+  getDynamicContent, 
+  saveAndUpdateDynamicContent, 
+  deleteDynamicContent,
+  listenDynamicContent 
+} from "@/integrations/firebase/firestore";
 import { toast } from "sonner";
 
 interface ContactMessage {
@@ -119,37 +124,62 @@ const AdminContactManager = () => {
     }
   };
 
-  // Fetch messages
+  // Fetch messages from Firebase
   const fetchMessages = async () => {
     try {
-      const { data, error } = await supabase
-        .from('contact_messages')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setMessages(data || []);
+      const { data, error } = await getDynamicContent('contact_messages');
+      if (error) {
+        console.error('Error fetching messages:', error);
+        toast.error('Failed to fetch messages');
+        return;
+      }
+      
+      const messagesArray = Array.isArray(data) ? data : [];
+      setMessages(messagesArray.map(msg => ({
+        ...msg,
+        created_at: msg.created_at || new Date().toISOString(),
+        updated_at: msg.updated_at || new Date().toISOString(),
+      })));
     } catch (error) {
       console.error('Error fetching messages:', error);
       toast.error('Failed to fetch messages');
     }
   };
 
-  // Fetch contact settings
+  // Fetch contact settings from Firebase
   const fetchContactSettings = async () => {
     try {
-      const { data, error } = await supabase
-        .from('contact_settings')
-        .select('*');
-
-      if (error) throw error;
+      const { data, error } = await getDynamicContent('contact_settings', 'main');
+      if (error) {
+        console.error('Error fetching contact settings:', error);
+        toast.error('Failed to fetch contact settings');
+        return;
+      }
       
-      const settings: any = {};
-      data?.forEach(setting => {
-        settings[setting.setting_key] = setting.setting_value;
-      });
-      
-      setContactSettings(settings);
+      if (data) {
+        setContactSettings(data);
+      } else {
+        // Set default settings if none exist
+        const defaultSettings = {
+          contact_info: {
+            email: "sumonahmedjubayer@email.com",
+            phone: "+447405241663",
+            twitter_url: "https://twitter.com",
+            linkedin_url: "https://linkedin.com/in/yourprofile",
+            github_url: "https://github.com/yourprofile"
+          },
+          response_times: {
+            twitter: "24 hours",
+            email: "48 hours on weekdays",
+            general: "Weekends and holidays may take up to 48 hours for response"
+          },
+          welcome_message: {
+            headline: "Get In Touch",
+            description: "I am always excited to connect with fellow developers, AI enthusiasts, and curious minds. Whether you want to discuss the latest in AI technology, explore potential collaborations, or simply say hello, I would love to hear from you!"
+          }
+        };
+        setContactSettings(defaultSettings);
+      }
     } catch (error) {
       console.error('Error fetching contact settings:', error);
       toast.error('Failed to fetch contact settings');
@@ -159,16 +189,18 @@ const AdminContactManager = () => {
   // Update message status
   const updateMessageStatus = async (messageId: string, status: string) => {
     try {
-      const { error } = await supabase
-        .from('contact_messages')
-        .update({ 
-          status,
-          updated_at: new Date().toISOString(),
-          replied_at: status === 'replied' ? new Date().toISOString() : null
-        })
-        .eq('id', messageId);
+      const messageToUpdate = messages.find(m => m.id === messageId);
+      if (!messageToUpdate) return;
 
-      if (error) throw error;
+      const updatedMessage = {
+        ...messageToUpdate,
+        status,
+        updated_at: new Date().toISOString(),
+        replied_at: status === 'replied' ? new Date().toISOString() : messageToUpdate.replied_at
+      };
+
+      const { error } = await saveAndUpdateDynamicContent('contact_messages', updatedMessage, messageId);
+      if (error) throw new Error(error);
       
       await fetchMessages();
       toast.success(`Message marked as ${status}`);
@@ -181,15 +213,17 @@ const AdminContactManager = () => {
   // Update admin notes
   const updateAdminNotes = async (messageId: string, notes: string) => {
     try {
-      const { error } = await supabase
-        .from('contact_messages')
-        .update({ 
-          admin_notes: notes,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', messageId);
+      const messageToUpdate = messages.find(m => m.id === messageId);
+      if (!messageToUpdate) return;
 
-      if (error) throw error;
+      const updatedMessage = {
+        ...messageToUpdate,
+        admin_notes: notes,
+        updated_at: new Date().toISOString()
+      };
+
+      const { error } = await saveAndUpdateDynamicContent('contact_messages', updatedMessage, messageId);
+      if (error) throw new Error(error);
       
       await fetchMessages();
       if (selectedMessage?.id === messageId) {
@@ -210,16 +244,20 @@ const AdminContactManager = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from('contact_messages')
-        .update({ 
+      const promises = selectedMessages.map(async (messageId) => {
+        const messageToUpdate = messages.find(m => m.id === messageId);
+        if (!messageToUpdate) return;
+
+        const updatedMessage = {
+          ...messageToUpdate,
           status: action,
           updated_at: new Date().toISOString()
-        })
-        .in('id', selectedMessages);
+        };
 
-      if (error) throw error;
-      
+        return saveAndUpdateDynamicContent('contact_messages', updatedMessage, messageId);
+      });
+
+      await Promise.all(promises);
       await fetchMessages();
       setSelectedMessages([]);
       toast.success(`${selectedMessages.length} messages updated`);
@@ -232,13 +270,7 @@ const AdminContactManager = () => {
   // Delete message
   const deleteMessage = async (messageId: string) => {
     try {
-      const { error } = await supabase
-        .from('contact_messages')
-        .delete()
-        .eq('id', messageId);
-
-      if (error) throw error;
-      
+      await deleteDynamicContent('contact_messages', messageId);
       await fetchMessages();
       if (selectedMessage?.id === messageId) {
         setSelectedMessage(null);
@@ -672,18 +704,8 @@ const ContactSettingsEditor = ({ settings, onUpdate }: { settings: ContactSettin
     if (!editingSettings) return;
 
     try {
-      // Update each setting
-      for (const [key, value] of Object.entries(editingSettings)) {
-        const { error } = await supabase
-          .from('contact_settings')
-          .update({ 
-            setting_value: value,
-            updated_at: new Date().toISOString()
-          })
-          .eq('setting_key', key);
-
-        if (error) throw error;
-      }
+      const { error } = await saveAndUpdateDynamicContent('contact_settings', editingSettings, 'main');
+      if (error) throw new Error(error);
 
       toast.success('Contact settings updated successfully');
       onUpdate();
