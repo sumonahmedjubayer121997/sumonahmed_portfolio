@@ -207,7 +207,7 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete, minDuration = 2000 })
               >
                 Initializing portfolio systems...
               </motion.p>
-            </div>
+            </motion.div>
 
             {/* Progress Indicator */}
             <motion.div
