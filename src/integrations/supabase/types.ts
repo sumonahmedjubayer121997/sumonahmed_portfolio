@@ -70,6 +70,94 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_messages: {
+        Row: {
+          admin_notes: string | null
+          assigned_to: string | null
+          created_at: string
+          id: string
+          message: string
+          platform: string
+          replied_at: string | null
+          sender_email: string | null
+          sender_name: string
+          sender_username: string | null
+          status: string
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          assigned_to?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          platform: string
+          replied_at?: string | null
+          sender_email?: string | null
+          sender_name: string
+          sender_username?: string | null
+          status?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          assigned_to?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          platform?: string
+          replied_at?: string | null
+          sender_email?: string | null
+          sender_name?: string
+          sender_username?: string | null
+          status?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_messages_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contact_settings: {
+        Row: {
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          setting_key: string
+          setting_value: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       page_content: {
         Row: {
           content: Json

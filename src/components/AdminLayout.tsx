@@ -2,7 +2,7 @@
 import { ReactNode, useState } from "react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { Button } from "@/components/ui/button";
-import { LogOut, Home, User, Briefcase, FolderOpen, BookOpen, Info, Mail, Menu, X, HomeIcon } from "lucide-react";
+import { LogOut, Home, User, Briefcase, FolderOpen, BookOpen, Info, Mail, Menu, X, HomeIcon, MessageSquare } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 interface AdminLayoutProps {
@@ -23,6 +23,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { path: "/myportadmin/dashboard/blogs", label: "Blogs", icon: BookOpen },
     { path: "/myportadmin/dashboard/about", label: "About", icon: Info },
     { path: "/myportadmin/dashboard/contact", label: "Contact", icon: Mail },
+    { path: "/myportadmin/dashboard/contact-manager", label: "Contact Manager", icon: MessageSquare },
   ];
 
   return (
@@ -34,7 +35,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
            backgroundAttachment: 'fixed',
            position: 'relative'
          }}>
-      {/* Top Navigation Bar */}
+      {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200 px-4 py-3 flex items-center justify-between relative z-10">
         <div className="flex items-center space-x-4">
           <button
@@ -135,7 +136,6 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               </nav>
             </div>
 
-            {/* overlay background */}
             <div
               className="flex-1 bg-black bg-opacity-30"
               onClick={() => setSidebarOpen(false)}

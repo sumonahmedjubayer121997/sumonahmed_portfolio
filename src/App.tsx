@@ -21,6 +21,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminContentManager from "./pages/AdminContentManager";
 import AdminHomeManager from "./pages/AdminHomeManager";
+import AdminContactManager from "./pages/AdminContactManager";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import InteractiveBackground from "./components/InteractiveBackground";
 import FluidCursor from "./components/FluidCursor";
@@ -77,6 +78,14 @@ const App = () => {
                 element={
                   <AdminProtectedRoute>
                     <AdminHomeManager />
+                  </AdminProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/myportadmin/dashboard/contact-manager" 
+                element={
+                  <AdminProtectedRoute>
+                    <AdminContactManager />
                   </AdminProtectedRoute>
                 } 
               />
