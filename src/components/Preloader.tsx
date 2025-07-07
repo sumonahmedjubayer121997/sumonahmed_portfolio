@@ -10,29 +10,31 @@ interface PreloaderProps {
 
 const Preloader: React.FC<PreloaderProps> = ({ onComplete, minDuration = 2000 }) => {
   const [isVisible, setIsVisible] = useState(true);
-  const [loadingText, setLoadingText] = useState('Loading');
+  const stages = ['git pull', 'npm run build', 'firebase deploy'];
+const [stageIndex, setStageIndex] = useState(0);
 
   useEffect(() => {
-    const textAnimation = setInterval(() => {
-      setLoadingText(prev => {
-        const dots = prev.split('Loading')[1] || '';
-        if (dots.length >= 3) return 'Loading';
-        return 'Loading' + '.'.repeat(dots.length + 1);
-      });
-    }, 500);
+  let currentStage = 0;
+  const stageDuration = minDuration / stages.length;
 
-    const timer = setTimeout(() => {
+  const stageTimer = setInterval(() => {
+    currentStage++;
+    if (currentStage < stages.length) {
+      setStageIndex(currentStage);
+    } else {
+      clearInterval(stageTimer);
       setIsVisible(false);
       setTimeout(() => {
         onComplete?.();
       }, 500);
-    }, minDuration);
+    }
+  }, stageDuration);
 
-    return () => {
-      clearInterval(textAnimation);
-      clearTimeout(timer);
-    };
-  }, [onComplete, minDuration]);
+  return () => clearInterval(stageTimer);
+}, [onComplete, minDuration]);
+
+
+  
 
   return (
     <AnimatePresence>
@@ -40,7 +42,7 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete, minDuration = 2000 })
         <motion.div
           className="fixed inset-0 z-50 flex items-center justify-center"
           style={{
-            background: 'linear-gradient(135deg, #0f1419 0%, #1a1f2e 50%, #0f1419 100%)',
+            background: 'linear-gradient(135deg, #ffffff 0%, #fafafa 50%, #f0f0f0 100%)',
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -161,20 +163,14 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete, minDuration = 2000 })
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
             >
-              <motion.p 
-                className="text-xl font-light text-gray-300 mb-2"
-                animate={{ opacity: [0.7, 1, 0.7] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              >
-                {loadingText}
-              </motion.p>
+              
               <motion.p 
                 className="text-sm text-gray-500 font-mono"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1 }}
               >
-                Initializing portfolio systems...
+                 {stages[stageIndex]}
               </motion.p>
             </motion.div>
 

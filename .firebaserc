@@ -1,6 +1,7 @@
 {
   "projects": {
-    "prod": "sumon-ahemd-info"
+    "prod": "sumon-ahemd-info",
+    "default": "sumon-ahemd-info"
   },
   "targets": {},
   "etags": {}
