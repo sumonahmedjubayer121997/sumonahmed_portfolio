@@ -92,66 +92,10 @@ useEffect(() => {
 
       {/* Bio Section */}
       <div className="space-y-6 text-lg text-gray-700 leading-relaxed">
-        <p>
-          I bring ideas to life through thoughtful engineering{" "}
-          <span className="italic text-gray-900 font-medium">(quickly)</span> —
-          combining modern frameworks, cloud technologies, and a shipping-first
-          mindset, always backed by data and metrics.
-        </p>
-        {/* <p>
-          {homeData?.aboutMe} 
-          </p> */}
-        {/* <p>
-          Currently I am working as a Founding Engineer at{" "}
-          <a
-            href="https://kay.ai"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-900 font-medium underline hover:text-gray-700 transition-colors duration-200"
-          >
-            kay.ai
-          </a>{" "}
-          building AI Agents for Insurances. I have built multiple products in
-          past 5 years.{" "}
-          <span className="text-gray-900 font-medium">
-            Raised $100K funding
-          </span>{" "}
-          for my startup{" "}
-          <a
-            href="https://dreamboat.ai"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-900 font-medium underline hover:text-gray-700 transition-colors duration-200"
-          >
-            Dreamboat.ai
-          </a>
-          , built{" "}
-          <a
-            href="https://engagebud.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-900 font-medium underline hover:text-gray-700 transition-colors duration-200"
-          >
-            Engagebud
-          </a>
-          ,{" "}
-          <a
-            href="https://influencerbit.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-900 font-medium underline hover:text-gray-700 transition-colors duration-200"
-          >
-            Influencerbit
-          </a>
-          .
-        </p> */}
-         <p className="text-lg text-gray-700">
-          You can talk to me about{" "}
-          <span className="font-semibold text-gray-900">
-            AI, new ideas, life, or anything else
-          </span>
-          .
-        </p>
+        
+        <p dangerouslySetInnerHTML={{ __html: homeData?.aboutMe }}></p>
+       
+        
       </div>
 
       {/* Tech Stack */}

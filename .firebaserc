@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "portfolio-28701"
-  }
+    "prod": "sumon-ahemd-info"
+  },
+  "targets": {},
+  "etags": {}
 }

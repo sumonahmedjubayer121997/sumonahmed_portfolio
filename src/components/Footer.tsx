@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, Gauge } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useAdminAuth } from '@/hooks/useAdminAuth'; // adjust the import path to where your hook is
 
 const Footer = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isAuthenticated, isLoading } = useAdminAuth();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -28,15 +31,26 @@ const Footer = () => {
   return (
     <footer className="bg-white border-t border-gray-200 py-4 px-6">
       <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
-        {/* Left - Reach out link */}
+        
+        {/* Left - Reach out or Dashboard button */}
         <div className="flex items-center">
-          <a 
-            href="/contact"
-            className="text-gray-700 hover:text-gray-900 sm:text-xs font-medium  transition-colors duration-200 inline-flex items-center group"
-          >
-            Reach out
-            <span className="ml-1 transition-transform duration-200 group-hover:translate-x-1">→</span>
-          </a>
+          {!isLoading && isAuthenticated ? (
+             <Link
+              to="/myportadmin/dashboard"
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 inline-flex items-center"
+              aria-label="Go to Dashboard"
+            >
+              <Gauge className="w-4 h-4 text-gray-600" />
+            </Link>
+          ) : (
+            <a 
+              href="/contact"
+              className="text-gray-700 hover:text-gray-900 sm:text-xs font-medium transition-colors duration-200 inline-flex items-center group"
+            >
+              Reach out
+              <span className="ml-1 transition-transform duration-200 group-hover:translate-x-1">→</span>
+            </a>
+          )}
         </div>
 
         {/* Center - Made by text */}
@@ -49,7 +63,9 @@ const Footer = () => {
         {/* Right - Time display and theme toggle */}
         <div className="flex items-center space-x-4">
           <div className="text-right">
-            <div className="text-xs text-gray-500">Local: {formatTime(currentTime, Intl.DateTimeFormat().resolvedOptions().timeZone)}</div>
+            <div className="text-xs text-gray-500">
+              Local: {formatTime(currentTime, Intl.DateTimeFormat().resolvedOptions().timeZone)}
+            </div>
             <div className="text-xs text-gray-500">UK: {formatTime(currentTime, 'Europe/London')}</div>
           </div>
 
