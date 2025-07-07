@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useState } from "react";
 import Layout from "../components/Layout";
@@ -6,19 +5,50 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Mail, Github, Linkedin, Send, ContactIcon } from "lucide-react";
+import { Mail, Github, Linkedin, Send, Phone } from "lucide-react";
+import { useContactData } from "@/hooks/useContactData";
+import { saveAndUpdateDynamicContent } from "@/integrations/firebase/firestore";
+import { toast } from "sonner";
 
 const Contact = () => {
+  const { contacts, loading } = useContactData();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     message: ""
   });
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log("Form submitted:", formData);
+    setSubmitting(true);
+    
+    try {
+      // Save the message to Firebase
+      const messageData = {
+        sender_name: formData.name,
+        sender_email: formData.email,
+        message: formData.message,
+        platform: 'website_form',
+        status: 'new',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      const { error } = await saveAndUpdateDynamicContent('contact_messages', messageData);
+      
+      if (error) {
+        throw new Error(error);
+      }
+
+      toast.success('Message sent successfully! I\'ll get back to you soon.');
+      setFormData({ name: "", email: "", message: "" });
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error('Failed to send message. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -27,6 +57,34 @@ const Contact = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  // Get icon for contact type
+  const getContactIcon = (type: string) => {
+    switch (type) {
+      case 'email': return <Mail className="w-5 h-5" />;
+      case 'phone': return <Phone className="w-5 h-5" />;
+      case 'twitter': return (
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+        </svg>
+      );
+      case 'linkedin': return <Linkedin className="w-5 h-5" />;
+      case 'github': return <Github className="w-5 h-5" />;
+      default: return <Mail className="w-5 h-5" />;
+    }
+  };
+
+  // Create link based on contact type
+  const getContactLink = (contact: any) => {
+    switch (contact.type) {
+      case 'email':
+        return `mailto:${contact.url}`;
+      case 'phone':
+        return `tel:${contact.url}`;
+      default:
+        return contact.url;
+    }
   };
 
   return (
@@ -52,123 +110,177 @@ const Contact = () => {
                 Let's Connect
               </h2>
               
-              {/* Contact Methods */}
+              {/* Dynamic Contact Methods */}
               <div className="space-y-4">
-                {/* Email */}
-                <Card className="hover:shadow-md transition-shadow duration-200">
-                  <CardContent className="flex items-center p-4">
-                    <Mail className="w-5 h-5 text-gray-500 mr-3" />
-                    <div>
-                      <p className="font-medium text-gray-900">Email</p>
-                      <a 
-          href="mailto:sumonahmedjubayer@email.com" 
-          className="text-gray-600 hover:text-gray-900 transition-colors"
-        >
-          sumonahmedjubayer@email.com
-        </a>
+                {loading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map(i => (
+                      <Card key={i} className="animate-pulse">
+                        <CardContent className="flex items-center p-4">
+                          <div className="w-5 h-5 bg-gray-300 rounded mr-3"></div>
+                          <div className="flex-1">
+                            <div className="h-4 bg-gray-300 rounded w-1/3 mb-2"></div>
+                            <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : contacts.length > 0 ? (
+                  contacts.map((contact) => (
+                    <Card key={contact.id} className="hover:shadow-md transition-shadow duration-200">
+                      <CardContent className="flex items-center justify-between p-4">
+                        <div className="flex items-center flex-1">
+                          <div className="text-gray-500 mr-3">
+                            {getContactIcon(contact.type)}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-900">{contact.displayText}</p>
+                            {contact.url && (
+                              <p className="text-gray-600 text-sm">{contact.url}</p>
+                            )}
+                            {contact.notes && (
+                              <p className="text-sm text-gray-500 mt-1">{contact.notes}</p>
+                            )}
+                          </div>
+                        </div>
+                        {contact.url && (
+                          <Button 
+                            size="sm" 
+                            className="bg-gray-900 hover:bg-gray-800 text-white ml-4"
+                            asChild
+                          >
+                            <a 
+                              href={getContactLink(contact)}
+                              target={contact.type !== 'email' && contact.type !== 'phone' ? "_blank" : undefined}
+                              rel={contact.type !== 'email' && contact.type !== 'phone' ? "noopener noreferrer" : undefined}
+                            >
+                              {contact.type === 'email' ? 'Email' :
+                               contact.type === 'phone' ? 'Call' :
+                               contact.type === 'twitter' ? 'Follow' :
+                               'Connect'}
+                            </a>
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  <>
+                    {/* Email */}
+                    <Card className="hover:shadow-md transition-shadow duration-200">
+                      <CardContent className="flex items-center p-4">
+                        <Mail className="w-5 h-5 text-gray-500 mr-3" />
+                        <div>
+                          <p className="font-medium text-gray-900">Email</p>
+                          <a 
+                            href="mailto:sumonahmedjubayer@email.com" 
+                            className="text-gray-600 hover:text-gray-900 transition-colors"
+                          >
+                            sumonahmedjubayer@email.com
+                          </a>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                    </div>
-                  </CardContent>
-                </Card>
+                    {/* X (Twitter) */}
+                    <Card className="hover:shadow-md transition-shadow duration-200">
+                      <CardContent className="flex items-center justify-between p-4">
+                        <div className="flex items-center">
+                          <svg
+                            className="w-5 h-5 text-gray-500 mr-3"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                          </svg>
+                          <div>
+                            <p className="font-medium text-gray-900">X (Twitter)</p>
+                            <p className="text-sm text-gray-500">Fastest response - usually within 24 hours</p>
+                          </div>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          className="bg-gray-900 hover:bg-gray-800 text-white"
+                          asChild
+                        >
+                          <a 
+                            href="https://twitter.com" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                          >
+                            Follow me on X
+                          </a>
+                        </Button>
+                      </CardContent>
+                    </Card>
 
-                {/* X (Twitter) */}
-                <Card className="hover:shadow-md transition-shadow duration-200">
-                  <CardContent className="flex items-center justify-between p-4">
-                    <div className="flex items-center">
-                      <svg
-                        className="w-5 h-5 text-gray-500 mr-3"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                      </svg>
-                      <div>
-                        <p className="font-medium text-gray-900">X (Twitter)</p>
-                        <p className="text-sm text-gray-500">Fastest response - usually within 24 hours</p>
-                      </div>
-                    </div>
-                    <Button 
-                      size="sm" 
-                      className="bg-gray-900 hover:bg-gray-800 text-white"
-                      asChild
-                    >
-                      <a 
-                        href="https://twitter.com" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                      >
-                        Follow me on X
-                      </a>
-                    </Button>
-                  </CardContent>
-                </Card>
+                    {/* LinkedIn */}
+                    <Card className="hover:shadow-md transition-shadow duration-200">
+                      <CardContent className="flex items-center p-4">
+                        <Linkedin className="w-5 h-5 text-gray-500 mr-3" />
+                        <div>
+                          <p className="font-medium text-gray-900">LinkedIn</p>
+                          <a 
+                            href="https://linkedin.com/in/yourprofile" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-gray-600 hover:text-gray-900 transition-colors"
+                          >
+                            linkedin.com/in/yourprofile
+                          </a>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                {/* LinkedIn */}
-                <Card className="hover:shadow-md transition-shadow duration-200">
-                  <CardContent className="flex items-center p-4">
-                    <Linkedin className="w-5 h-5 text-gray-500 mr-3" />
-                    <div>
-                      <p className="font-medium text-gray-900">LinkedIn</p>
-                      <a 
-                        href="https://linkedin.com/in/yourprofile" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-gray-600 hover:text-gray-900 transition-colors"
-                      >
-                        linkedin.com/in/yourprofile
-                      </a>
-                    </div>
-                  </CardContent>
-                </Card>
+                    {/* GitHub */}
+                    <Card className="hover:shadow-md transition-shadow duration-200">
+                      <CardContent className="flex items-center p-4">
+                        <Github className="w-5 h-5 text-gray-500 mr-3" />
+                        <div>
+                          <p className="font-medium text-gray-900">GitHub</p>
+                          <a 
+                            href="https://github.com/yourprofile" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-gray-600 hover:text-gray-900 transition-colors"
+                          >
+                            github.com/yourprofile
+                          </a>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                {/* GitHub */}
-                <Card className="hover:shadow-md transition-shadow duration-200">
-                  <CardContent className="flex items-center p-4">
-                    <Github className="w-5 h-5 text-gray-500 mr-3" />
-                    <div>
-                      <p className="font-medium text-gray-900">GitHub</p>
-                      <a 
-                        href="https://github.com/yourprofile" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-gray-600 hover:text-gray-900 transition-colors"
-                      >
-                        github.com/yourprofile
-                      </a>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="hover:shadow-md transition-shadow duration-200">
-  <CardContent className="flex items-center justify-between p-4">
-    <div className="flex items-center">
-      <svg
-        className="w-5 h-5 text-gray-500 mr-3"
-        fill="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1.003 1.003 0 011.11-.21c1.12.45 2.33.69 3.58.69.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.07 21 3 13.93 3 5c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.24 2.46.69 3.58.13.27.07.6-.21 1.11l-2.2 2.2z" />
-      </svg>
-      <div>
-        <p className="font-medium text-gray-900">Phone</p>
-        <p className="text-sm text-gray-500">Call or text for a quick reply</p>
-      </div>
-    </div>
-    <Button
-      size="sm"
-      className="bg-gray-900 hover:bg-gray-800 text-white"
-      asChild
-    >
-      <a 
-        href="tel:+447405241663"
-      >
-        Call +447405241663
-      </a>
-    </Button>
-  </CardContent>
-</Card>
-
-
-                
+                    <Card className="hover:shadow-md transition-shadow duration-200">
+                      <CardContent className="flex items-center justify-between p-4">
+                        <div className="flex items-center">
+                          <svg
+                            className="w-5 h-5 text-gray-500 mr-3"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1.003 1.003 0 011.11-.21c1.12.45 2.33.69 3.58.69.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.07 21 3 13.93 3 5c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.24 2.46.69 3.58.13.27.07.6-.21 1.11l-2.2 2.2z" />
+                          </svg>
+                          <div>
+                            <p className="font-medium text-gray-900">Phone</p>
+                            <p className="text-sm text-gray-500">Call or text for a quick reply</p>
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          className="bg-gray-900 hover:bg-gray-800 text-white"
+                          asChild
+                        >
+                          <a 
+                            href="tel:+447405241663"
+                          >
+                            Call +447405241663
+                          </a>
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
               </div>
             </div>
 
@@ -213,6 +325,7 @@ const Contact = () => {
                       onChange={handleInputChange}
                       className="w-full rounded-lg border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
                       placeholder="Your name"
+                      disabled={submitting}
                     />
                   </div>
 
@@ -229,6 +342,7 @@ const Contact = () => {
                       onChange={handleInputChange}
                       className="w-full rounded-lg border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500"
                       placeholder="your@email.com"
+                      disabled={submitting}
                     />
                   </div>
 
@@ -245,15 +359,17 @@ const Contact = () => {
                       onChange={handleInputChange}
                       className="w-full rounded-lg border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 resize-none"
                       placeholder="Tell me about your project, question, or just say hello..."
+                      disabled={submitting}
                     />
                   </div>
 
                   <Button 
                     type="submit" 
                     className="w-full bg-gray-900 hover:bg-gray-800 text-white rounded-lg py-3 font-medium transition-colors duration-200 flex items-center justify-center gap-2"
+                    disabled={submitting}
                   >
                     <Send className="w-4 h-4" />
-                    Send Message
+                    {submitting ? 'Sending...' : 'Send Message'}
                   </Button>
                 </form>
               </CardContent>
