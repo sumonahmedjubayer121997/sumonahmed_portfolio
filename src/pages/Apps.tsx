@@ -147,9 +147,10 @@ const Apps = () => {
                 >
                   <div className="flex flex-col w-full h-full p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
                     <img
-                      src={app.screenshots && app.screenshots.length > 0 ? app.screenshots[0] : "https://firstnorth.org/wp-content/uploads/2020/10/Gen-Blood-Drive-web-1.jpg"}
+                      src={app.screenshots && app.screenshots.length > 0 ? app.screenshots[0] : "https://firebasestorage.googleapis.com/v0/b/taskwise-n03h6.firebasestorage.app/o/public%2Fimages%2Fblood-donation-preview.png?alt=media"}
                       alt={app.about || app.title}
-                      className="max-h-52 md:w-full mb-4 items-center justify-center rounded-md"
+                      className="w-full max-h-52 mb-4 object-cover rounded-lg"
+                      style={{ borderRadius: '8px' }}
                     />
                     <div className="flex items-center justify-between">
                       <h2 className="text-md font-bold group-hover:text-primary transition-colors duration-200">{app.title}</h2>
