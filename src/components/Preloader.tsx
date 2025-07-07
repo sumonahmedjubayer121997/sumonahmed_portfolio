@@ -13,25 +13,35 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete, minDuration = 2000 })
   const stages = ['git pull', 'npm run build', 'firebase deploy'];
 const [stageIndex, setStageIndex] = useState(0);
 
-  useEffect(() => {
-  let currentStage = 0;
-  const stageDuration = minDuration / stages.length;
+useEffect(() => {
+  const stageDurations = [200, 200, 700];
+  setStageIndex(0);
 
-  const stageTimer = setInterval(() => {
-    currentStage++;
-    if (currentStage < stages.length) {
-      setStageIndex(currentStage);
-    } else {
-      clearInterval(stageTimer);
+  let timers: NodeJS.Timeout[] = [];
+
+  // Schedule stage updates
+  stageDurations.slice(0, -1).forEach((_, index) => {
+    timers.push(
+      setTimeout(() => {
+        setStageIndex(index + 1);
+      }, stageDurations.slice(0, index + 1).reduce((a, b) => a + b, 0))
+    );
+  });
+
+  // Schedule preloader finish after all stages
+  timers.push(
+    setTimeout(() => {
       setIsVisible(false);
       setTimeout(() => {
         onComplete?.();
       }, 500);
-    }
-  }, stageDuration);
+    }, stageDurations.reduce((a, b) => a + b, 0))
+  );
 
-  return () => clearInterval(stageTimer);
-}, [onComplete, minDuration]);
+  return () => timers.forEach(t => clearTimeout(t));
+}, [onComplete]);
+
+
 
 
   
