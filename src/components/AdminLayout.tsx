@@ -1,9 +1,9 @@
+
 import { ReactNode, useState } from "react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { Button } from "@/components/ui/button";
-import { LogOut, Home, User, Briefcase, FolderOpen, BookOpen, Info, Mail, Menu, X,HomeIcon } from "lucide-react";
+import { LogOut, Home, User, Briefcase, FolderOpen, BookOpen, Info, Mail, Menu, X, HomeIcon } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -26,9 +26,16 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen w-full bg-background text-foreground transition-colors duration-300" 
+         style={{
+           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif',
+           backgroundImage: 'linear-gradient(to right, rgba(219, 227, 235, 0.20) 1px, transparent 1px), linear-gradient(to bottom, rgba(219, 227, 235, 0.20) 1px, transparent 1px)',
+           backgroundSize: '50px 50px',
+           backgroundAttachment: 'fixed',
+           position: 'relative'
+         }}>
       {/* Top Navigation Bar */}
-      <header className="bg-white shadow-sm border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+      <header className="bg-white shadow-sm border-b border-gray-200 px-4 py-3 flex items-center justify-between relative z-10">
         <div className="flex items-center space-x-4">
           <button
             className="md:hidden text-gray-600"
@@ -36,13 +43,13 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           >
             <Menu className="h-6 w-6" />
           </button>
-            <Link
-              to="/"
-              className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 inline-flex items-center"
-              aria-label="Go to Dashboard"
-            >
-              <HomeIcon className="w-4 h-4 text-gray-600" />
-            </Link>
+          <Link
+            to="/"
+            className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 inline-flex items-center"
+            aria-label="Go to Dashboard"
+          >
+            <HomeIcon className="w-4 h-4 text-gray-600" />
+          </Link>
           <h1 className="text-lg md:text-xl font-bold text-gray-800">Admin Panel</h1>
         </div>
 
@@ -66,7 +73,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
       <div className="flex">
         {/* Sidebar (desktop) */}
-        <aside className="hidden md:block w-64 bg-white shadow-md h-[calc(100vh-56px)] overflow-y-auto">
+        <aside className="hidden md:block w-64 bg-white shadow-md h-[calc(100vh-56px)] overflow-y-auto relative z-10">
           <nav className="p-4">
             <ul className="space-y-2">
               {menuItems.map((item) => {
@@ -137,8 +144,11 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         )}
 
         {/* Main content */}
-        <main className="flex-1 p-4 sm:p-6 md:p-8 h-[calc(100vh-56px)] overflow-y-auto">
-          <div className="max-w-7xl mx-auto">{children}</div>
+        <main className="flex-1 p-4 sm:p-6 md:p-8 h-[calc(100vh-56px)] overflow-y-auto relative z-10" 
+              style={{ opacity: 1, backdropFilter: 'none' }}>
+          <div className="max-w-7xl mx-auto relative z-20" style={{ opacity: 1 }}>
+            {children}
+          </div>
         </main>
       </div>
     </div>
