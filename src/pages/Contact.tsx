@@ -136,9 +136,7 @@ const Contact = () => {
                           </div>
                           <div className="flex-1">
                             <p className="font-medium text-gray-900">{contact.displayText}</p>
-                            {contact.url && (
-                              <p className="text-gray-600 text-sm">{contact.url}</p>
-                            )}
+                          
                             {contact.notes && (
                               <p className="text-sm text-gray-500 mt-1">{contact.notes}</p>
                             )}
