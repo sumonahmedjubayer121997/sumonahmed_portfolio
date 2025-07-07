@@ -14,7 +14,7 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete, minDuration = 2000 })
 const [stageIndex, setStageIndex] = useState(0);
 
 useEffect(() => {
-  const stageDurations = [200, 200, 700];
+  const stageDurations = [200, 400, 700];
   setStageIndex(0);
 
   let timers: NodeJS.Timeout[] = [];
