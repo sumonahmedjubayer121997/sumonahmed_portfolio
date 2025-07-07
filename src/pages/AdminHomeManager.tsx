@@ -18,9 +18,7 @@ import {
   listenDynamicContent
 } from '@/integrations/firebase/firestore';
 import IconSelector from "@/components/IconSelector";
-import EditorJSComponent from "@/components/EditorJS";
-import { htmlToEditorJS, editorJSToHtml } from "@/utils/editorjs-converter";
-import { OutputData } from '@editorjs/editorjs';
+import RichTextEditor from "@/components/RichTextEditor";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface PortfolioData {
@@ -28,7 +26,6 @@ interface PortfolioData {
   position: string;
   onlineLink: string;
   aboutMe: string;
-  aboutMeEditorData?: OutputData; // New field for Editor.js data
   selectedIcons: string[];
 }
 
@@ -38,7 +35,6 @@ const AdminHomeManager = () => {
     position: '',
     onlineLink: '',
     aboutMe: '',
-    aboutMeEditorData: undefined,
     selectedIcons: []
   });
   const [showPreview, setShowPreview] = useState(false);
@@ -66,7 +62,6 @@ const AdminHomeManager = () => {
             position: portfolioData.position || '',
             onlineLink: portfolioData.onlineLink || '',
             aboutMe: portfolioData.aboutMe || '',
-            aboutMeEditorData: portfolioData.aboutMeEditorData || (portfolioData.aboutMe ? htmlToEditorJS(portfolioData.aboutMe) : undefined),
             selectedIcons: portfolioData.selectedIcons || []
           });
         } else {
@@ -77,7 +72,6 @@ const AdminHomeManager = () => {
             position: '',
             onlineLink: '',
             aboutMe: '',
-            aboutMeEditorData: undefined,
             selectedIcons: []
           });
         }
@@ -199,17 +193,11 @@ const handleSave = async () => {
     console.log('Starting save process...');
     const collectionName = 'home';
 
-    // Convert Editor.js data to HTML for backward compatibility
-    const dataToSave = {
-      ...formData,
-      aboutMe: formData.aboutMeEditorData ? editorJSToHtml(formData.aboutMeEditorData) : formData.aboutMe
-    };
-
     if (existingContent) {
       console.log('Updating existing content with ID:', existingContent.id);
       const { error } = await saveAndUpdateDynamicContent(collectionName, {
         title: 'Portfolio Information',
-        content: dataToSave,
+        content: formData,
         status: 'published',
       }, existingContent.id);
 
@@ -228,7 +216,7 @@ const handleSave = async () => {
       console.log('Creating new content...');
       const { error } = await saveAndUpdateDynamicContent(collectionName, {
         title: 'Portfolio Information',
-        content: dataToSave,
+        content: formData,
         status: 'published',
       });
 
@@ -259,19 +247,11 @@ const handleSave = async () => {
 };
 
 
-  const handleInputChange = (field: keyof PortfolioData, value: string | string[] | OutputData) => {
+  const handleInputChange = (field: keyof PortfolioData, value: string | string[]) => {
     console.log(`Updating field ${field} with value:`, value);
     setFormData(prev => ({
       ...prev,
       [field]: value
-    }));
-  };
-
-  const handleEditorChange = (data: OutputData) => {
-    setFormData(prev => ({
-      ...prev,
-      aboutMeEditorData: data,
-      aboutMe: editorJSToHtml(data) // Keep HTML version for preview
     }));
   };
 
@@ -398,13 +378,13 @@ const handleSave = async () => {
                         <Info size={14} className="text-gray-400" />
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>Block-based rich text editor for structured content creation.</p>
+                        <p>Rich text description about yourself. Supports HTML formatting.</p>
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                  <EditorJSComponent
-                    data={formData.aboutMeEditorData}
-                    onChange={handleEditorChange}
+                  <RichTextEditor
+                    value={formData.aboutMe}
+                    onChange={(value) => handleInputChange('aboutMe', value)}
                     placeholder="I bring ideas to life through thoughtful engineering..."
                   />
                 </div>
