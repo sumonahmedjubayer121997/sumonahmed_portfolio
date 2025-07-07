@@ -19,7 +19,7 @@ const AdminProtectedRoute = ({ children }: AdminProtectedRouteProps) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/myportadmin/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;

@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import TechStack from "./icon/TechStack";
+import { listenDynamicContent } from "@/integrations/firebase/firestore"; // adjust your path
+import { getFirestore, doc, onSnapshot } from "firebase/firestore";
+
 
 const roles = [
   "Software Engineer",
@@ -10,6 +13,31 @@ const roles = [
 
 const ProfileSection = () => {
   const [index, setIndex] = useState(0);
+
+  //getting data state; 
+  const [homeData, setHomeData] = useState<any | null>(null);
+const [isLoading, setIsLoading] = useState(true);
+
+useEffect(() => {
+  setIsLoading(true);
+
+  const unsubscribe = listenDynamicContent(
+    'home', 
+    '7E1fmebGEixv8p2mjJfy',   // or null to listen entire collection
+    (data) => {
+      console.log("Realtime data:", data);
+      setHomeData(data?.content || null);
+      setIsLoading(false);
+    },
+    (error) => {
+      console.error("Realtime error:", error);
+      setIsLoading(false);
+    }
+  );
+
+  return () => unsubscribe();
+}, []);
+
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -23,7 +51,7 @@ const ProfileSection = () => {
       {/* Main Heading */}
       <div>
         <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-4">
-          Hey, I'm Sumon
+          Hey, I'm {homeData?.name || 'Sumon'}
         </h1>
         <div className="relative h-10">
           <AnimatePresence mode="wait">
@@ -70,6 +98,9 @@ const ProfileSection = () => {
           combining modern frameworks, cloud technologies, and a shipping-first
           mindset, always backed by data and metrics.
         </p>
+        {/* <p>
+          {homeData?.aboutMe} 
+          </p> */}
         {/* <p>
           Currently I am working as a Founding Engineer at{" "}
           <a

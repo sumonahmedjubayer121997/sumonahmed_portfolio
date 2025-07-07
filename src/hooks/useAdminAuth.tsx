@@ -34,7 +34,7 @@ export const useAdminAuth = () => {
       setIsAuthenticated(false);
       setAdminId(null);
       setUser(null);
-      navigate('/myportadmin/login');
+      navigate('/');  //if admin logout it will redirect to home page
     } catch (error) {
       console.error('Logout error:', error);
     }

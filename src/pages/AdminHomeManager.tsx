@@ -13,7 +13,9 @@ import {
   createContent, 
   updateContent,
   ContentType,
-  ContentItem 
+  ContentItem ,
+  saveDynamicContent,
+  getDynamicContent
 } from '@/integrations/firebase/firestore';
 import IconSelector from "@/components/IconSelector";
 import RichTextEditor from "@/components/RichTextEditor";
@@ -45,37 +47,85 @@ const AdminHomeManager = () => {
     fetchExistingContent();
   }, []);
 
-  const fetchExistingContent = async () => {
-    try {
-      setIsInitialLoading(true);
-      console.log('Fetching existing content...');
-      const contents = await getContentByPageType('home');
-      console.log('Fetched contents:', contents);
+  // const fetchExistingContent = async () => {
+  //   try {
+  //     setIsInitialLoading(true);
+  //     console.log('Fetching existing content...');
+  //     const contents = await getContentByPageType('home');
+  //     console.log('Fetched contents:', contents);
       
-      if (contents.length > 0) {
-        const content = contents[0];
-        setExistingContent(content);
-        const data = content.content as PortfolioData;
-        setFormData({
-          name: data.name || '',
-          position: data.position || '',
-          onlineLink: data.onlineLink || '',
-          aboutMe: data.aboutMe || '',
-          selectedIcons: data.selectedIcons || []
-        });
-        console.log('Form data set:', data);
-      }
-    } catch (error: any) {
+  //     if (contents.length > 0) {
+  //       const content = contents[0];
+  //       setExistingContent(content);
+  //       const data = content.content as PortfolioData;
+  //       setFormData({
+  //         name: data.name || '',
+  //         position: data.position || '',
+  //         onlineLink: data.onlineLink || '',
+  //         aboutMe: data.aboutMe || '',
+  //         selectedIcons: data.selectedIcons || []
+  //       });
+  //       console.log('Form data set:', data);
+  //     }
+  //   } catch (error: any) {
+  //     console.error('Error fetching content:', error);
+  //     toast({
+  //       title: "Error",
+  //       description: "Failed to load existing content. Please try again.",
+  //       variant: "destructive",
+  //     });
+  //   } finally {
+  //     setIsInitialLoading(false);
+  //   }
+  // };
+
+
+const fetchExistingContent = async () => {
+  try {
+    setIsInitialLoading(true);
+    console.log('Fetching existing content...');
+
+    const { data, error } = await getDynamicContent('home', '7E1fmebGEixv8p2mjJfy');  // Fetch 'home/main'
+
+    if (error) {
       console.error('Error fetching content:', error);
       toast({
         title: "Error",
-        description: "Failed to load existing content. Please try again.",
+        description: error,
         variant: "destructive",
       });
-    } finally {
-      setIsInitialLoading(false);
+      return;
     }
-  };
+
+    if (data) {
+      console.log('Fetched content:', data);
+      setExistingContent(data);  // Includes id and content
+
+      const portfolioData = data.content as PortfolioData;
+      setFormData({
+        name: portfolioData.name || '',
+        position: portfolioData.position || '',
+        onlineLink: portfolioData.onlineLink || '',
+        aboutMe: portfolioData.aboutMe || '',
+        selectedIcons: portfolioData.selectedIcons || []
+      });
+
+      console.log('Form data set:', portfolioData);
+    } else {
+      console.log('No content found.');
+    }
+
+  } catch (error: any) {
+    console.error('Unexpected error fetching content:', error);
+    toast({
+      title: "Error",
+      description: "Failed to load existing content. Please try again.",
+      variant: "destructive",
+    });
+  } finally {
+    setIsInitialLoading(false);
+  }
+};
 
   const validateForm = (): boolean => {
     const errors: string[] = [];
@@ -114,69 +164,72 @@ const AdminHomeManager = () => {
   };
 
   const handleSave = async () => {
-    console.log('Save button clicked, form data:', formData);
-    
-    if (!validateForm()) {
-      console.log('Validation failed');
-      return;
-    }
+  console.log('Save button clicked, form data:', formData);
+  
+  if (!validateForm()) {
+    console.log('Validation failed');
+    return;
+  }
 
-    setIsLoading(true);
-    try {
-      console.log('Starting save process...');
-      
-      if (existingContent) {
-        console.log('Updating existing content with ID:', existingContent.id);
-        const { error } = await updateContent(existingContent.id, {
-          title: 'Portfolio Information',
-          content: formData,
-          status: 'published',
-        });
+  setIsLoading(true);
+  try {
+    console.log('Starting save process...');
 
-        if (error) {
-          console.error('Update error:', error);
-          throw new Error(error);
-        }
-        
-        console.log('Content updated successfully');
-        toast({ 
-          title: "Success!", 
-          description: "Portfolio updated successfully!",
-        });
-      } else {
-        console.log('Creating new content...');
-        const { error } = await createContent({
-          page_type: 'home',
-          title: 'Portfolio Information',
-          content: formData,
-          status: 'published'
-        });
+    const collectionName = 'home';  // You can make this dynamic if needed!
 
-        if (error) {
-          console.error('Create error:', error);
-          throw new Error(error);
-        }
-        
-        console.log('Content created successfully');
-        toast({ 
-          title: "Success!", 
-          description: "Portfolio created successfully!",
-        });
-        
-        // Refresh the content to get the new ID
-        await fetchExistingContent();
+    if (existingContent) {
+      console.log('Updating existing content with ID:', existingContent.id);
+      const { error } = await saveDynamicContent(collectionName, {
+        title: 'Portfolio Information',
+        content: formData,
+        status: 'published',
+      }, existingContent.id);
+
+      if (error) {
+        console.error('Update error:', error);
+        throw new Error(error);
       }
-    } catch (error: any) {
-      console.error('Save error:', error);
+
+      console.log('Content updated successfully');
       toast({
-        title: "Error",
-        description: error.message || "Failed to save portfolio. Please try again.",
-        variant: "destructive",
+        title: 'Success!',
+        description: 'Portfolio updated successfully!',
       });
-    } finally {
-      setIsLoading(false);
+    } else {
+      console.log('Creating new content...');
+      const { error } = await saveDynamicContent(collectionName, {
+        title: 'Portfolio Information',
+        content: formData,
+        status: 'published',
+      });
+
+      if (error) {
+        console.error('Create error:', error);
+        throw new Error(error);
+      }
+
+      console.log('Content created successfully');
+      toast({
+        title: 'Success!',
+        description: 'Portfolio created successfully!',
+      });
+
+      // Refresh to load the new document
+      await fetchExistingContent();
     }
-  };
+
+  } catch (error: any) {
+    console.error('Save error:', error);
+    toast({
+      title: 'Error',
+      description: error.message || 'Failed to save portfolio. Please try again.',
+      variant: 'destructive',
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   const handleInputChange = (field: keyof PortfolioData, value: string | string[]) => {
     console.log(`Updating field ${field} with value:`, value);
