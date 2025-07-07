@@ -9,7 +9,6 @@ import {
   User,
   Mail,
   Wrench,
-  Edit,
   Keyboard,
   Menu,
   X,
@@ -52,7 +51,6 @@ const ResponsiveNavbar = () => {
     { name: "About", path: "/about", icon: User },
     { name: "Contact", path: "/contact", icon: Mail },
     { name: "Tools", path: "/tools", icon: Wrench },
-    { name: "Rich Editor", path: "/rich-editor", icon: Edit },
   ];
 
   const socialLinks = [

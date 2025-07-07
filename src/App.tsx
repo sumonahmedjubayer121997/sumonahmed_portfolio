@@ -16,7 +16,6 @@ import BlogDetail from "./pages/BlogDetail";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Tools from "./pages/Tools";
-import RichEditor from "./pages/RichEditor";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -63,7 +62,6 @@ const App = () => {
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/tools" element={<Tools />} />
-              <Route path="/rich-editor" element={<RichEditor />} />
               
               {/* Admin Routes */}
               <Route path="/myportadmin/login" element={<AdminLogin />} />
