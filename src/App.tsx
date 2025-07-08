@@ -25,6 +25,7 @@ import AdminAboutManager from "./pages/AdminAboutManager";
 import AdminExperienceManager from "./pages/AdminExperienceManager";
 import AdminToolsManager from "./pages/AdminToolsManager";
 import AdminAppsManager from "./pages/AdminAppsManager";
+import AdminProjectsManager from "./pages/AdminProjectsManager";
 import AdminBlogManager from "./pages/AdminBlogManager";
 import AdminContactManager from "./pages/AdminContactManager";
 import AdminClientsMessages from "./pages/AdminClientsMessages";
@@ -109,6 +110,14 @@ function App() {
               element={
                 <AdminProtectedRoute>
                   <AdminAppsManager />
+                </AdminProtectedRoute>
+              }
+            />
+            <Route
+              path="/myportadmin/dashboard/projects"
+              element={
+                <AdminProtectedRoute>
+                  <AdminProjectsManager />
                 </AdminProtectedRoute>
               }
             />

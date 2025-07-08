@@ -8,10 +8,12 @@ import { Home, User, Briefcase, FolderOpen, BookOpen, Info, Mail, Wrench, Messag
 const AdminDashboard = () => {
   const [contentCounts, setContentCounts] = useState<Record<string, number>>({});
   const [messagesCount, setMessagesCount] = useState(0);
+  const [projectsCount, setProjectsCount] = useState(0);
 
   useEffect(() => {
     fetchContentCounts();
     fetchMessagesCount();
+    fetchProjectsCount();
   }, []);
 
   const fetchContentCounts = async () => {
@@ -34,11 +36,21 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchProjectsCount = async () => {
+    try {
+      const { data, error } = await getDynamicContent('projects');
+      if (!error && data) {
+        setProjectsCount(data.length);
+      }
+    } catch (error) {
+      console.error('Error fetching projects count:', error);
+    }
+  };
+
   const pageTypes = [
     { key: 'home', label: 'Home', icon: Home },
     { key: 'experience', label: 'Experience', icon: User },
     { key: 'apps', label: 'Apps', icon: Briefcase },
-    { key: 'projects', label: 'Projects', icon: FolderOpen },
     { key: 'blogs', label: 'Blogs', icon: BookOpen },
     { key: 'about', label: 'About', icon: Info },
     { key: 'tools', label: 'Tools', icon: Wrench },
@@ -73,6 +85,22 @@ const AdminDashboard = () => {
             );
           })}
           
+          {/* Projects Card */}
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Projects
+              </CardTitle>
+              <FolderOpen className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{projectsCount}</div>
+              <CardDescription>
+                {projectsCount === 1 ? 'project' : 'projects'}
+              </CardDescription>
+            </CardContent>
+          </Card>
+          
           {/* Client Messages Card */}
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -103,6 +131,16 @@ const AdminDashboard = () => {
                 </CardHeader>
               </Card>
             ))}
+            
+            {/* Projects Quick Action */}
+            <Card className="cursor-pointer hover:bg-gray-50">
+              <CardHeader>
+                <CardTitle className="text-lg">Manage Projects</CardTitle>
+                <CardDescription>
+                  Create, edit, and showcase your portfolio projects
+                </CardDescription>
+              </CardHeader>
+            </Card>
             
             {/* Client Messages Quick Action */}
             <Card className="cursor-pointer hover:bg-gray-50">
