@@ -120,7 +120,7 @@ const AppDetail = () => {
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Back Button */}
         <div className="mb-8">
           <Link to="/apps">
@@ -184,23 +184,23 @@ const AppDetail = () => {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Left Column - Screenshots */}
           <div className="lg:col-span-2">
             {/* Screenshots */}
             {app.screenshots && app.screenshots.length > 0 && (
-              <Card className="mb-8">
+              <Card className="mb-6 lg:mb-8">
                 <CardHeader>
-                  <CardTitle>Screenshots</CardTitle>
+                  <CardTitle className="text-lg lg:text-xl">Screenshots</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
                     {app.screenshots.map((screenshot, index) => (
                       <img
                         key={index}
                         src={screenshot}
                         alt={`${app.title} screenshot ${index + 1}`}
-                        className="rounded-lg shadow-md w-full h-64 object-cover"
+                        className="rounded-lg shadow-md w-full h-48 sm:h-56 md:h-64 object-cover"
                       />
                     ))}
                   </div>
@@ -210,31 +210,34 @@ const AppDetail = () => {
 
             {/* Detailed Description */}
             {(app.longDescription || app.about) && (
-              <Card className="mb-8">
+              <Card className="mb-6 lg:mb-8">
                 <CardHeader>
-                  <CardTitle>About This App</CardTitle>
+                  <CardTitle className="text-lg lg:text-xl">About This App</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{app.longDescription || app.about}</p>
+                  <div 
+                    className="prose prose-sm sm:prose lg:prose-lg max-w-none text-gray-700 dark:text-gray-300 leading-relaxed prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-strong:text-gray-900 dark:prose-strong:text-white prose-ul:text-gray-700 dark:prose-ul:text-gray-300 prose-li:text-gray-700 dark:prose-li:text-gray-300"
+                    dangerouslySetInnerHTML={{ __html: app.longDescription || app.about }}
+                  />
                 </CardContent>
               </Card>
             )}
 
             {/* Features */}
             {app.features && app.features.length > 0 && (
-              <Card className="mb-8">
+              <Card className="mb-6 lg:mb-8">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Zap className="w-5 h-5" />
+                  <CardTitle className="flex items-center gap-2 text-lg lg:text-xl">
+                    <Zap className="w-4 h-4 lg:w-5 lg:h-5" />
                     Key Features
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <ul className="grid grid-cols-1 gap-3">
                     {app.features.map((feature, index) => (
                       <li key={index} className="flex items-start gap-2">
                         <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-                        <span className="text-gray-700 dark:text-gray-300">{feature}</span>
+                        <span className="text-sm sm:text-base text-gray-700 dark:text-gray-300">{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -244,19 +247,19 @@ const AppDetail = () => {
           </div>
 
           {/* Right Column - Technical Details */}
-          <div className="space-y-6">
+          <div className="space-y-4 lg:space-y-6">
             {/* Technologies Used */}
             {app.technologies && app.technologies.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Technologies Used</CardTitle>
+                  <CardTitle className="text-lg lg:text-xl">Technologies Used</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-wrap gap-2 lg:gap-3">
                     {app.technologies.map((tech, index) => (
-                      <div key={index} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-lg">
-                        <TechIcon techName={tech} className="w-4 h-4" />
-                        <span className="text-sm font-medium">{tech}</span>
+                      <div key={index} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 px-2 py-1 lg:px-3 lg:py-2 rounded-lg">
+                        <TechIcon techName={tech} className="w-3 h-3 lg:w-4 lg:h-4" />
+                        <span className="text-xs lg:text-sm font-medium">{tech}</span>
                       </div>
                     ))}
                   </div>
@@ -268,10 +271,13 @@ const AppDetail = () => {
             {app.challenges && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Challenges & Solutions</CardTitle>
+                  <CardTitle className="text-lg lg:text-xl">Challenges & Solutions</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{app.challenges}</p>
+                  <div 
+                    className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 text-sm leading-relaxed prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-strong:text-gray-900 dark:prose-strong:text-white prose-ul:text-gray-700 dark:prose-ul:text-gray-300 prose-li:text-gray-700 dark:prose-li:text-gray-300"
+                    dangerouslySetInnerHTML={{ __html: app.challenges }}
+                  />
                 </CardContent>
               </Card>
             )}
@@ -280,10 +286,13 @@ const AppDetail = () => {
             {app.achievements && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Achievements</CardTitle>
+                  <CardTitle className="text-lg lg:text-xl">Achievements</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{app.achievements}</p>
+                  <div 
+                    className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 text-sm leading-relaxed prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-strong:text-gray-900 dark:prose-strong:text-white prose-ul:text-gray-700 dark:prose-ul:text-gray-300 prose-li:text-gray-700 dark:prose-li:text-gray-300"
+                    dangerouslySetInnerHTML={{ __html: app.achievements }}
+                  />
                 </CardContent>
               </Card>
             )}
@@ -292,10 +301,13 @@ const AppDetail = () => {
             {app.accessibility && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Accessibility</CardTitle>
+                  <CardTitle className="text-lg lg:text-xl">Accessibility</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{app.accessibility}</p>
+                  <div 
+                    className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 text-sm leading-relaxed prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-strong:text-gray-900 dark:prose-strong:text-white prose-ul:text-gray-700 dark:prose-ul:text-gray-300 prose-li:text-gray-700 dark:prose-li:text-gray-300"
+                    dangerouslySetInnerHTML={{ __html: app.accessibility }}
+                  />
                 </CardContent>
               </Card>
             )}
