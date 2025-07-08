@@ -1,90 +1,113 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Filter } from "lucide-react";
+import { getDynamicContent } from "@/integrations/firebase/firestore";
+import { toast } from "sonner";
+
+interface BlogItem {
+  id: string;
+  title: string;
+  slug: string;
+  status: 'Draft' | 'Published';
+  date: string;
+  author: string;
+  tags: string[];
+  coverImage?: string;
+  content: string;
+  excerpt?: string;
+  readTime?: string;
+  createdAt?: any;
+  updatedAt?: any;
+}
 
 const Blogs = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTag, setSelectedTag] = useState<string>("");
+  const [blogs, setBlogs] = useState<BlogItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const blogs = [
-    {
-      id: "building-ai-products-that-actually-ship",
-      title: "Building AI Products That Actually Ship",
-      date: "March 2024",
-      excerpt: "Lessons learned from building multiple AI products and the importance of shipping quickly.",
-      readTime: "5 min read",
-      tag: "thought",
-      tags: ["AI", "Product Development", "Startup"],
-      image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=400&h=200&fit=crop&crop=center",
-      alt: "Laptop computer with code on screen"
-    },
-    {
-      id: "the-future-of-ai-in-insurance",
-      title: "The Future of AI in Insurance",
-      date: "February 2024",
-      excerpt: "How AI agents are transforming the insurance industry and what to expect next.",
-      readTime: "7 min read",
-      tag: "tutorial",
-      tags: ["AI", "Insurance", "Technology"],
-      image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=200&fit=crop&crop=center",
-      alt: "Monitor showing programming code"
-    },
-    {
-      id: "from-idea-to-100k-funding",
-      title: "From Idea to $100K Funding",
-      date: "January 2024",
-      excerpt: "The journey of building Dreamboat.ai and raising our first round of funding.",
-      readTime: "10 min read",
-      tag: "resource",
-      tags: ["Startup", "Funding", "Entrepreneurship"],
-      image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&h=200&fit=crop&crop=center",
-      alt: "Person using MacBook Pro"
-    },
-    {
-      id: "the-power-of-1-percent",
-      title: "The Power of 1%: Daily Habits for Success",
-      date: "December 2023",
-      excerpt: "Small daily, weekly, and monthly actions that compound into massive growth—tailored for founders and engineers.",
-      readTime: "6 min read",
-      tag: "thought",
-      tags: ["Productivity", "Habits", "Growth"],
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=200&fit=crop&crop=center",
-      alt: "Woman using laptop computer"
-    }
-  ];
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await getDynamicContent('blogs');
+        
+        if (error) {
+          console.error('Error fetching blogs:', error);
+          toast.error('Failed to load blogs');
+          return;
+        }
+
+        if (data && Array.isArray(data)) {
+          // Filter to only show published blogs and sort by date
+          const publishedBlogs = (data as BlogItem[])
+            .filter(blog => blog.status === 'Published')
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          
+          setBlogs(publishedBlogs);
+        }
+      } catch (error) {
+        console.error('Error fetching blogs:', error);
+        toast.error('Failed to load blogs');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlogs();
+  }, []);
 
   // Get all unique tags
-  const allTags = Array.from(new Set(blogs.flatMap(blog => blog.tags)));
+  const allTags = Array.from(new Set(blogs.flatMap(blog => blog.tags || [])));
 
   // Filter blogs based on search term and selected tag
   const filteredBlogs = blogs.filter(blog => {
     const matchesSearch = searchTerm === "" || 
       blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      blog.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      blog.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+      (blog.excerpt || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (blog.tags || []).some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const matchesTag = selectedTag === "" || blog.tags.includes(selectedTag);
+    const matchesTag = selectedTag === "" || (blog.tags || []).includes(selectedTag);
 
     return matchesSearch && matchesTag;
   });
 
-  const getTagStyle = (tag: string) => {
-    switch (tag) {
-      case "thought":
-        return "bg-slate-800 text-white hover:bg-slate-700";
-      case "tutorial": 
-        return "bg-blue-600 text-white hover:bg-blue-700";
-      case "resource":
-        return "bg-green-600 text-white hover:bg-green-700";
-      default:
-        return "bg-gray-600 text-white hover:bg-gray-700";
-    }
+  const getTagStyle = (status: string) => {
+    return "bg-slate-800 text-white hover:bg-slate-700";
   };
+
+  // Generate excerpt from content if not provided
+  const generateExcerpt = (content: string, maxLength: number = 150) => {
+    // Remove HTML tags and get plain text
+    const plainText = content.replace(/<[^>]*>/g, '').trim();
+    if (plainText.length <= maxLength) return plainText;
+    return plainText.substring(0, maxLength) + '...';
+  };
+
+  // Calculate read time based on content
+  const calculateReadTime = (content: string) => {
+    const wordsPerMinute = 200;
+    const wordCount = content.replace(/<[^>]*>/g, '').split(/\s+/).length;
+    const readTime = Math.ceil(wordCount / wordsPerMinute);
+    return `${readTime} min read`;
+  };
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-6xl mx-auto">
+          <div className="flex justify-center items-center py-12">
+            <div className="text-lg text-gray-600">Loading blogs...</div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -137,19 +160,21 @@ const Blogs = () => {
           </div>
 
           {/* Filter Tags Display */}
-          <div className="flex flex-wrap gap-2 mb-6">
-            {allTags.map(tag => (
-              <Button
-                key={tag}
-                variant={selectedTag === tag ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedTag(selectedTag === tag ? "" : tag)}
-                className="text-xs"
-              >
-                {tag}
-              </Button>
-            ))}
-          </div>
+          {allTags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-6">
+              {allTags.map(tag => (
+                <Button
+                  key={tag}
+                  variant={selectedTag === tag ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedTag(selectedTag === tag ? "" : tag)}
+                  className="text-xs"
+                >
+                  {tag}
+                </Button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Results Count */}
@@ -166,21 +191,23 @@ const Blogs = () => {
         {/* Blog Cards Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {filteredBlogs.length > 0 ? (
-            filteredBlogs.map((blog, index) => (
+            filteredBlogs.map((blog) => (
               <Link
-                key={index}
-                to={`/blogs/${blog.id}`}
+                key={blog.id}
+                to={`/blogs/${blog.slug}`}
                 className="block"
               >
                 <article className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02] overflow-hidden cursor-pointer border border-gray-100 h-full">
                   {/* Feature Image */}
-                  <div className="aspect-[2/1] overflow-hidden">
-                    <img
-                      src={blog.image}
-                      alt={blog.alt}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                  {blog.coverImage && (
+                    <div className="aspect-[2/1] overflow-hidden">
+                      <img
+                        src={blog.coverImage}
+                        alt={blog.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
                   
                   {/* Card Content */}
                   <div className="p-6 relative flex flex-col justify-between h-full">
@@ -192,29 +219,31 @@ const Blogs = () => {
                       
                       {/* Excerpt */}
                       <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-2">
-                        {blog.excerpt}
+                        {blog.excerpt || generateExcerpt(blog.content)}
                       </p>
 
                       {/* Tags */}
-                      <div className="flex flex-wrap gap-1 mb-4">
-                        {blog.tags.slice(0, 3).map((tag, tagIndex) => (
-                          <Badge
-                            key={tagIndex}
-                            variant="secondary"
-                            className="text-xs px-2 py-1 bg-gray-100 text-gray-700"
-                          >
-                            {tag}
-                          </Badge>
-                        ))}
-                        {blog.tags.length > 3 && (
-                          <Badge variant="secondary" className="text-xs px-2 py-1 bg-gray-100 text-gray-700">
-                            +{blog.tags.length - 3}
-                          </Badge>
-                        )}
-                      </div>
+                      {blog.tags && blog.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-4">
+                          {blog.tags.slice(0, 3).map((tag, tagIndex) => (
+                            <Badge
+                              key={tagIndex}
+                              variant="secondary"
+                              className="text-xs px-2 py-1 bg-gray-100 text-gray-700"
+                            >
+                              {tag}
+                            </Badge>
+                          ))}
+                          {blog.tags.length > 3 && (
+                            <Badge variant="secondary" className="text-xs px-2 py-1 bg-gray-100 text-gray-700">
+                              +{blog.tags.length - 3}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
                     </div>
                     
-                    {/* Date and Category */}
+                    {/* Date and Read Time */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <p className="text-xs text-gray-400">
@@ -222,16 +251,16 @@ const Blogs = () => {
                         </p>
                         <span className="text-gray-300">•</span>
                         <p className="text-xs text-gray-400">
-                          {blog.readTime}
+                          {blog.readTime || calculateReadTime(blog.content)}
                         </p>
                       </div>
                       
-                      {/* Tag Badge */}
+                      {/* Status Badge */}
                       <Badge 
                         variant="secondary" 
-                        className={`text-xs px-2 py-1 rounded-full ${getTagStyle(blog.tag)}`}
+                        className={`text-xs px-2 py-1 rounded-full ${getTagStyle(blog.status)}`}
                       >
-                        {blog.tag}
+                        Published
                       </Badge>
                     </div>
                   </div>
@@ -241,18 +270,20 @@ const Blogs = () => {
           ) : (
             <div className="col-span-2 text-center py-12">
               <p className="text-gray-600 text-lg">
-                No blogs found matching your criteria.
+                {blogs.length === 0 ? 'No published blogs found.' : 'No blogs found matching your criteria.'}
               </p>
-              <Button
-                onClick={() => {
-                  setSearchTerm("");
-                  setSelectedTag("");
-                }}
-                variant="outline"
-                className="mt-4"
-              >
-                Clear Filters
-              </Button>
+              {filteredBlogs.length === 0 && blogs.length > 0 && (
+                <Button
+                  onClick={() => {
+                    setSearchTerm("");
+                    setSelectedTag("");
+                  }}
+                  variant="outline"
+                  className="mt-4"
+                >
+                  Clear Filters
+                </Button>
+              )}
             </div>
           )}
         </div>
