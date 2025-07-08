@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,10 +21,11 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminContentManager from "./pages/AdminContentManager";
 import AdminHomeManager from "./pages/AdminHomeManager";
 import AdminAboutManager from "./pages/AdminAboutManager";
+import AdminExperienceManager from "./pages/AdminExperienceManager";
+import AdminToolsManager from "./pages/AdminToolsManager";
 import AdminAppsManager from "./pages/AdminAppsManager";
 import AdminBlogManager from "./pages/AdminBlogManager";
 import AdminContactManager from "./pages/AdminContactManager";
-import AdminExperienceManager from "./pages/AdminExperienceManager";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -88,6 +88,14 @@ function App() {
               element={
                 <AdminProtectedRoute>
                   <AdminExperienceManager />
+                </AdminProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/myportadmin/dashboard/tools" 
+              element={
+                <AdminProtectedRoute>
+                  <AdminToolsManager />
                 </AdminProtectedRoute>
               } 
             />
