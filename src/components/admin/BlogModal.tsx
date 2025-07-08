@@ -169,17 +169,41 @@ const BlogModal: React.FC<BlogModalProps> = ({ blog, mode, onClose }) => {
     try {
       setSaving(true);
 
+      // Filter and clean the data to remove undefined values
+      const filteredCodeSnippets = codeSnippets.filter(snippet => 
+        snippet.language && snippet.code && snippet.code.trim() !== ''
+      );
+
+      const filteredResources = resources.filter(resource => 
+        resource.title && resource.title.trim() !== '' && 
+        resource.url && resource.url.trim() !== ''
+      );
+
+      const filteredExtraSections = extraSections.filter(section => 
+        section.title && section.title.trim() !== '' && 
+        section.body && section.body.trim() !== ''
+      );
+
+      const filteredTableOfContents = tableOfContents.filter(item => 
+        item && item.trim() !== ''
+      );
+
       const blogData: Partial<BlogItem> = {
         ...data,
-        tags,
-        coverImage,
-        tableOfContents: tableOfContents.length > 0 ? tableOfContents : undefined,
-        codeSnippets: codeSnippets.length > 0 ? codeSnippets : undefined,
-        resources: resources.filter(r => r.title && r.url).length > 0 
-          ? resources.filter(r => r.title && r.url) : undefined,
-        extraSections: extraSections.filter(s => s.title && s.body).length > 0 
-          ? extraSections.filter(s => s.title && s.body) : undefined,
+        tags: tags.filter(tag => tag && tag.trim() !== ''),
+        coverImage: coverImage || undefined,
+        tableOfContents: filteredTableOfContents.length > 0 ? filteredTableOfContents : undefined,
+        codeSnippets: filteredCodeSnippets.length > 0 ? filteredCodeSnippets : undefined,
+        resources: filteredResources.length > 0 ? filteredResources : undefined,
+        extraSections: filteredExtraSections.length > 0 ? filteredExtraSections : undefined,
       };
+
+      // Remove undefined fields completely
+      Object.keys(blogData).forEach(key => {
+        if (blogData[key as keyof BlogItem] === undefined) {
+          delete blogData[key as keyof BlogItem];
+        }
+      });
 
       if (mode === 'edit' && blog?.id) {
         const { error } = await updateDynamicContent('blogs', blog.id, blogData);
