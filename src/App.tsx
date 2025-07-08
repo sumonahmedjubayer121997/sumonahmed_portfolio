@@ -42,86 +42,89 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/experience" element={<Experience />} />
             <Route path="/apps" element={<Apps />} />
-            <Route path="/apps/:id" element={<AppDetail />} />
+            <Route path="/apps/:appName" element={<AppDetail />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/projects/:id" element={<ProjectDetail />} />
             <Route path="/blogs" element={<Blogs />} />
             <Route path="/blogs/:slug" element={<BlogDetail />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/tools" element={<Tools />} />
-            <Route path="/upload-blood-donation" element={<UploadBloodDonationImage />} />
+            <Route
+              path="/upload-blood-donation"
+              element={<UploadBloodDonationImage />}
+            />
             <Route path="/myportlogin" element={<AdminLogin />} />
-            <Route 
-              path="/myportadmin/dashboard" 
+            <Route
+              path="/myportadmin/dashboard"
               element={
                 <AdminProtectedRoute>
                   <AdminDashboard />
                 </AdminProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/myportadmin/dashboard/:contentType" 
+            <Route
+              path="/myportadmin/dashboard/:contentType"
               element={
                 <AdminProtectedRoute>
                   <AdminContentManager />
                 </AdminProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/myportadmin/dashboard/home" 
+            <Route
+              path="/myportadmin/dashboard/home"
               element={
                 <AdminProtectedRoute>
                   <AdminHomeManager />
                 </AdminProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/myportadmin/dashboard/about" 
+            <Route
+              path="/myportadmin/dashboard/about"
               element={
                 <AdminProtectedRoute>
                   <AdminAboutManager />
                 </AdminProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/myportadmin/dashboard/experience" 
+            <Route
+              path="/myportadmin/dashboard/experience"
               element={
                 <AdminProtectedRoute>
                   <AdminExperienceManager />
                 </AdminProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/myportadmin/dashboard/tools" 
+            <Route
+              path="/myportadmin/dashboard/tools"
               element={
                 <AdminProtectedRoute>
                   <AdminToolsManager />
                 </AdminProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/myportadmin/dashboard/apps" 
+            <Route
+              path="/myportadmin/dashboard/apps"
               element={
                 <AdminProtectedRoute>
                   <AdminAppsManager />
                 </AdminProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/myportadmin/dashboard/blogs" 
+            <Route
+              path="/myportadmin/dashboard/blogs"
               element={
                 <AdminProtectedRoute>
                   <AdminBlogManager />
                 </AdminProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/myportadmin/dashboard/contact-manager" 
+            <Route
+              path="/myportadmin/dashboard/contact-manager"
               element={
                 <AdminProtectedRoute>
                   <AdminContactManager />
                 </AdminProtectedRoute>
-              } 
+              }
             />
             <Route path="*" element={<NotFound />} />
           </Routes>
