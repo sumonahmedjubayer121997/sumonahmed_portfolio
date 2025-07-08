@@ -1,10 +1,10 @@
-
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import TechIcon from "@/components/TechIcon";
 import Layout from "../components/Layout";
 import { getDynamicContent } from "@/integrations/firebase/firestore";
 import { toast } from "sonner";
+import DOMPurify from "dompurify";
 
 interface AppItem {
   id: string;
@@ -22,6 +22,12 @@ interface AppItem {
   visible?: boolean;
 }
 
+// Strip HTML tags from a string safely
+function stripHtmlTags(html: string): string {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  return doc.body.textContent || "";
+}
+
 const Apps = () => {
   const [apps, setApps] = useState<AppItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,22 +36,24 @@ const Apps = () => {
     const fetchApps = async () => {
       try {
         setLoading(true);
-        const { data, error } = await getDynamicContent('apps');
-        
+        const { data, error } = await getDynamicContent("apps");
+
         if (error) {
-          console.error('Error fetching apps:', error);
-          toast.error('Failed to load apps');
+          console.error("Error fetching apps:", error);
+          toast.error("Failed to load apps");
           return;
         }
 
         if (data && Array.isArray(data)) {
           // Filter to only show visible apps
-          const visibleApps = (data as AppItem[]).filter(app => app.visible !== false);
+          const visibleApps = (data as AppItem[]).filter(
+            (app) => app.visible !== false
+          );
           setApps(visibleApps);
         }
       } catch (error) {
-        console.error('Error fetching apps:', error);
-        toast.error('Failed to load apps');
+        console.error("Error fetching apps:", error);
+        toast.error("Failed to load apps");
       } finally {
         setLoading(false);
       }
@@ -54,7 +62,7 @@ const Apps = () => {
     fetchApps();
   }, []);
 
-  console.log('Apps page rendered', { apps, loading });
+  console.log("Apps page rendered", { apps, loading });
 
   return (
     <Layout>
@@ -79,7 +87,13 @@ const Apps = () => {
               transform="rotate(45 254.558 1.41421)"
               stroke="purple"
             >
-              <animate attributeName="stroke-dasharray" from="0,1000" to="1000,0" dur="3s" fill="freeze" />
+              <animate
+                attributeName="stroke-dasharray"
+                from="0,1000"
+                to="1000,0"
+                dur="3s"
+                fill="freeze"
+              />
             </rect>
             <rect
               x="341.105"
@@ -90,7 +104,14 @@ const Apps = () => {
               transform="rotate(135 341.105 421.087)"
               stroke="purple"
             >
-              <animate attributeName="stroke-dasharray" from="0,1000" to="1000,0" dur="3s" fill="freeze" begin="0.5s" />
+              <animate
+                attributeName="stroke-dasharray"
+                from="0,1000"
+                to="1000,0"
+                dur="3s"
+                fill="freeze"
+                begin="0.5s"
+              />
             </rect>
             <rect
               y="1.41421"
@@ -100,7 +121,14 @@ const Apps = () => {
               transform="matrix(-0.707107 0.707107 0.707107 0.707107 374.96 111.414)"
               stroke="purple"
             >
-              <animate attributeName="stroke-dasharray" from="0,1000" to="1000,0" dur="3s" fill="freeze" begin="1s" />
+              <animate
+                attributeName="stroke-dasharray"
+                from="0,1000"
+                to="1000,0"
+                dur="3s"
+                fill="freeze"
+                begin="1s"
+              />
             </rect>
             <rect
               x="1.41421"
@@ -111,7 +139,14 @@ const Apps = () => {
               transform="matrix(0.707107 0.707107 0.707107 -0.707107 288.414 531.087)"
               stroke="purple"
             >
-              <animate attributeName="stroke-dasharray" from="0,1000" to="1000,0" dur="3s" fill="freeze" begin="1.5s" />
+              <animate
+                attributeName="stroke-dasharray"
+                from="0,1000"
+                to="1000,0"
+                dur="3s"
+                fill="freeze"
+                begin="1.5s"
+              />
             </rect>
           </svg>
         </div>
@@ -129,34 +164,48 @@ const Apps = () => {
         {/* App Cards Section */}
         {loading ? (
           <div className="flex justify-center items-center py-12">
-            <div className="text-lg text-gray-600 dark:text-gray-400">Loading apps...</div>
+            <div className="text-lg text-gray-600 dark:text-gray-400">
+              Loading apps...
+            </div>
           </div>
         ) : apps.length === 0 ? (
           <div className="flex justify-center items-center py-12">
-            <div className="text-lg text-gray-600 dark:text-gray-400">No apps found</div>
+            <div className="text-lg text-gray-600 dark:text-gray-400">
+              No apps found
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-5xl mx-auto relative z-10">
             {apps.map((app) => {
               const appLink = `/apps/${encodeURIComponent(app.title)}`;
               console.log(`Creating link for ${app.title}: ${appLink}`);
-              
+
               return (
-                <Link 
-                  key={app.id} 
+                <Link
+                  key={app.id}
                   to={appLink}
                   className="w-full group"
-                  onClick={() => console.log(`Clicked on ${app.title}, navigating to ${appLink}`)}
+                  onClick={() =>
+                    console.log(
+                      `Clicked on ${app.title}, navigating to ${appLink}`
+                    )
+                  }
                 >
                   <div className="flex flex-col w-full h-full p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
                     <img
-                      src={app.screenshots && app.screenshots.length > 0 ? app.screenshots[0] : "https://firebasestorage.googleapis.com/v0/b/taskwise-n03h6.firebasestorage.app/o/public%2Fimages%2Fblood-donation-preview.png?alt=media"}
-                      alt={app.about || app.title}
+                      src={
+                        app.screenshots && app.screenshots.length > 0
+                          ? app.screenshots[0]
+                          : "https://firebasestorage.googleapis.com/v0/b/taskwise-n03h6.firebasestorage.app/o/public%2Fimages%2Fblood-donation-preview.png?alt=media"
+                      }
+                      alt={app.title}
                       className="w-full max-h-52 mb-4 object-cover rounded-lg"
-                      style={{ borderRadius: '8px' }}
+                      style={{ borderRadius: "8px" }}
                     />
                     <div className="flex items-center justify-between">
-                      <h2 className="text-md font-bold group-hover:text-primary transition-colors duration-200">{app.title}</h2>
+                      <h2 className="text-md font-bold group-hover:text-primary transition-colors duration-200">
+                        {app.title}
+                      </h2>
                       <div className="flex mt-1 space-x-2">
                         {app.technologies?.map((tech, index) => (
                           <div key={index} title={tech}>
@@ -165,7 +214,16 @@ const Apps = () => {
                         ))}
                       </div>
                     </div>
-                    <p className="mt-2 text-gray-600 dark:text-gray-400 text-sm">{app.about || 'No description available'}</p>
+                    <p className="mt-2 text-gray-600 dark:text-gray-400 text-sm">
+                      <p className="mt-2 text-gray-600 dark:text-gray-400 text-sm">
+                        {(() => {
+                          const plainText = stripHtmlTags(app.about || "");
+                          return plainText.length > 150
+                            ? plainText.substring(0, 147) + "..."
+                            : plainText || "No description available";
+                        })()}
+                      </p>
+                    </p>
                   </div>
                 </Link>
               );
