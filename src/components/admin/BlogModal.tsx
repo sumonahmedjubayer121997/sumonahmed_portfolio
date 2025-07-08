@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { saveDynamicContent, updateDynamicContent } from '@/integrations/firebase/firestore';
 import { uploadFile } from '@/integrations/firebase/storage';
+import RichContentEditor from '@/components/RichContentEditor';
 import type { BlogItem } from '@/pages/AdminBlogManager';
 
 const blogSchema = z.object({
@@ -51,6 +52,7 @@ const BlogModal: React.FC<BlogModalProps> = ({ blog, mode, onClose }) => {
   );
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [blogContent, setBlogContent] = useState(blog?.content || '');
 
   const {
     register,
@@ -84,6 +86,11 @@ const BlogModal: React.FC<BlogModalProps> = ({ blog, mode, onClose }) => {
       setValue('slug', slug);
     }
   }, [watchTitle, mode, setValue]);
+
+  // Update form content when blogContent changes
+  useEffect(() => {
+    setValue('content', blogContent);
+  }, [blogContent, setValue]);
 
   const handleImageUpload = async (file: File) => {
     try {
@@ -190,6 +197,7 @@ const BlogModal: React.FC<BlogModalProps> = ({ blog, mode, onClose }) => {
 
       const blogData: Partial<BlogItem> = {
         ...data,
+        content: blogContent, // Use the rich content from editor
         tags: tags.filter(tag => tag && tag.trim() !== ''),
         coverImage: coverImage || undefined,
         tableOfContents: filteredTableOfContents.length > 0 ? filteredTableOfContents : undefined,
@@ -385,17 +393,16 @@ const BlogModal: React.FC<BlogModalProps> = ({ blog, mode, onClose }) => {
             </CardContent>
           </Card>
 
-          {/* Content */}
+          {/* Content - Using RichContentEditor */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Content *</CardTitle>
             </CardHeader>
             <CardContent>
-              <Textarea
-                {...register('content')}
-                placeholder="Write your blog content here (HTML/Markdown supported)"
-                rows={10}
-                className="font-mono"
+              <RichContentEditor
+                initialContent={blogContent}
+                onSave={(content) => setBlogContent(content)}
+                placeholder="Write your blog content here..."
               />
               {errors.content && (
                 <p className="text-red-600 text-sm mt-1">{errors.content.message}</p>
@@ -546,7 +553,7 @@ const BlogModal: React.FC<BlogModalProps> = ({ blog, mode, onClose }) => {
             </CardContent>
           </Card>
 
-          {/* Extra Sections */}
+          {/* Extra Sections - Using RichContentEditor for section body */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
@@ -578,12 +585,14 @@ const BlogModal: React.FC<BlogModalProps> = ({ blog, mode, onClose }) => {
                       onChange={(e) => updateExtraSection(index, 'title', e.target.value)}
                       placeholder="Section title"
                     />
-                    <Textarea
-                      value={section.body}
-                      onChange={(e) => updateExtraSection(index, 'body', e.target.value)}
-                      placeholder="Section content"
-                      rows={4}
-                    />
+                    <div className="space-y-2">
+                      <Label>Section Content</Label>
+                      <RichContentEditor
+                        initialContent={section.body}
+                        onSave={(content) => updateExtraSection(index, 'body', content)}
+                        placeholder="Write section content here..."
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
