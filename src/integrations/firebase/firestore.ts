@@ -1,4 +1,3 @@
-
 import { 
   collection, 
   doc, 
@@ -19,11 +18,6 @@ import {
   DocumentReference 
 } from 'firebase/firestore';
 import { db } from './config';
-
-
-
-
-
 
 export type ContentType = 'home' | 'experience' | 'apps' | 'projects' | 'blogs' | 'about' | 'contact';
 
@@ -115,26 +109,10 @@ export const deleteContent = async (id: string) => {
   }
 };
 
-
-
 ////////////////////////////////////Mine ////////////////////////////////////
 //Creating content;
 
-
-
-/**
- * Save or update data dynamically to any collection
- * 
- * @param collectionName - name of the Firestore collection (e.g. 'apps', 'home')
- * @param data - data object to save
- * @param docId - optional docId; if provided, updates that document; else creates a new one
- * @returns result with id and error
- **/
-
-
-
 const dbFire = getFirestore();
-
 
 //getting latest data using single id ,otherwise it will come with all of the data that belongs to the collection;
 export const listenDynamicContent = (
@@ -181,9 +159,7 @@ export const listenDynamicContent = (
   }
 };
 
-
 //SaveAndUpdate
-
 export const saveAndUpdateDynamicContent = async (
   collectionName: string, 
   data: any, 
@@ -207,26 +183,42 @@ export const saveAndUpdateDynamicContent = async (
   }
 };
 
+// Add these missing functions for blog functionality
+export const saveDynamicContent = async (collectionName: string, data: any) => {
+  try {
+    const docRef = await addDoc(collection(dbFire, collectionName), data);
+    return { id: docRef.id, error: null };
+  } catch (error: any) {
+    console.error(`Error saving to ${collectionName}:`, error);
+    return { id: null, error: error.message };
+  }
+};
 
+export const updateDynamicContent = async (collectionName: string, docId: string, data: any) => {
+  try {
+    const docRef = doc(dbFire, collectionName, docId);
+    await updateDoc(docRef, data);
+    return { error: null };
+  } catch (error: any) {
+    console.error(`Error updating ${collectionName}/${docId}:`, error);
+    return { error: error.message };
+  }
+};
 
 export const deleteDynamicContent = async (
   collectionName: string,
-  docId: string,
-  onSuccess?: () => void,
-  onError?: (error: any) => void
+  docId: string
 ) => {
   try {
     const docRef = doc(dbFire, collectionName, docId);
     await deleteDoc(docRef);
     console.log(`Deleted document ${collectionName}/${docId}`);
-    if (onSuccess) onSuccess();
-  } catch (error) {
+    return { error: null };
+  } catch (error: any) {
     console.error(`Error deleting ${collectionName}/${docId}:`, error);
-    if (onError) onError(error);
+    return { error: error.message };
   }
 };
-
-
 
 /**
  * Dynamically get content from Firestore
@@ -260,5 +252,3 @@ export const getDynamicContent = async (
     return { data: null, error: error.message };
   }
 };
-
-
