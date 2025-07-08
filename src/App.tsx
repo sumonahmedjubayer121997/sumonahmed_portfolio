@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,6 +27,7 @@ import InteractiveBackground from "./components/InteractiveBackground";
 import FluidCursor from "./components/FluidCursor";
 import Preloader from "./components/Preloader";
 import { usePreloader } from "./hooks/usePreloader";
+import AdminBlogManager from './pages/AdminBlogManager';
 
 const queryClient = new QueryClient();
 
@@ -95,6 +95,14 @@ const App = () => {
                 element={
                   <AdminProtectedRoute>
                     <AdminAppsManager />
+                  </AdminProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/myportadmin/dashboard/blogs" 
+                element={
+                  <AdminProtectedRoute>
+                    <AdminBlogManager />
                   </AdminProtectedRoute>
                 } 
               />
