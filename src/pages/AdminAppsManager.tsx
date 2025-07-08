@@ -133,17 +133,20 @@ const AdminAppsManager = () => {
   const handleDeleteApp = async (app: AppItem) => {
     if (!confirm(`Are you sure you want to delete "${app.title}"?`)) return;
 
-    await deleteDynamicContent(
-      'apps',
-      app.id,
-      () => {
-        toast.success('App deleted successfully');
-      },
-      (error) => {
+    try {
+      const { error } = await deleteDynamicContent('apps', app.id);
+      
+      if (error) {
         console.error('Delete error:', error);
         toast.error('Failed to delete app');
+        return;
       }
-    );
+      
+      toast.success('App deleted successfully');
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast.error('Failed to delete app');
+    }
   };
 
   const handleModalClose = () => {
