@@ -362,7 +362,7 @@ const AppDetail = () => {
                 </CardHeader>
                 <CardContent>
                   <div
-                    className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 text-sm leading-relaxed prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-strong:text-gray-900 dark:prose-strong:text-white prose-ul:text-gray-700 dark:prose-ul:text-gray-300 prose-li:text-gray-700 dark:prose-li:text-gray-300"
+                    className="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 text-sm leading-relaxed prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-strong:text-gray-900 dark:prose-strong:text-white prose-ul:text-gray-700 dark:prose-ul:text-gray-300 prose-li:text-gray-700 dark:prose-li:text-gray-300 break-words whitespace-pre-wrap overflow-hidden"
                     dangerouslySetInnerHTML={{
                       __html: (() => {
                         const encodedHtml =

@@ -66,7 +66,7 @@ const Apps = () => {
 
   return (
     <Layout>
-      <div className="relative pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-4xl mx-auto text-foreground transition-colors duration-300">
+      <div className="relative pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-4xl mx-auto text-foreground transition-colors duration-300 overflow-hidden">
         {/* SVG background */}
         <div className="absolute top-0 -mt-20 right-0 opacity-40 z-0 hidden sm:block">
           <svg
@@ -216,7 +216,7 @@ const Apps = () => {
                     </div>
                     <p className="mt-2 text-gray-600 dark:text-gray-400 text-sm">
                       <div
-                        className="mt-2 text-gray-600 dark:text-gray-400 text-sm"
+                        className="mt-2 text-gray-600 dark:text-gray-400 text-sm break-words whitespace-pre-wrap overflow-hidden"
                         dangerouslySetInnerHTML={{
                           __html: (() => {
                             const rawHtml =
