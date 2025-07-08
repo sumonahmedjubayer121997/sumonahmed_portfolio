@@ -2,14 +2,16 @@
 import { useState, useEffect } from "react";
 import AdminLayout from "@/components/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getContentCounts } from '@/integrations/firebase/firestore';
-import { Home, User, Briefcase, FolderOpen, BookOpen, Info, Mail } from "lucide-react";
+import { getContentCounts, getDynamicContent } from '@/integrations/firebase/firestore';
+import { Home, User, Briefcase, FolderOpen, BookOpen, Info, Mail, Wrench, MessageSquare } from "lucide-react";
 
 const AdminDashboard = () => {
   const [contentCounts, setContentCounts] = useState<Record<string, number>>({});
+  const [messagesCount, setMessagesCount] = useState(0);
 
   useEffect(() => {
     fetchContentCounts();
+    fetchMessagesCount();
   }, []);
 
   const fetchContentCounts = async () => {
@@ -21,6 +23,17 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchMessagesCount = async () => {
+    try {
+      const { data, error } = await getDynamicContent('contact_messages');
+      if (!error && data) {
+        setMessagesCount(data.length);
+      }
+    } catch (error) {
+      console.error('Error fetching messages count:', error);
+    }
+  };
+
   const pageTypes = [
     { key: 'home', label: 'Home', icon: Home },
     { key: 'experience', label: 'Experience', icon: User },
@@ -28,6 +41,7 @@ const AdminDashboard = () => {
     { key: 'projects', label: 'Projects', icon: FolderOpen },
     { key: 'blogs', label: 'Blogs', icon: BookOpen },
     { key: 'about', label: 'About', icon: Info },
+    { key: 'tools', label: 'Tools', icon: Wrench },
     { key: 'contact', label: 'Contact', icon: Mail },
   ];
 
@@ -58,6 +72,22 @@ const AdminDashboard = () => {
               </Card>
             );
           })}
+          
+          {/* Client Messages Card */}
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Client Messages
+              </CardTitle>
+              <MessageSquare className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{messagesCount}</div>
+              <CardDescription>
+                {messagesCount === 1 ? 'message received' : 'messages received'}
+              </CardDescription>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="mt-12">
@@ -73,6 +103,16 @@ const AdminDashboard = () => {
                 </CardHeader>
               </Card>
             ))}
+            
+            {/* Client Messages Quick Action */}
+            <Card className="cursor-pointer hover:bg-gray-50">
+              <CardHeader>
+                <CardTitle className="text-lg">View Client Messages</CardTitle>
+                <CardDescription>
+                  Review and manage messages from website visitors
+                </CardDescription>
+              </CardHeader>
+            </Card>
           </div>
         </div>
       </div>

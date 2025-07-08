@@ -1,8 +1,7 @@
-
 import { ReactNode, useState } from "react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { Button } from "@/components/ui/button";
-import { LogOut, Home, User, Briefcase, FolderOpen, BookOpen, Info, Mail, Menu, X, HomeIcon, MessageSquare } from "lucide-react";
+import { LogOut, Home, User, Briefcase, FolderOpen, BookOpen, Info, Mail, Menu, X, HomeIcon, MessageSquare, Wrench } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 interface AdminLayoutProps {
@@ -22,7 +21,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { path: "/myportadmin/dashboard/projects", label: "Projects", icon: FolderOpen },
     { path: "/myportadmin/dashboard/blogs", label: "Blogs", icon: BookOpen },
     { path: "/myportadmin/dashboard/about", label: "About", icon: Info },
+    { path: "/myportadmin/dashboard/tools", label: "Tools", icon: Wrench },
     { path: "/myportadmin/dashboard/contact", label: "Contact", icon: Mail },
+    { path: "/myportadmin/dashboard/clientsMessages", label: "Client Messages", icon: MessageSquare },
     { path: "/myportadmin/dashboard/contact-manager", label: "Contact Manager", icon: MessageSquare },
   ];
 

@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -26,6 +27,7 @@ import AdminToolsManager from "./pages/AdminToolsManager";
 import AdminAppsManager from "./pages/AdminAppsManager";
 import AdminBlogManager from "./pages/AdminBlogManager";
 import AdminContactManager from "./pages/AdminContactManager";
+import AdminClientsMessages from "./pages/AdminClientsMessages";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -115,6 +117,22 @@ function App() {
               element={
                 <AdminProtectedRoute>
                   <AdminBlogManager />
+                </AdminProtectedRoute>
+              }
+            />
+            <Route
+              path="/myportadmin/dashboard/contact"
+              element={
+                <AdminProtectedRoute>
+                  <AdminContactManager />
+                </AdminProtectedRoute>
+              }
+            />
+            <Route
+              path="/myportadmin/dashboard/clientsMessages"
+              element={
+                <AdminProtectedRoute>
+                  <AdminClientsMessages />
                 </AdminProtectedRoute>
               }
             />
