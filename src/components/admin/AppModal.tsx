@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { X, Upload, Link as LinkIcon } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -28,6 +29,7 @@ const appSchema = z.object({
   codeLink: z.string().url().optional().or(z.literal('')),
   downloadLink: z.string().url().optional().or(z.literal('')),
   order: z.number().min(0, 'Order must be a positive number'),
+  visible: z.boolean(),
 });
 
 type AppFormData = z.infer<typeof appSchema>;
@@ -67,6 +69,7 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
       codeLink: '',
       downloadLink: '',
       order: 0,
+      visible: true,
     },
   });
 
@@ -82,6 +85,7 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
         codeLink: editingApp.codeLink || '',
         downloadLink: editingApp.downloadLink || '',
         order: editingApp.order,
+        visible: editingApp.visible !== false,
       });
       setScreenshots(editingApp.screenshots || []);
       setTechnologies(editingApp.technologies || []);
@@ -279,6 +283,21 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
                       <p className="text-sm text-red-500 mt-1">{errors.order.message}</p>
                     )}
                   </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Controller
+                    name="visible"
+                    control={control}
+                    render={({ field }) => (
+                      <Switch
+                        id="visible"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
+                  />
+                  <Label htmlFor="visible">Visible to public</Label>
                 </div>
               </TabsContent>
 

@@ -4,11 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Eye, Edit, Trash2, ArrowUpDown } from 'lucide-react';
+import { Plus, Search, Eye, Edit, Trash2, ArrowUpDown, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import AppsTable from '@/components/admin/AppsTable';
 import AppModal from '@/components/admin/AppModal';
-import { listenDynamicContent, deleteDynamicContent } from '@/integrations/firebase/firestore';
+import { listenDynamicContent, deleteDynamicContent, saveAndUpdateDynamicContent } from '@/integrations/firebase/firestore';
 
 export interface AppItem {
   id: string;
@@ -28,6 +28,7 @@ export interface AppItem {
   achievements: string;
   accessibility: string;
   order: number;
+  visible: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -106,6 +107,27 @@ const AdminAppsManager = () => {
 
   const handleViewApp = (app: AppItem) => {
     setViewingApp(app);
+  };
+
+  const handleToggleVisibility = async (app: AppItem) => {
+    const updatedApp = { ...app, visible: !app.visible };
+    
+    try {
+      const { error } = await saveAndUpdateDynamicContent(
+        'apps',
+        updatedApp,
+        app.id
+      );
+      
+      if (error) {
+        throw new Error(error);
+      }
+      
+      toast.success(`App ${app.visible ? 'hidden' : 'shown'} successfully`);
+    } catch (error) {
+      console.error('Toggle visibility error:', error);
+      toast.error('Failed to toggle app visibility');
+    }
   };
 
   const handleDeleteApp = async (app: AppItem) => {
@@ -234,6 +256,7 @@ const AdminAppsManager = () => {
           onEdit={handleEditApp}
           onView={handleViewApp}
           onDelete={handleDeleteApp}
+          onToggleVisibility={handleToggleVisibility}
           getStatusColor={getStatusColor}
           getTypeColor={getTypeColor}
         />

@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowUpDown, Eye, Edit, Trash2 } from 'lucide-react';
+import { ArrowUpDown, Eye, Edit, Trash2, EyeOff } from 'lucide-react';
 import type { AppItem } from '@/pages/AdminAppsManager';
 
 interface AppsTableProps {
@@ -14,6 +14,7 @@ interface AppsTableProps {
   onEdit: (app: AppItem) => void;
   onView: (app: AppItem) => void;
   onDelete: (app: AppItem) => void;
+  onToggleVisibility: (app: AppItem) => void;
   getStatusColor: (status: string) => string;
   getTypeColor: (type: string) => string;
 }
@@ -26,6 +27,7 @@ const AppsTable: React.FC<AppsTableProps> = ({
   onEdit,
   onView,
   onDelete,
+  onToggleVisibility,
   getStatusColor,
   getTypeColor
 }) => {
@@ -55,6 +57,7 @@ const AppsTable: React.FC<AppsTableProps> = ({
                 <SortableHeader field="title">Title</SortableHeader>
                 <SortableHeader field="type">Type</SortableHeader>
                 <SortableHeader field="status">Status</SortableHeader>
+                <SortableHeader field="visible">Visibility</SortableHeader>
                 <SortableHeader field="duration">Duration</SortableHeader>
                 <TableHead>Technologies</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -63,7 +66,7 @@ const AppsTable: React.FC<AppsTableProps> = ({
             <TableBody>
               {apps.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                  <TableCell colSpan={8} className="text-center py-8 text-gray-500">
                     No apps found
                   </TableCell>
                 </TableRow>
@@ -86,6 +89,16 @@ const AppsTable: React.FC<AppsTableProps> = ({
                       <Badge className={getStatusColor(app.status)}>
                         {app.status}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onToggleVisibility(app)}
+                        className={app.visible ? 'text-green-600 hover:text-green-700' : 'text-gray-400 hover:text-gray-600'}
+                      >
+                        {app.visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                      </Button>
                     </TableCell>
                     <TableCell>{app.duration}</TableCell>
                     <TableCell>

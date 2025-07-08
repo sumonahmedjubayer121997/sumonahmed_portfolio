@@ -19,6 +19,7 @@ interface AppItem {
   demoLink?: string;
   codeLink?: string;
   downloadLink?: string;
+  visible?: boolean;
 }
 
 const Apps = () => {
@@ -38,7 +39,9 @@ const Apps = () => {
         }
 
         if (data && Array.isArray(data)) {
-          setApps(data as AppItem[]);
+          // Filter to only show visible apps
+          const visibleApps = (data as AppItem[]).filter(app => app.visible !== false);
+          setApps(visibleApps);
         }
       } catch (error) {
         console.error('Error fetching apps:', error);
