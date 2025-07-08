@@ -25,6 +25,7 @@ import AdminAboutManager from "./pages/AdminAboutManager";
 import AdminAppsManager from "./pages/AdminAppsManager";
 import AdminBlogManager from "./pages/AdminBlogManager";
 import AdminContactManager from "./pages/AdminContactManager";
+import AdminExperienceManager from "./pages/AdminExperienceManager";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -79,6 +80,14 @@ function App() {
               element={
                 <AdminProtectedRoute>
                   <AdminAboutManager />
+                </AdminProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/myportadmin/dashboard/experience" 
+              element={
+                <AdminProtectedRoute>
+                  <AdminExperienceManager />
                 </AdminProtectedRoute>
               } 
             />
