@@ -1,10 +1,8 @@
 
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Eye, EyeOff } from "lucide-react";
 import TechIcon from "@/components/TechIcon";
 import Layout from "../components/Layout";
-import { Button } from "@/components/ui/button";
 import { getDynamicContent } from "@/integrations/firebase/firestore";
 import { toast } from "sonner";
 
@@ -26,7 +24,6 @@ interface AppItem {
 const Apps = () => {
   const [apps, setApps] = useState<AppItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showApps, setShowApps] = useState(true);
 
   useEffect(() => {
     const fetchApps = async () => {
@@ -118,32 +115,16 @@ const Apps = () => {
 
         {/* Header Section */}
         <div className="mb-12 relative z-10">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-            <div>
-              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-2">
-                Apps
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 text-lg">
-                A timeline of my apps projects.
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => setShowApps(!showApps)}
-              className="flex items-center gap-2 w-fit"
-            >
-              {showApps ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              {showApps ? 'Hide Apps' : 'Show Apps'}
-            </Button>
-          </div>
+          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+            Apps
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 text-lg">
+            A timeline of my apps projects.
+          </p>
         </div>
 
         {/* App Cards Section */}
-        {!showApps ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="text-lg text-gray-600 dark:text-gray-400">Apps are hidden. Click "Show Apps" to view them.</div>
-          </div>
-        ) : loading ? (
+        {loading ? (
           <div className="flex justify-center items-center py-12">
             <div className="text-lg text-gray-600 dark:text-gray-400">Loading apps...</div>
           </div>
