@@ -27,7 +27,6 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { X, Plus, Upload } from "lucide-react";
@@ -262,7 +261,7 @@ export const ProjectModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {mode === "edit" ? "Edit Project" : "Add New Project"}
@@ -531,24 +530,80 @@ export const ProjectModal = ({
               </div>
             </div>
 
-            {/* About Section */}
-            <FormField
-              control={form.control}
-              name="about"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>About</FormLabel>
-                  <FormControl>
-                    <RichContentEditor
-                      initialContent={field.value}
-                      onSave={(content) => field.onChange(content)}
-                      placeholder="Describe the project..."
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Rich Text Fields */}
+            <div className="space-y-6">
+              <FormField
+                control={form.control}
+                name="about"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>About</FormLabel>
+                    <FormControl>
+                      <RichContentEditor
+                        initialContent={field.value}
+                        onSave={(content) => field.onChange(content)}
+                        placeholder="Describe the project..."
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="challenges"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Challenges</FormLabel>
+                    <FormControl>
+                      <RichContentEditor
+                        initialContent={field.value || ""}
+                        onSave={(content) => field.onChange(content)}
+                        placeholder="Describe challenges faced..."
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="achievements"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Achievements</FormLabel>
+                    <FormControl>
+                      <RichContentEditor
+                        initialContent={field.value || ""}
+                        onSave={(content) => field.onChange(content)}
+                        placeholder="Describe achievements..."
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="accessibility"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Accessibility</FormLabel>
+                    <FormControl>
+                      <RichContentEditor
+                        initialContent={field.value || ""}
+                        onSave={(content) => field.onChange(content)}
+                        placeholder="Describe accessibility features..."
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             {/* Features */}
             <div>
@@ -581,63 +636,6 @@ export const ProjectModal = ({
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Rich Text Fields */}
-            <div className="grid grid-cols-1 gap-6">
-              <FormField
-                control={form.control}
-                name="challenges"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Challenges</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Describe challenges faced..."
-                        className="min-h-[100px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="achievements"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Achievements</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Describe achievements..."
-                        className="min-h-[100px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="accessibility"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Accessibility</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Describe accessibility features..."
-                        className="min-h-[100px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
 
             {/* Visibility Toggle */}
