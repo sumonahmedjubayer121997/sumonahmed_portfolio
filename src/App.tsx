@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -52,10 +51,7 @@ function App() {
             <Route path="/blogs/:slug" element={<BlogDetail />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/tools" element={<Tools />} />
-            <Route
-              path="/upload-blood-donation"
-              element={<UploadBloodDonationImage />}
-            />
+
             <Route path="/myportlogin" element={<AdminLogin />} />
             <Route
               path="/myportadmin/dashboard"

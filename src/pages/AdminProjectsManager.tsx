@@ -1,24 +1,26 @@
-
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/AdminLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Filter } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ProjectsTable } from "@/components/admin/ProjectsTable";
-import { ProjectModal } from "@/components/admin/ProjectModal";
-import { ProjectPreviewModal } from "@/components/admin/ProjectPreviewModal";
-import { listenDynamicContent, deleteDynamicContent } from "@/integrations/firebase/firestore";
-import { useToast } from "@/hooks/use-toast";
+import { Plus, Search } from "lucide-react";
+import { toast } from "sonner";
 
-export interface Project {
+import ProjectsTable from "@/components/admin/ProjectsTable";
+import ProjectModal from "@/components/admin/ProjectModal";
+import {
+  listenDynamicContent,
+  deleteDynamicContent,
+  saveAndUpdateDynamicContent,
+} from "@/integrations/firebase/firestore";
+
+export interface ProjectItem {
   id: string;
-  order: number;
   title: string;
   status: "draft" | "published" | "archived";
   version: string;
-  type: "Mobile" | "Web" | "Desktop";
+  type: "mobile" | "web" | "desktop";
   duration: string;
   demoLink?: string;
   codeLink?: string;
@@ -26,98 +28,124 @@ export interface Project {
   screenshots: string[];
   technologies: string[];
   about: string;
-  features: string[];
+  features: string;
   challenges: string;
   achievements: string;
   accessibility: string;
+  order: number;
+  visible: boolean;
   createdAt: string;
   updatedAt: string;
-  visible: boolean;
 }
 
-const AdminProjectsManager = () => {
-  const [projects, setProjects] = useState<Project[]>([]);
+const AdminProjectsManager: React.FC = () => {
+  const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<"add" | "edit">("add");
-  const { toast } = useToast();
+  const [editingProject, setEditingProject] = useState<ProjectItem | null>(
+    null
+  );
+  const [viewingProject, setViewingProject] = useState<ProjectItem | null>(
+    null
+  );
+  const [sortField, setSortField] = useState<keyof ProjectItem>("order");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
+  // Subscribe to firestore 'projects'
   useEffect(() => {
     const unsubscribe = listenDynamicContent(
-      'projects',
+      "projects",
       null,
-      (data: Project[]) => {
-        const sortedProjects = data
-          .sort((a: Project, b: Project) => (a.order || 0) - (b.order || 0));
-        setProjects(sortedProjects);
+      (data: ProjectItem[]) => {
+        setProjects(data || []);
         setLoading(false);
       },
       (error) => {
-        console.error('Error listening to projects:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load projects",
-          variant: "destructive",
-        });
+        console.error("Error listening to projects:", error);
+        toast.error("Failed to load projects");
         setLoading(false);
       }
     );
-
     return () => {
-      if (unsubscribe) unsubscribe();
+      unsubscribe?.();
     };
-  }, [toast]);
+  }, []);
 
-  const handleAddProject = () => {
-    setSelectedProject(null);
-    setModalMode("add");
-    setIsModalOpen(true);
-  };
-
-  const handleEditProject = (project: Project) => {
-    setSelectedProject(project);
-    setModalMode("edit");
-    setIsModalOpen(true);
-  };
-
-  const handleViewProject = (project: Project) => {
-    setSelectedProject(project);
-    setIsPreviewOpen(true);
-  };
-
-  const handleDeleteProject = async (projectId: string) => {
-    if (!confirm("Are you sure you want to delete this project?")) return;
-
-    try {
-      const { error } = await deleteDynamicContent('projects', projectId);
-      if (error) {
-        throw new Error(error);
-      }
-      
-      toast({
-        title: "Success",
-        description: "Project deleted successfully",
-      });
-    } catch (error: any) {
-      console.error('Error deleting project:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete project",
-        variant: "destructive",
-      });
+  const handleSort = (field: keyof ProjectItem) => {
+    if (sortField === field) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
     }
   };
 
-  const filteredProjects = projects.filter(project =>
-    project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    project.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    project.status.toLowerCase().includes(searchTerm.toLowerCase())
+  const sortedProjects = [...projects].sort((a, b) => {
+    const aVal = a[sortField];
+    const bVal = b[sortField];
+    if (typeof aVal === "string" && typeof bVal === "string") {
+      return sortDirection === "asc"
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
+    }
+    if (typeof aVal === "number" && typeof bVal === "number") {
+      return sortDirection === "asc" ? aVal - bVal : bVal - aVal;
+    }
+    return 0;
+  });
+
+  const filteredProjects = sortedProjects.filter((project) =>
+    [project.title, project.type, project.status].some((field) =>
+      field.toLowerCase().includes(searchTerm.toLowerCase())
+    )
   );
 
-  const getStatusColor = (status: string) => {
+  const handleAddProject = () => {
+    setEditingProject(null);
+    setIsModalOpen(true);
+  };
+  const handleEditProject = (p: ProjectItem) => {
+    setEditingProject(p);
+    setIsModalOpen(true);
+  };
+  const handleViewProject = (p: ProjectItem) => setViewingProject(p);
+
+  const handleToggleVisibility = async (p: ProjectItem) => {
+    const updated = { ...p, visible: !p.visible };
+    try {
+      const { error } = await saveAndUpdateDynamicContent(
+        "projects",
+        updated,
+        p.id
+      );
+      if (error) throw new Error(error);
+      toast.success(`Project ${p.visible ? "hidden" : "shown"} successfully`);
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to toggle visibility");
+    }
+  };
+
+  const handleDeleteProject = async (p: ProjectItem) => {
+    if (!confirm(`Delete "${p.title}" permanently?`)) return;
+    try {
+      const { error } = await deleteDynamicContent("projects", p.id);
+      if (error) throw new Error(error);
+      toast.success("Project deleted successfully");
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to delete project");
+    }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingProject(null);
+  };
+  const closeView = () => setViewingProject(null);
+
+  const getStatusColor = (status: ProjectItem["status"]) => {
     switch (status) {
       case "published":
         return "bg-green-100 text-green-800 border-green-200";
@@ -130,14 +158,14 @@ const AdminProjectsManager = () => {
     }
   };
 
-  const getTypeColor = (type: string) => {
+  const getTypeColor = (type: ProjectItem["type"]) => {
     switch (type) {
-      case "Mobile":
+      case "mobile":
         return "bg-blue-100 text-blue-800 border-blue-200";
-      case "Web":
+      case "web":
         return "bg-purple-100 text-purple-800 border-purple-200";
-      case "Desktop":
-        return "bg-orange-100 text-orange-800 border-orange-200";
+      case "desktop":
+        return "bg-indigo-100 text-indigo-800 border-indigo-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
@@ -147,7 +175,7 @@ const AdminProjectsManager = () => {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center h-96">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
         </div>
       </AdminLayout>
     );
@@ -159,10 +187,15 @@ const AdminProjectsManager = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Projects Manager</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Projects Manager
+            </h1>
             <p className="text-gray-600 mt-1">Manage your project portfolio</p>
           </div>
-          <Button onClick={handleAddProject} className="flex items-center gap-2">
+          <Button
+            onClick={handleAddProject}
+            className="flex items-center gap-2"
+          >
             <Plus className="w-4 h-4" />
             Add New Project
           </Button>
@@ -172,14 +205,16 @@ const AdminProjectsManager = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-4">
-              <div className="text-2xl font-bold text-primary">{projects.length}</div>
+              <div className="text-2xl font-bold text-primary">
+                {projects.length}
+              </div>
               <div className="text-sm text-gray-600">Total Projects</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4">
               <div className="text-2xl font-bold text-green-600">
-                {projects.filter(project => project.status === "published").length}
+                {projects.filter((p) => p.status === "published").length}
               </div>
               <div className="text-sm text-gray-600">Published</div>
             </CardContent>
@@ -187,7 +222,7 @@ const AdminProjectsManager = () => {
           <Card>
             <CardContent className="p-4">
               <div className="text-2xl font-bold text-yellow-600">
-                {projects.filter(project => project.status === "draft").length}
+                {projects.filter((p) => p.status === "draft").length}
               </div>
               <div className="text-sm text-gray-600">Drafts</div>
             </CardContent>
@@ -195,7 +230,7 @@ const AdminProjectsManager = () => {
           <Card>
             <CardContent className="p-4">
               <div className="text-2xl font-bold text-gray-600">
-                {projects.filter(project => project.status === "archived").length}
+                {projects.filter((p) => p.status === "archived").length}
               </div>
               <div className="text-sm text-gray-600">Archived</div>
             </CardContent>
@@ -220,27 +255,116 @@ const AdminProjectsManager = () => {
         {/* Projects Table */}
         <ProjectsTable
           projects={filteredProjects}
-          loading={loading}
+          onSort={handleSort}
+          sortField={sortField}
+          sortDirection={sortDirection}
           onEdit={handleEditProject}
           onView={handleViewProject}
           onDelete={handleDeleteProject}
+          onToggleVisibility={handleToggleVisibility}
+          getStatusColor={getStatusColor}
+          getTypeColor={getTypeColor}
         />
 
+        {/* Add/Edit Modal */}
         <ProjectModal
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          project={selectedProject}
-          mode={modalMode}
-          onSuccess={() => {
-            // The real-time listener will automatically update the list
-          }}
+          onClose={closeModal}
+          editingProject={editingProject}
         />
 
-        <ProjectPreviewModal
-          isOpen={isPreviewOpen}
-          onClose={() => setIsPreviewOpen(false)}
-          project={selectedProject}
-        />
+        {/* View Modal */}
+        {viewingProject && (
+          <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-lg max-w-4xl max-h-[90vh] overflow-y-auto w-full">
+              <div className="p-6 border-b flex justify-between items-center">
+                <h2 className="text-xl font-semibold">
+                  {viewingProject.title}
+                </h2>
+                <Button variant="ghost" onClick={closeView}>
+                  ×
+                </Button>
+              </div>
+              <div className="p-6 space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label>Status</label>
+                    <Badge className={getStatusColor(viewingProject.status)}>
+                      {viewingProject.status}
+                    </Badge>
+                  </div>
+                  <div>
+                    <label>Type</label>
+                    <Badge className={getTypeColor(viewingProject.type)}>
+                      {viewingProject.type}
+                    </Badge>
+                  </div>
+                  <div>
+                    <label>Version</label>
+                    <p>{viewingProject.version}</p>
+                  </div>
+                  <div>
+                    <label>Duration</label>
+                    <p>{viewingProject.duration}</p>
+                  </div>
+                </div>
+
+                {/* Screenshots */}
+                {viewingProject.screenshots?.length > 0 && (
+                  <div>
+                    <label>Screenshots</label>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-2">
+                      {viewingProject.screenshots.map((src, i) => (
+                        <img
+                          key={i}
+                          src={src}
+                          alt={`Screenshot ${i + 1}`}
+                          className="w-full h-32 object-cover rounded border"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Technologies */}
+                {viewingProject.technologies?.length > 0 && (
+                  <div>
+                    <label>Technologies</label>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {viewingProject.technologies.map((t, i) => (
+                        <Badge key={i} variant="outline">
+                          {t}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Content Sections */}
+                {[
+                  "about",
+                  "features",
+                  "challenges",
+                  "achievements",
+                  "accessibility",
+                ].map((key) => {
+                  const html = (viewingProject as any)[key];
+                  return (
+                    html && (
+                      <div key={key}>
+                        <label className="capitalize">{key}</label>
+                        <div
+                          className="mt-2 prose prose-sm max-w-none"
+                          dangerouslySetInnerHTML={{ __html: html }}
+                        />
+                      </div>
+                    )
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </AdminLayout>
   );

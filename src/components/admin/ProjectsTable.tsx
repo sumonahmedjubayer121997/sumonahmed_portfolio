@@ -1,4 +1,7 @@
-
+import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -7,181 +10,182 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Eye, Edit, Trash2, ArrowUpDown } from "lucide-react";
-import { Project } from "@/pages/AdminProjectsManager";
-import { useState } from "react";
+import { ArrowUpDown, Eye, Edit, Trash2, EyeOff } from "lucide-react";
+import type { ProjectItem } from "@/pages/AdminProjectsManager";
 
 interface ProjectsTableProps {
-  projects: Project[];
-  loading: boolean;
-  onEdit: (project: Project) => void;
-  onView: (project: Project) => void;
-  onDelete: (projectId: string) => void;
+  projects: ProjectItem[];
+  onSort: (field: keyof ProjectItem) => void;
+  sortField: keyof ProjectItem;
+  sortDirection: "asc" | "desc";
+  onEdit: (project: ProjectItem) => void;
+  onView: (project: ProjectItem) => void;
+  onDelete: (project: ProjectItem) => void;
+  onToggleVisibility: (project: ProjectItem) => void;
+  getStatusColor: (status: string) => string;
+  getTypeColor: (type: string) => string;
 }
 
-export const ProjectsTable = ({
+const ProjectsTable: React.FC<ProjectsTableProps> = ({
   projects,
-  loading,
+  onSort,
+  sortField,
+  sortDirection,
   onEdit,
   onView,
   onDelete,
-}: ProjectsTableProps) => {
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "published":
-        return "bg-green-100 text-green-800";
-      case "draft":
-        return "bg-yellow-100 text-yellow-800";
-      case "archived":
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case "Mobile":
-        return "bg-blue-100 text-blue-800";
-      case "Web":
-        return "bg-purple-100 text-purple-800";
-      case "Desktop":
-        return "bg-orange-100 text-orange-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const sortedProjects = [...projects].sort((a, b) => {
-    if (sortOrder === "asc") {
-      return (a.order || 0) - (b.order || 0);
-    } else {
-      return (b.order || 0) - (a.order || 0);
-    }
-  });
-
-  const toggleSort = () => {
-    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-  };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-48">
-        <div className="text-lg text-gray-600">Loading projects...</div>
-      </div>
-    );
-  }
-
-  if (projects.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <div className="text-gray-500 text-lg">No projects found</div>
-        <div className="text-gray-400 text-sm mt-2">
-          Create your first project to get started
+  onToggleVisibility,
+  getStatusColor,
+  getTypeColor,
+}) => {
+  const SortableHeader = ({
+    field,
+    children,
+  }: {
+    field: keyof ProjectItem;
+    children: React.ReactNode;
+  }) => (
+    <TableHead>
+      <Button
+        variant="ghost"
+        className="h-auto p-0 font-medium hover:bg-transparent"
+        onClick={() => onSort(field)}
+      >
+        <div className="flex items-center gap-1">
+          {children}
+          <ArrowUpDown className="w-3 h-3" />
         </div>
-      </div>
-    );
-  }
+      </Button>
+    </TableHead>
+  );
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-20">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleSort}
-                className="flex items-center gap-1 p-0 h-auto font-medium"
-              >
-                Order
-                <ArrowUpDown className="h-3 w-3" />
-              </Button>
-            </TableHead>
-            <TableHead>Title</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Duration</TableHead>
-            <TableHead>Technologies</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {sortedProjects.map((project) => (
-            <TableRow key={project.id}>
-              <TableCell className="font-medium">
-                {project.order || 0}
-              </TableCell>
-              <TableCell>
-                <div>
-                  <div className="font-medium">{project.title}</div>
-                  {project.version && (
-                    <div className="text-sm text-gray-500">v{project.version}</div>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell>
-                <Badge className={getTypeColor(project.type)}>
-                  {project.type}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <Badge className={getStatusColor(project.status)}>
-                  {project.status}
-                </Badge>
-              </TableCell>
-              <TableCell>{project.duration}</TableCell>
-              <TableCell>
-                <div className="flex flex-wrap gap-1">
-                  {project.technologies.slice(0, 3).map((tech, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
-                      {tech}
-                    </Badge>
-                  ))}
-                  {project.technologies.length > 3 && (
-                    <Badge variant="secondary" className="text-xs">
-                      +{project.technologies.length - 3}
-                    </Badge>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell className="text-right">
-                <div className="flex items-center justify-end gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onView(project)}
-                    className="h-8 w-8 p-0"
+    <Card>
+      <CardContent className="p-0">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <SortableHeader field="order">Order</SortableHeader>
+                <SortableHeader field="title">Title</SortableHeader>
+                <SortableHeader field="type">Type</SortableHeader>
+                <SortableHeader field="status">Status</SortableHeader>
+                <SortableHeader field="visible">Visibility</SortableHeader>
+                <SortableHeader field="duration">Duration</SortableHeader>
+                <TableHead>Technologies</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {projects.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={8}
+                    className="text-center py-8 text-gray-500"
                   >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onEdit(project)}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onDelete(project.id)}
-                    className="h-8 w-8 p-0 text-red-600 hover:text-red-800"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+                    No projects found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                projects.map((project) => (
+                  <TableRow key={project.id} className="hover:bg-gray-50">
+                    <TableCell className="font-medium">
+                      {project.order}
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{project.title}</div>
+                        <div className="text-sm text-gray-500">
+                          v{project.version}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getTypeColor(project.type)}>
+                        {project.type}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getStatusColor(project.status)}>
+                        {project.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onToggleVisibility(project)}
+                        className={
+                          project.visible
+                            ? "text-green-600 hover:text-green-700"
+                            : "text-gray-400 hover:text-gray-600"
+                        }
+                      >
+                        {project.visible ? (
+                          <Eye className="w-4 h-4" />
+                        ) : (
+                          <EyeOff className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </TableCell>
+                    <TableCell>{project.duration}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {project.technologies
+                          ?.slice(0, 3)
+                          .map((tech, index) => (
+                            <Badge
+                              key={index}
+                              variant="outline"
+                              className="text-xs"
+                            >
+                              {tech}
+                            </Badge>
+                          ))}
+                        {project.technologies?.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{project.technologies.length - 3}
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onView(project)}
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onEdit(project)}
+                          className="text-gray-600 hover:text-gray-700 hover:bg-gray-50"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onDelete(project)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
+
+export default ProjectsTable;

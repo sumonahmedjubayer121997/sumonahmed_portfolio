@@ -1,34 +1,45 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { X, Upload, Link as LinkIcon } from 'lucide-react';
-import { Switch } from '@/components/ui/switch';
-import { toast } from 'sonner';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import RichContentEditor from '@/components/RichContentEditor';
-import TechnologySelector from '@/components/admin/TechnologySelector';
-import ScreenshotUploader from '@/components/admin/ScreenshotUploader';
-import { saveAndUpdateDynamicContent } from '@/integrations/firebase/firestore';
-import type { AppItem } from '@/pages/AdminAppsManager';
+import React, { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { X, Upload, Link as LinkIcon } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import RichContentEditor from "@/components/RichContentEditor";
+import TechnologySelector from "@/components/admin/TechnologySelector";
+import ScreenshotUploader from "@/components/admin/ScreenshotUploader";
+import { saveAndUpdateDynamicContent } from "@/integrations/firebase/firestore";
+import type { AppItem } from "@/pages/AdminAppsManager";
 
 const appSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  status: z.enum(['draft', 'published', 'archived']),
-  version: z.string().min(1, 'Version is required'),
-  type: z.enum(['mobile', 'web', 'desktop']),
-  duration: z.string().min(1, 'Duration is required'),
-  demoLink: z.string().url().optional().or(z.literal('')),
-  codeLink: z.string().url().optional().or(z.literal('')),
-  downloadLink: z.string().url().optional().or(z.literal('')),
-  order: z.number().min(0, 'Order must be a positive number'),
+  title: z.string().min(1, "Title is required"),
+  status: z.enum(["draft", "published", "archived"]),
+  version: z.string().min(1, "Version is required"),
+  type: z.enum(["mobile", "web", "desktop"]),
+  duration: z.string().min(1, "Duration is required"),
+  demoLink: z.string().url().optional().or(z.literal("")),
+  codeLink: z.string().url().optional().or(z.literal("")),
+  downloadLink: z.string().url().optional().or(z.literal("")),
+  order: z.number().min(0, "Order must be a positive number"),
   visible: z.boolean(),
 });
 
@@ -45,11 +56,11 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
   const [screenshots, setScreenshots] = useState<string[]>([]);
   const [technologies, setTechnologies] = useState<string[]>([]);
   const [richTextFields, setRichTextFields] = useState({
-    about: '',
-    features: '',
-    challenges: '',
-    achievements: '',
-    accessibility: '',
+    about: "",
+    features: "",
+    challenges: "",
+    achievements: "",
+    accessibility: "",
   });
 
   const {
@@ -60,14 +71,14 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
   } = useForm<AppFormData>({
     resolver: zodResolver(appSchema),
     defaultValues: {
-      title: '',
-      status: 'draft',
-      version: '1.0.0',
-      type: 'web',
-      duration: '',
-      demoLink: '',
-      codeLink: '',
-      downloadLink: '',
+      title: "",
+      status: "draft",
+      version: "1.0.0",
+      type: "web",
+      duration: "",
+      demoLink: "",
+      codeLink: "",
+      downloadLink: "",
       order: 0,
       visible: true,
     },
@@ -81,38 +92,38 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
         version: editingApp.version,
         type: editingApp.type,
         duration: editingApp.duration,
-        demoLink: editingApp.demoLink || '',
-        codeLink: editingApp.codeLink || '',
-        downloadLink: editingApp.downloadLink || '',
+        demoLink: editingApp.demoLink || "",
+        codeLink: editingApp.codeLink || "",
+        downloadLink: editingApp.downloadLink || "",
         order: editingApp.order,
         visible: editingApp.visible !== false,
       });
       setScreenshots(editingApp.screenshots || []);
       setTechnologies(editingApp.technologies || []);
       setRichTextFields({
-        about: editingApp.about || '',
-        features: editingApp.features || '',
-        challenges: editingApp.challenges || '',
-        achievements: editingApp.achievements || '',
-        accessibility: editingApp.accessibility || '',
+        about: editingApp.about || "",
+        features: editingApp.features || "",
+        challenges: editingApp.challenges || "",
+        achievements: editingApp.achievements || "",
+        accessibility: editingApp.accessibility || "",
       });
     } else {
       reset();
       setScreenshots([]);
       setTechnologies([]);
       setRichTextFields({
-        about: '',
-        features: '',
-        challenges: '',
-        achievements: '',
-        accessibility: '',
+        about: "",
+        features: "",
+        challenges: "",
+        achievements: "",
+        accessibility: "",
       });
     }
   }, [editingApp, reset]);
 
   const onSubmit = async (data: AppFormData) => {
     setSaving(true);
-    
+
     try {
       const appData = {
         ...data,
@@ -124,38 +135,47 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
       };
 
       const { error } = await saveAndUpdateDynamicContent(
-        'apps',
+        "apps",
         appData,
         editingApp?.id
       );
 
       if (error) throw new Error(error);
 
-      toast.success(editingApp ? 'App updated successfully' : 'App created successfully');
+      toast.success(
+        editingApp ? "App updated successfully" : "App created successfully"
+      );
       onClose();
     } catch (error) {
-      console.error('Error saving app:', error);
-      toast.error('Failed to save app');
+      console.error("Error saving app:", error);
+      toast.error("Failed to save app");
     } finally {
       setSaving(false);
     }
   };
 
-  const handleRichTextChange = (field: keyof typeof richTextFields, content: string) => {
-    setRichTextFields(prev => ({ ...prev, [field]: content }));
+  const handleRichTextChange = (
+    field: keyof typeof richTextFields,
+    content: string
+  ) => {
+    setRichTextFields((prev) => ({ ...prev, [field]: content }));
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle>
-            {editingApp ? 'Edit App' : 'Add New App'}
-          </DialogTitle>
+          <DialogTitle>{editingApp ? "Edit App" : "Add New App"}</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 overflow-hidden">
-          <Tabs defaultValue="basic" className="flex flex-col flex-1 overflow-hidden">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col flex-1 overflow-hidden"
+        >
+          <Tabs
+            defaultValue="basic"
+            className="flex flex-col flex-1 overflow-hidden"
+          >
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="basic">Basic Info</TabsTrigger>
               <TabsTrigger value="media">Media & Tech</TabsTrigger>
@@ -176,12 +196,14 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
                           {...field}
                           id="title"
                           placeholder="Enter app title"
-                          className={errors.title ? 'border-red-500' : ''}
+                          className={errors.title ? "border-red-500" : ""}
                         />
                       )}
                     />
                     {errors.title && (
-                      <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.title.message}
+                      </p>
                     )}
                   </div>
 
@@ -195,12 +217,14 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
                           {...field}
                           id="version"
                           placeholder="e.g., 1.0.0"
-                          className={errors.version ? 'border-red-500' : ''}
+                          className={errors.version ? "border-red-500" : ""}
                         />
                       )}
                     />
                     {errors.version && (
-                      <p className="text-sm text-red-500 mt-1">{errors.version.message}</p>
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.version.message}
+                      </p>
                     )}
                   </div>
 
@@ -210,7 +234,10 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
                       name="status"
                       control={control}
                       render={({ field }) => (
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
                           <SelectTrigger>
                             <SelectValue placeholder="Select status" />
                           </SelectTrigger>
@@ -230,7 +257,10 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
                       name="type"
                       control={control}
                       render={({ field }) => (
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
                           <SelectTrigger>
                             <SelectValue placeholder="Select type" />
                           </SelectTrigger>
@@ -254,12 +284,14 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
                           {...field}
                           id="duration"
                           placeholder="e.g., 3 months, 2 weeks"
-                          className={errors.duration ? 'border-red-500' : ''}
+                          className={errors.duration ? "border-red-500" : ""}
                         />
                       )}
                     />
                     {errors.duration && (
-                      <p className="text-sm text-red-500 mt-1">{errors.duration.message}</p>
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.duration.message}
+                      </p>
                     )}
                   </div>
 
@@ -274,13 +306,17 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
                           id="order"
                           type="number"
                           min="0"
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                          className={errors.order ? 'border-red-500' : ''}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value) || 0)
+                          }
+                          className={errors.order ? "border-red-500" : ""}
                         />
                       )}
                     />
                     {errors.order && (
-                      <p className="text-sm text-red-500 mt-1">{errors.order.message}</p>
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.order.message}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -324,7 +360,7 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
                   <Label>About</Label>
                   <RichContentEditor
                     initialContent={richTextFields.about}
-                    onSave={(content) => handleRichTextChange('about', content)}
+                    onSave={(content) => handleRichTextChange("about", content)}
                     placeholder="Describe the app..."
                   />
                 </div>
@@ -333,7 +369,9 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
                   <Label>Features</Label>
                   <RichContentEditor
                     initialContent={richTextFields.features}
-                    onSave={(content) => handleRichTextChange('features', content)}
+                    onSave={(content) =>
+                      handleRichTextChange("features", content)
+                    }
                     placeholder="List the key features..."
                   />
                 </div>
@@ -342,7 +380,9 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
                   <Label>Challenges</Label>
                   <RichContentEditor
                     initialContent={richTextFields.challenges}
-                    onSave={(content) => handleRichTextChange('challenges', content)}
+                    onSave={(content) =>
+                      handleRichTextChange("challenges", content)
+                    }
                     placeholder="Describe challenges faced..."
                   />
                 </div>
@@ -351,7 +391,9 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
                   <Label>Achievements</Label>
                   <RichContentEditor
                     initialContent={richTextFields.achievements}
-                    onSave={(content) => handleRichTextChange('achievements', content)}
+                    onSave={(content) =>
+                      handleRichTextChange("achievements", content)
+                    }
                     placeholder="Highlight achievements..."
                   />
                 </div>
@@ -360,7 +402,9 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
                   <Label>Accessibility</Label>
                   <RichContentEditor
                     initialContent={richTextFields.accessibility}
-                    onSave={(content) => handleRichTextChange('accessibility', content)}
+                    onSave={(content) =>
+                      handleRichTextChange("accessibility", content)
+                    }
                     placeholder="Describe accessibility features..."
                   />
                 </div>
@@ -378,12 +422,14 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
                         id="demoLink"
                         type="url"
                         placeholder="https://demo.example.com"
-                        className={errors.demoLink ? 'border-red-500' : ''}
+                        className={errors.demoLink ? "border-red-500" : ""}
                       />
                     )}
                   />
                   {errors.demoLink && (
-                    <p className="text-sm text-red-500 mt-1">{errors.demoLink.message}</p>
+                    <p className="text-sm text-red-500 mt-1">
+                      {errors.demoLink.message}
+                    </p>
                   )}
                 </div>
 
@@ -398,12 +444,14 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
                         id="codeLink"
                         type="url"
                         placeholder="https://github.com/username/repo"
-                        className={errors.codeLink ? 'border-red-500' : ''}
+                        className={errors.codeLink ? "border-red-500" : ""}
                       />
                     )}
                   />
                   {errors.codeLink && (
-                    <p className="text-sm text-red-500 mt-1">{errors.codeLink.message}</p>
+                    <p className="text-sm text-red-500 mt-1">
+                      {errors.codeLink.message}
+                    </p>
                   )}
                 </div>
 
@@ -418,12 +466,14 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
                         id="downloadLink"
                         type="url"
                         placeholder="https://download.example.com"
-                        className={errors.downloadLink ? 'border-red-500' : ''}
+                        className={errors.downloadLink ? "border-red-500" : ""}
                       />
                     )}
                   />
                   {errors.downloadLink && (
-                    <p className="text-sm text-red-500 mt-1">{errors.downloadLink.message}</p>
+                    <p className="text-sm text-red-500 mt-1">
+                      {errors.downloadLink.message}
+                    </p>
                   )}
                 </div>
               </TabsContent>
@@ -435,7 +485,7 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
               Cancel
             </Button>
             <Button type="submit" disabled={saving}>
-              {saving ? 'Saving...' : editingApp ? 'Update App' : 'Create App'}
+              {saving ? "Saving..." : editingApp ? "Update App" : "Create App"}
             </Button>
           </div>
         </form>

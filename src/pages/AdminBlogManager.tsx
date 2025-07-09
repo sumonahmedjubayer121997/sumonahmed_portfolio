@@ -1,22 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Eye, Edit, Trash2 } from 'lucide-react';
-import AdminLayout from '@/components/AdminLayout';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from 'sonner';
-import { getDynamicContent, deleteDynamicContent } from '@/integrations/firebase/firestore';
-import BlogModal from '@/components/admin/BlogModal';
-import BlogPreviewModal from '@/components/admin/BlogPreviewModal';
+import React, { useState, useEffect } from "react";
+import { Plus, Search, Filter, Eye, Edit, Trash2 } from "lucide-react";
+import AdminLayout from "@/components/AdminLayout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import {
+  getDynamicContent,
+  deleteDynamicContent,
+} from "@/integrations/firebase/firestore";
+import BlogModal from "@/components/admin/BlogModal";
+import BlogPreviewModal from "@/components/admin/BlogPreviewModal";
 
 export interface BlogItem {
   id: string;
   title: string;
   slug: string;
-  status: 'Draft' | 'Published';
+  status: "Draft" | "Published";
   date: string;
   author: string;
   tags: string[];
@@ -34,28 +50,28 @@ const AdminBlogManager = () => {
   const [blogs, setBlogs] = useState<BlogItem[]>([]);
   const [filteredBlogs, setFilteredBlogs] = useState<BlogItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [selectedBlog, setSelectedBlog] = useState<BlogItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
+  const [modalMode, setModalMode] = useState<"add" | "edit">("add");
 
   const fetchBlogs = async () => {
     try {
       setLoading(true);
-      const { data, error } = await getDynamicContent('blogs');
-      
+      const { data, error } = await getDynamicContent("blogs");
+
       if (error) {
-        console.error('Error fetching blogs:', error);
-        toast.error('Failed to load blogs');
+        console.error("Error fetching blogs:", error);
+        toast.error("Failed to load blogs");
         return;
       }
 
       if (data && Array.isArray(data)) {
-        const blogsData = data.map(blog => ({
+        const blogsData = data.map((blog) => ({
           ...blog,
-          id: blog.id || blog.docId
+          id: blog.id || blog.docId,
         }));
         setBlogs(blogsData);
         setFilteredBlogs(blogsData);
@@ -64,8 +80,8 @@ const AdminBlogManager = () => {
         setFilteredBlogs([]);
       }
     } catch (error) {
-      console.error('Error fetching blogs:', error);
-      toast.error('Failed to load blogs');
+      console.error("Error fetching blogs:", error);
+      toast.error("Failed to load blogs");
     } finally {
       setLoading(false);
     }
@@ -77,31 +93,36 @@ const AdminBlogManager = () => {
 
   useEffect(() => {
     let filtered = blogs;
-    
+
     if (searchTerm) {
-      filtered = filtered.filter(blog =>
-        blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        blog.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        blog.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      filtered = filtered.filter(
+        (blog) =>
+          blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          blog.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          blog.tags.some((tag) =>
+            tag.toLowerCase().includes(searchTerm.toLowerCase())
+          )
       );
     }
-    
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(blog => blog.status.toLowerCase() === statusFilter);
+
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(
+        (blog) => blog.status.toLowerCase() === statusFilter
+      );
     }
-    
+
     setFilteredBlogs(filtered);
   }, [searchTerm, statusFilter, blogs]);
 
   const handleAddBlog = () => {
     setSelectedBlog(null);
-    setModalMode('add');
+    setModalMode("add");
     setIsModalOpen(true);
   };
 
   const handleEditBlog = (blog: BlogItem) => {
     setSelectedBlog(blog);
-    setModalMode('edit');
+    setModalMode("edit");
     setIsModalOpen(true);
   };
 
@@ -116,18 +137,18 @@ const AdminBlogManager = () => {
     }
 
     try {
-      const { error } = await deleteDynamicContent('blogs', blog.id);
-      
+      const { error } = await deleteDynamicContent("blogs", blog.id);
+
       if (error) {
-        toast.error('Failed to delete blog');
+        toast.error("Failed to delete blog");
         return;
       }
 
-      toast.success('Blog deleted successfully');
+      toast.success("Blog deleted successfully");
       fetchBlogs();
     } catch (error) {
-      console.error('Error deleting blog:', error);
-      toast.error('Failed to delete blog');
+      console.error("Error deleting blog:", error);
+      toast.error("Failed to delete blog");
     }
   };
 
@@ -139,12 +160,12 @@ const AdminBlogManager = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Published':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'Draft':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case "Published":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "Draft":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
@@ -163,8 +184,12 @@ const AdminBlogManager = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Manage Blogs</h1>
-            <p className="text-gray-600 mt-1">Create and manage your blog posts</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+              Manage Blogs
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Create and manage your blog posts
+            </p>
           </div>
           <Button onClick={handleAddBlog} className="flex items-center gap-2">
             <Plus className="w-4 h-4" />
@@ -225,8 +250,13 @@ const AdminBlogManager = () => {
                 <TableBody>
                   {filteredBlogs.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                        {blogs.length === 0 ? 'No blogs found. Create your first blog post!' : 'No blogs match your search criteria.'}
+                      <TableCell
+                        colSpan={6}
+                        className="text-center py-8 text-gray-500"
+                      >
+                        {blogs.length === 0
+                          ? "No blogs found. Create your first blog post!"
+                          : "No blogs match your search criteria."}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -234,21 +264,33 @@ const AdminBlogManager = () => {
                       <TableRow key={blog.id} className="hover:bg-gray-50">
                         <TableCell>
                           <div>
-                            <div className="font-medium text-gray-900">{blog.title}</div>
-                            <div className="text-sm text-gray-500">/{blog.slug}</div>
+                            <div className="font-medium text-gray-900">
+                              {blog.title}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              /{blog.slug}
+                            </div>
                           </div>
                         </TableCell>
-                        <TableCell className="text-gray-700">{blog.author}</TableCell>
+                        <TableCell className="text-gray-700">
+                          {blog.author}
+                        </TableCell>
                         <TableCell>
                           <Badge className={getStatusColor(blog.status)}>
                             {blog.status}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-gray-700">{blog.date}</TableCell>
+                        <TableCell className="text-gray-700">
+                          {blog.date}
+                        </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
                             {blog.tags?.slice(0, 2).map((tag, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">
+                              <Badge
+                                key={index}
+                                variant="outline"
+                                className="text-xs"
+                              >
                                 {tag}
                               </Badge>
                             ))}
