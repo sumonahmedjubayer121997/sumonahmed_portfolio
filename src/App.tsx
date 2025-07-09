@@ -30,6 +30,9 @@ import AdminBlogManager from "./pages/AdminBlogManager";
 import AdminContactManager from "./pages/AdminContactManager";
 import AdminClientsMessages from "./pages/AdminClientsMessages";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
+import InteractiveBackground from "./components/InteractiveBackground";
+import FluidCursor from "./components/FluidCursor";
+
 
 const queryClient = new QueryClient();
 
@@ -154,6 +157,20 @@ function App() {
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
+        <div
+      style={{
+        pointerEvents: "none",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        zIndex: 5,
+      }}
+    >
+      <InteractiveBackground />
+      <FluidCursor />
+    </div>
     </QueryClientProvider>
   );
 }
