@@ -32,11 +32,18 @@ import AdminClientsMessages from "./pages/AdminClientsMessages";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import InteractiveBackground from "./components/InteractiveBackground";
 import FluidCursor from "./components/FluidCursor";
-
+import Preloader from "./components/Preloader";
+import { usePreloader } from "./hooks/usePreloader";
 
 const queryClient = new QueryClient();
 
 function App() {
+  const { isLoading } = usePreloader({ minDuration: 2000, checkAssets: true });
+
+  if (isLoading) {
+    return <Preloader />;
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -156,21 +163,21 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
-      </TooltipProvider>
         <div
-      style={{
-        pointerEvents: "none",
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        zIndex: 5,
-      }}
-    >
-      <InteractiveBackground />
-      <FluidCursor />
-    </div>
+          style={{
+            pointerEvents: "none",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            zIndex: 5,
+          }}
+        >
+          <InteractiveBackground />
+          <FluidCursor />
+        </div>
+      </TooltipProvider>
     </QueryClientProvider>
   );
 }

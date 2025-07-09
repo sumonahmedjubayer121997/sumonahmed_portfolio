@@ -49,7 +49,7 @@ const Preloader: React.FC<PreloaderProps> = ({ onComplete, duration = 1500 }) =>
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 bg-transaparent flex items-center justify-center z-50 transition-opacity duration-500">
+    <div className="fixed inset-0 bg-transparent flex items-center justify-center z-50 transition-opacity duration-500">
       {/* Background animated particles */}
       <div className="absolute inset-0 overflow-hidden">
         {[...Array(20)].map((_, i) => (
