@@ -6,7 +6,7 @@ interface PreloaderProps {
   duration?: number;
 }
 
-const Preloader: React.FC<PreloaderProps> = ({ onComplete, duration = 3000 }) => {
+const Preloader: React.FC<PreloaderProps> = ({ onComplete, duration = 1500 }) => {
   const [progress, setProgress] = useState(0);
   const [currentText, setCurrentText] = useState('Initializing...');
   const [isVisible, setIsVisible] = useState(true);
