@@ -1,9 +1,9 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useState } from "react";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Experience from "./pages/Experience";
@@ -32,6 +32,7 @@ import AdminClientsMessages from "./pages/AdminClientsMessages";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import InteractiveBackground from "./components/InteractiveBackground";
 import FluidCursor from "./components/FluidCursor";
+import EffectsToggle from "./components/EffectsToggle";
 import Preloader from "./components/Preloader";
 import { usePreloader } from "./hooks/usePreloader";
 
@@ -39,6 +40,7 @@ const queryClient = new QueryClient();
 
 function App() {
   const { isLoading } = usePreloader({ minDuration: 2000, checkAssets: true });
+  const [effectsEnabled, setEffectsEnabled] = useState(true);
 
   if (isLoading) {
     return <Preloader />;
@@ -163,20 +165,25 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
-        <div
-          style={{
-            pointerEvents: "none",
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            zIndex: 5,
-          }}
-        >
-          <InteractiveBackground />
-          <FluidCursor />
-        </div>
+        
+        {effectsEnabled && (
+          <div
+            style={{
+              pointerEvents: "none",
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              zIndex: 5,
+            }}
+          >
+            <InteractiveBackground />
+            <FluidCursor />
+          </div>
+        )}
+        
+        <EffectsToggle onToggle={setEffectsEnabled} />
       </TooltipProvider>
     </QueryClientProvider>
   );
