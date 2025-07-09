@@ -1,231 +1,157 @@
 
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Server, Cloud, Database, Cpu, Globe } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Loader, Code, Zap, Cloud, Server } from 'lucide-react';
 
 interface PreloaderProps {
   onComplete?: () => void;
-  minDuration?: number;
+  duration?: number;
 }
 
-const Preloader: React.FC<PreloaderProps> = ({ onComplete, minDuration = 2000 }) => {
+const Preloader: React.FC<PreloaderProps> = ({ onComplete, duration = 1500 }) => {
+  const [progress, setProgress] = useState(0);
+  const [currentText, setCurrentText] = useState('Initializing...');
   const [isVisible, setIsVisible] = useState(true);
-  const stages = ['git pull', 'npm run build', 'firebase deploy'];
-const [stageIndex, setStageIndex] = useState(0);
 
-useEffect(() => {
-  const stageDurations = [200, 400, 700];
-  setStageIndex(0);
+  const loadingTexts = [
+    'Initializing...',
+    'Loading Dependencies...',
+    'Compiling Code...',
+    'Deploying to Cloud...',
+    'Starting Services...',
+    'Portfolio Ready!'
+  ];
 
-  let timers: NodeJS.Timeout[] = [];
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        const newProgress = prev + (100 / (duration / 100));
+        
+        // Update text based on progress
+        const textIndex = Math.floor((newProgress / 100) * (loadingTexts.length - 1));
+        setCurrentText(loadingTexts[Math.min(textIndex, loadingTexts.length - 1)]);
+        
+        if (newProgress >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            setIsVisible(false);
+            onComplete?.();
+          }, 500);
+          return 100;
+        }
+        
+        return newProgress;
+      });
+    }, 100);
 
-  // Schedule stage updates
-  stageDurations.slice(0, -1).forEach((_, index) => {
-    timers.push(
-      setTimeout(() => {
-        setStageIndex(index + 1);
-      }, stageDurations.slice(0, index + 1).reduce((a, b) => a + b, 0))
-    );
-  });
+    return () => clearInterval(interval);
+  }, [duration, onComplete]);
 
-  // Schedule preloader finish after all stages
-  timers.push(
-    setTimeout(() => {
-      setIsVisible(false);
-      setTimeout(() => {
-        onComplete?.();
-      }, 500);
-    }, stageDurations.reduce((a, b) => a + b, 0))
-  );
-
-  return () => timers.forEach(t => clearTimeout(t));
-}, [onComplete]);
-
-
-
-
-  
+  if (!isVisible) return null;
 
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center"
-          style={{
-            background: 'linear-gradient(135deg, #ffffff 0%, #fafafa 50%, #f0f0f0 100%)',
-          }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ 
-            opacity: 0,
-            scale: 0.8,
-            transition: { duration: 0.5, ease: "easeInOut" }
-          }}
-        >
-          {/* Animated Grid Background */}
-          <motion.div
-            className="absolute inset-0 opacity-20"
-            animate={{
-              opacity: [0.1, 0.3, 0.1],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
+    <div className="fixed inset-0 bg-transaparent flex items-center justify-center z-50 transition-opacity duration-500">
+      {/* Background animated particles */}
+      <div className="absolute inset-0 overflow-hidden">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-green-400/20 rounded-full animate-pulse"
             style={{
-              backgroundImage: `
-                linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px)
-              `,
-              backgroundSize: '50px 50px'
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 2}s`,
+              animationDuration: `${2 + Math.random() * 2}s`
             }}
           />
+        ))}
+      </div>
 
-          <div className="relative flex flex-col items-center">
-            {/* Main 3D Cube Animation */}
-            <div className="relative mb-8">
-              <motion.div
-                className="relative w-20 h-20"
-                animate={{
-                  rotateX: [0, 360],
-                  rotateY: [0, 360],
-                }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "linear"
-                }}
-                style={{ transformStyle: 'preserve-3d' }}
-              >
-                {/* Cube faces */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg shadow-lg transform translate-z-10" 
-                     style={{ transform: 'rotateY(0deg) translateZ(40px)' }} />
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg shadow-lg" 
-                     style={{ transform: 'rotateY(90deg) translateZ(40px)' }} />
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg shadow-lg" 
-                     style={{ transform: 'rotateY(180deg) translateZ(40px)' }} />
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-700 to-blue-900 rounded-lg shadow-lg" 
-                     style={{ transform: 'rotateY(-90deg) translateZ(40px)' }} />
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-300 to-blue-500 rounded-lg shadow-lg" 
-                     style={{ transform: 'rotateX(90deg) translateZ(40px)' }} />
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-800 to-blue-950 rounded-lg shadow-lg" 
-                     style={{ transform: 'rotateX(-90deg) translateZ(40px)' }} />
-              </motion.div>
-
-              {/* Orbiting Tech Icons */}
-              <motion.div
-                className="absolute inset-0 w-32 h-32 -translate-x-6 -translate-y-6"
-                animate={{ rotate: 360 }}
-                transition={{
-                  duration: 8,
-                  repeat: Infinity,
-                  ease: "linear"
-                }}
-              >
-                <Server className="absolute top-0 left-1/2 w-4 h-4 text-blue-400 -translate-x-2" />
-                <Cloud className="absolute top-1/2 right-0 w-4 h-4 text-gray-300 -translate-y-2" />
-                <Database className="absolute bottom-0 left-1/2 w-4 h-4 text-blue-500 -translate-x-2" />
-                <Cpu className="absolute top-1/2 left-0 w-4 h-4 text-gray-400 -translate-y-2" />
-              </motion.div>
-            </div>
-
-            {/* Pulsing Network Nodes */}
-            <div className="flex space-x-4 mb-8">
-              {[0, 1, 2].map((index) => (
-                <motion.div
-                  key={index}
-                  className="w-3 h-3 bg-blue-500 rounded-full"
-                  animate={{
-                    scale: [1, 1.2, 1],
-                    opacity: [0.7, 1, 0.7],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    delay: index * 0.3
-                  }}
-                />
-              ))}
-            </div>
-
-            {/* Connection Lines */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              <motion.div
-                className="w-px h-16 bg-gradient-to-b from-transparent via-blue-400 to-transparent"
-                animate={{
-                  opacity: [0, 1, 0],
-                  scaleY: [0.5, 1, 0.5]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-            </div>
-
-            {/* Loading Text */}
-            <motion.div
-              className="text-center"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
+      <div className="relative z-10 text-center space-y-8">
+        {/* Animated Code Brackets */}
+        <div className="relative">
+          <div className="flex items-center justify-center space-x-4 text-6xl font-mono text-green-400">
+            <span className="animate-bounce" style={{ animationDelay: '0s' }}>{`{`}</span>
+            <div className="relative">
+              {/* Rotating deployment icons */}
+              <div className="flex space-x-2">
+                <Server className="w-8 h-8 animate-spin text-blue-400" style={{ animationDuration: '3s' }} />
+                <Cloud className="w-8 h-8 animate-bounce text-cyan-400" style={{ animationDelay: '0.5s' }} />
+                <Zap className="w-8 h-8 animate-pulse text-yellow-400" />
+              </div>
               
-              <motion.p 
-                className="text-sm text-gray-500 font-mono"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1 }}
-              >
-                 {stages[stageIndex]}
-              </motion.p>
-            </motion.div>
+              {/* Code symbol animation */}
+              <div className="absolute -top-2 -right-2">
+                <Code className="w-4 h-4 text-green-300 animate-ping" />
+              </div>
+            </div>
+            <span className="animate-bounce" style={{ animationDelay: '0.2s' }}>{`}`}</span>
+          </div>
+        </div>
 
-            {/* Progress Indicator */}
-            <motion.div
-              className="mt-6 w-48 h-1 bg-gray-800 rounded-full overflow-hidden"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 }}
-            >
-              <motion.div
-                className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: '100%' }}
-                transition={{ 
-                  duration: minDuration / 1000 - 0.5, 
-                  ease: "easeInOut" 
-                }}
-              />
-            </motion.div>
+        {/* Loading Text */}
+        <div className="space-y-4">
+          <p className="text-2xl font-mono text-white tracking-wider">
+            {currentText}
+          </p>
+          
+          {/* Terminal-style Progress Bar */}
+          <div className="w-96 max-w-md mx-auto">
+            <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+              <div className="flex justify-between items-center space-x-2 mb-2">
+                <div className="flex space-x-1">
+                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span className="text-slate-400 text-sm font-mono ml-1">terminal</span>
+                </div>
+<div className="flex items-center space-x-1">
+ <span className="text-slate-400 text-sm font-mono ml-1">{currentText}</span>
+</div>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <span className="text-green-400 font-mono text-sm">$</span>
+                  <span className="text-white font-mono text-sm">deploy --portfolio</span>
+                </div>
+                
+                {/* Progress Bar */}
+                <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-green-400 to-blue-400 rounded-full transition-all duration-300 ease-out relative"
+                    style={{ width: `${progress}%` }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
+                  </div>
+                </div>
+                
+                <div className="flex justify-between text-xs font-mono text-slate-400">
+                  <span>{Math.round(progress)}%</span>
+                  <span className="animate-pulse">●</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-            {/* Floating Particles */}
-            {[...Array(6)].map((_, index) => (
-              <motion.div
-                key={index}
-                className="absolute w-1 h-1 bg-blue-400 rounded-full"
-                style={{
-                  top: `${20 + (index * 15)}%`,
-                  left: `${10 + (index * 12)}%`,
-                }}
-                animate={{
-                  y: [-20, 20, -20],
-                  opacity: [0.3, 1, 0.3],
-                }}
-                transition={{
-                  duration: 3 + (index * 0.5),
-                  repeat: Infinity,
-                  ease: "easeInOut"
+        {/* Spinning Loader */}
+        <div className="flex justify-center items-center space-x-2">
+          <Loader className="w-6 h-6 text-green-400 animate-spin" />
+          <div className="flex space-x-1">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className="w-2 h-2 bg-green-400 rounded-full animate-bounce"
+                style={{ 
+                  animationDelay: `${i * 0.2}s`,
+                  animationDuration: '1s'
                 }}
               />
             ))}
           </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        </div>
+      </div>
+    </div>
   );
 };
 
