@@ -157,17 +157,13 @@ export const ProjectPreviewModal = ({
           )}
 
           {/* Features */}
-          {project.features && project.features.length > 0 && (
+          {project.features && (
             <div>
               <h3 className="text-lg font-semibold mb-3">Features</h3>
-              <ul className="space-y-2">
-                {project.features.map((feature, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <span className="text-green-600 mt-1">•</span>
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
+              <div 
+                className="prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: project.features }}
+              />
             </div>
           )}
 
@@ -175,7 +171,10 @@ export const ProjectPreviewModal = ({
           {project.challenges && (
             <div>
               <h3 className="text-lg font-semibold mb-3">Challenges</h3>
-              <p className="text-gray-700 leading-relaxed">{project.challenges}</p>
+              <div 
+                className="prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: project.challenges }}
+              />
             </div>
           )}
 
@@ -183,7 +182,10 @@ export const ProjectPreviewModal = ({
           {project.achievements && (
             <div>
               <h3 className="text-lg font-semibold mb-3">Achievements</h3>
-              <p className="text-gray-700 leading-relaxed">{project.achievements}</p>
+              <div 
+                className="prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: project.achievements }}
+              />
             </div>
           )}
 
@@ -191,7 +193,10 @@ export const ProjectPreviewModal = ({
           {project.accessibility && (
             <div>
               <h3 className="text-lg font-semibold mb-3">Accessibility</h3>
-              <p className="text-gray-700 leading-relaxed">{project.accessibility}</p>
+              <div 
+                className="prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: project.accessibility }}
+              />
             </div>
           )}
 
