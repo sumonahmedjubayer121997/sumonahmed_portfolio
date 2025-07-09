@@ -1,3 +1,4 @@
+
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
@@ -46,14 +47,15 @@ interface ProjectItem {
 }
 
 const ProjectDetail = () => {
-  const { appName } = useParams<{ appName: string }>();
+  const { title } = useParams<{ title: string }>();
   const [project, setProject] = useState<ProjectItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     const fetchProject = async () => {
-      if (!appName) {
+      if (!title) {
+        console.log("No title parameter found");
         setNotFound(true);
         setLoading(false);
         return;
@@ -61,28 +63,38 @@ const ProjectDetail = () => {
 
       try {
         setLoading(true);
-        const decodedAppName = decodeURIComponent(appName);
+        const decodedTitle = decodeURIComponent(title);
+        console.log("Looking for project with title:", decodedTitle);
+        
         const { data, error } = await getDynamicContent("projects");
 
         if (error) {
+          console.error("Error fetching projects:", error);
           toast.error("Failed to load project");
           setNotFound(true);
           return;
         }
 
         if (data && Array.isArray(data)) {
+          console.log("Available projects:", data.map(p => p.title));
           const found = data.find(
-            (item: ProjectItem) => item.title === decodedAppName
+            (item: ProjectItem) => item.title === decodedTitle
           );
+          
           if (found) {
+            console.log("Found project:", found);
             setProject(found);
           } else {
+            console.log("Project not found. Searched for:", decodedTitle);
+            console.log("Available titles:", data.map(p => p.title));
             setNotFound(true);
           }
         } else {
+          console.log("No data returned from projects collection");
           setNotFound(true);
         }
       } catch (err) {
+        console.error("Error in fetchProject:", err);
         toast.error("Failed to load project");
         setNotFound(true);
       } finally {
@@ -91,7 +103,7 @@ const ProjectDetail = () => {
     };
 
     fetchProject();
-  }, [appName]);
+  }, [title]);
 
   if (loading) {
     return (
@@ -111,8 +123,8 @@ const ProjectDetail = () => {
             Project Not Found
           </h1>
           <p className="mb-6 text-gray-600 dark:text-gray-400">
-            {appName
-              ? `No project named "${decodeURIComponent(appName)}" found.`
+            {title
+              ? `No project named "${decodeURIComponent(title)}" found.`
               : "Invalid project name."}
           </p>
           <Link to="/projects">
