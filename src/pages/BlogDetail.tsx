@@ -10,6 +10,13 @@ import { ArrowLeft, Clock, Calendar, Eye, ThumbsUp, ThumbsDown, Copy, Share2, Do
 import { useToast } from "@/hooks/use-toast";
 import { getDynamicContent } from "@/integrations/firebase/firestore";
 import { toast } from "sonner";
+import DOMPurify from "dompurify";
+
+function decodeHTML(encoded) {
+  const txt = document.createElement("textarea");
+  txt.innerHTML = encoded;
+  return txt.value;
+}
 
 interface BlogPost {
   id: string;
@@ -323,7 +330,7 @@ const BlogDetail = () => {
               )}
 
               {/* Article Content */}
-              <div className="p-8">
+              <div className="lg:p-8">
                 {/* Meta Information */}
                 <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-gray-500">
                   <div className="flex items-center gap-1">
@@ -367,9 +374,20 @@ const BlogDetail = () => {
                 </div>
 
                 {/* Article Content with improved typography */}
-                <div className="prose prose-lg max-w-none">
-                  <div className="blog-content" dangerouslySetInnerHTML={{ __html: blog.content }} />
-                </div>
+                 <div
+                      className="mt-2 text-gray-600 dark:text-gray-400 text-sm reak-words whitespace-pre-wrap overflow-hidden"
+                      dangerouslySetInnerHTML={{
+                        __html: (() => {
+                          const encodedHtml =
+                            blog?.content || "No description available";
+                          const decodedHtml = decodeHTML(encodedHtml);
+                          const sanitizedHtml = DOMPurify.sanitize(decodedHtml);
+
+                          // OPTIONAL: Truncate visually, not programmatically
+                          return sanitizedHtml;
+                        })(),
+                      }}
+                    ></div>
 
                 {/* Code Blocks */}
                 {blog.codeSnippets && blog.codeSnippets.map((codeBlock, index) => (
