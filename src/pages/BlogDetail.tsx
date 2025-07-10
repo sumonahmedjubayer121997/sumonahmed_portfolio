@@ -43,7 +43,7 @@ interface BlogPost {
 }
 
 const BlogDetail = () => {
-  const { blogId } = useParams<{ blogId: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { toast: showToast } = useToast();
   const [blog, setBlog] = useState<BlogPost | null>(null);
@@ -55,7 +55,7 @@ const BlogDetail = () => {
 
   useEffect(() => {
     const fetchBlogData = async () => {
-      if (!blogId) return;
+      if (!slug) return;
 
       try {
         setLoading(true);
@@ -69,7 +69,7 @@ const BlogDetail = () => {
 
         if (data && Array.isArray(data)) {
           // Find the current blog by slug
-          const currentBlog = (data as BlogPost[]).find(b => b.slug === blogId);
+          const currentBlog = (data as BlogPost[]).find(b => b.slug === slug);
           
           if (currentBlog && currentBlog.status === 'Published') {
             setBlog(currentBlog);
@@ -96,7 +96,7 @@ const BlogDetail = () => {
     };
 
     fetchBlogData();
-  }, [blogId]);
+  }, [slug]);
 
   // Add scroll tracking for table of contents
   useEffect(() => {
