@@ -10,11 +10,11 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
   const [effectsEnabled, setEffectsEnabled] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   useEffect(() => {
     const updateScreenSize = () => {
-      setIsMobile(window.innerWidth < 768);
+      setIsSmallScreen(window.innerWidth < 1024); // Treat <1024px (mobile + tablet) as small screen
     };
     updateScreenSize();
     window.addEventListener('resize', updateScreenSize);
@@ -48,7 +48,7 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
 
               {/* Hide Interactive Background */}
               <div className="flex flex-col items-center">
-                {isMobile ? (
+                {isSmallScreen ? (
                   <>
                     <button
                       onClick={handleEffectsToggle}
@@ -56,12 +56,12 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
                       aria-label="Hide Interactive Background"
                     >
                       {effectsEnabled ? (
-                        <Eye className="w-4 h-4 md:w-5 md:h-5 text-gray-700" />
+                        <Eye className="w-4 h-4 text-gray-700" />
                       ) : (
-                        <EyeOff className="w-4 h-4 md:w-5 md:h-5 text-gray-700" />
+                        <EyeOff className="w-4 h-4 text-gray-700" />
                       )}
                     </button>
-            
+                    <span className="text-xs text-gray-600 mt-1">Hide BG</span>
                   </>
                 ) : (
                   <Tooltip>
@@ -86,7 +86,7 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
 
               {/* Change Theme */}
               <div className="flex flex-col items-center">
-                {isMobile ? (
+                {isSmallScreen ? (
                   <>
                     <button
                       onClick={handleThemeToggle}
@@ -99,6 +99,7 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
                         <Sun className="w-4 h-4 text-gray-700" />
                       )}
                     </button>
+                    <span className="text-xs text-gray-600 mt-1">Theme</span>
                   </>
                 ) : (
                   <Tooltip>
@@ -123,7 +124,7 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
 
               {/* Ask Me */}
               <div className="flex flex-col items-center">
-                {isMobile ? (
+                {isSmallScreen ? (
                   <>
                     <button
                       onClick={handleAskMe}
@@ -132,6 +133,7 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
                     >
                       <Search className="w-4 h-4 text-gray-700" />
                     </button>
+                    <span className="text-xs text-gray-600 mt-1">Ask Me</span>
                   </>
                 ) : (
                   <Tooltip>
