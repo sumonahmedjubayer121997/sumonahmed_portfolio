@@ -8,6 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Search, Filter } from "lucide-react";
 import { getDynamicContent } from "@/integrations/firebase/firestore";
 import { toast } from "sonner";
+import DOMPurify from "dompurify";
+import { Share2 } from "lucide-react";
+
+function decodeHTML(encoded) {
+  const txt = document.createElement("textarea");
+  txt.innerHTML = encoded;
+  return txt.value;
+}
 
 interface BlogItem {
   id: string;
@@ -218,9 +226,24 @@ const Blogs = () => {
                       </h2>
                       
                       {/* Excerpt */}
-                      <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-2">
-                        {blog.excerpt || generateExcerpt(blog.content)}
-                      </p>
+                       <p className="mt-2 text-gray-600 dark:text-gray-400 text-sm">
+                     <div
+  className="mt-2 text-gray-600 dark:text-gray-400 text-sm break-words whitespace-pre-wrap overflow-hidden"
+  dangerouslySetInnerHTML={{
+    __html: (() => {
+      const encodedHtml = blog?.content || "No description available";
+      const decodedHtml = decodeHTML(encodedHtml);
+      const sanitizedHtml = DOMPurify.sanitize(decodedHtml);
+
+      // Truncate the sanitized HTML if it's too long
+      return sanitizedHtml.length > 150
+        ? sanitizedHtml.substring(0, 147) + "..."
+        : sanitizedHtml;
+    })(),
+  }}
+></div>
+
+                    </p>
 
                       {/* Tags */}
                       {blog.tags && blog.tags.length > 0 && (

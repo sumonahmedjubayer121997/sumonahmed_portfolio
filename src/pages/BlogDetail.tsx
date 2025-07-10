@@ -307,33 +307,18 @@ const BlogDetail = () => {
           {/* Main Content */}
           <div className="flex-1 max-w-4xl">
             {/* Back Button */}
-            <Button
-              onClick={() => navigate('/blogs')}
-              variant="ghost"
-              className="mb-6 -ml-4"
-            >
+             <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 min-h-screen overflow-x-hidden">
+        {/* Back Button */}
+        <div className="mb-8">
+          <Link to="/blogs">
+            <Button variant="outline">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Blogs
+              Back to Apps
             </Button>
+          </Link>
+        </div>
 
-            {/* Article Header */}
-            <article className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              {/* Feature Image */}
-              {blog.coverImage && (
-                <div className="aspect-[2/1] overflow-hidden">
-                  <img
-                    src={blog.coverImage}
-                    alt={blog.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-
-              {/* Article Content */}
-              <div className="lg:p-8">
-                <div className="p-3">
-                {/* Meta Information */}
-                <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-gray-500">
+       <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-gray-500">
                   <div className="flex items-center gap-1">
                     <Calendar className="w-4 h-4" />
                     {blog.date}
@@ -365,18 +350,56 @@ const BlogDetail = () => {
                     ))}
                   </div>
                 )}
-                 <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
+
+        {/* App Header */}
+        
+        <div className="mb-12">
+          <div className="flex flex-wrap items-center gap-4 mb-4">
+            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
               <div dangerouslySetInnerHTML={{ __html: blog.title }} />
             </h1>
-
-                {/* Share Button */}
-                <div className="flex justify-end mb-8">
+          </div>
+           <div className="flex justify-end mb-8">
                   <Button onClick={handleShare} variant="outline" size="sm">
                     <Share2 className="w-4 h-4 mr-2" />
                     Share
                   </Button>
                 </div>
+
+
+           {/* Feature Image */}
+              {blog.coverImage && (
+                <div className="aspect-[2/1] overflow-hidden">
+                  <img
+                    src={blog.coverImage}
+                    alt={blog.title}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
+              )}
+
+          {/* <p className="text-xl text-gray-600 dark:text-gray-400 mb-6 break-words whitespace-pre-wrap overflow-hidden">
+            <div
+              dangerouslySetInnerHTML={{
+                __html:
+                  blog.about ||
+                  blog.longDescription ||
+                  "No description available",
+              }}
+            />
+          </p> */}
+          </div>
+
+          
+        </div>
+
+            {/* Article Header */}
+            <article className="rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              
+
+              {/* Article Content */}
+              <div className="lg:p-8">
+                
 
                 {/* Article Content with improved typography */}
                  <div
