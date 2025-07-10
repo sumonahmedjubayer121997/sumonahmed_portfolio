@@ -331,6 +331,7 @@ const BlogDetail = () => {
 
               {/* Article Content */}
               <div className="lg:p-8">
+                <div className="p-3">
                 {/* Meta Information */}
                 <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-gray-500">
                   <div className="flex items-center gap-1">
@@ -364,6 +365,9 @@ const BlogDetail = () => {
                     ))}
                   </div>
                 )}
+                 <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
+              <div dangerouslySetInnerHTML={{ __html: blog.title }} />
+            </h1>
 
                 {/* Share Button */}
                 <div className="flex justify-end mb-8">
@@ -371,6 +375,7 @@ const BlogDetail = () => {
                     <Share2 className="w-4 h-4 mr-2" />
                     Share
                   </Button>
+                </div>
                 </div>
 
                 {/* Article Content with improved typography */}
