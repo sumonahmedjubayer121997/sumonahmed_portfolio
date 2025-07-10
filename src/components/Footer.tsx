@@ -29,7 +29,7 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-white border-t border-gray-200 py-4 px-6">
+    <footer className="bg-white border-t border-gray-200 py-4 px-6" ref={footerRef}>
       <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
         
         {/* Left - Reach out or Dashboard button */}
