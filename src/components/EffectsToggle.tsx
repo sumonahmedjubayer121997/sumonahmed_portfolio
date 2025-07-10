@@ -14,7 +14,7 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
 
   useEffect(() => {
     const updateScreenSize = () => {
-      setIsSmallScreen(window.innerWidth < 1024); // Treat <1024px (mobile + tablet) as small screen
+      setIsSmallScreen(window.innerWidth < 768); // Treat <1024px (mobile + tablet) as small screen
     };
     updateScreenSize();
     window.addEventListener('resize', updateScreenSize);
