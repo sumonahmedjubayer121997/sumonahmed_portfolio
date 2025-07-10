@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Info, EyeOff, Eye, Sun, Moon, Search, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -11,15 +12,53 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
+  const [isNearFooter, setIsNearFooter] = useState(false);
+  const [hasScrolled, setHasScrolled] = useState(false);
 
   useEffect(() => {
     const updateScreenSize = () => {
-      setIsSmallScreen(window.innerWidth < 768); // Treat <1024px (mobile + tablet) as small screen
+      setIsSmallScreen(window.innerWidth < 768);
     };
     updateScreenSize();
     window.addEventListener('resize', updateScreenSize);
     return () => window.removeEventListener('resize', updateScreenSize);
   }, []);
+
+  useEffect(() => {
+    // Track scroll position to determine if user has scrolled
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setHasScrolled(scrollY > 50);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    // Observe footer visibility
+    const footer = document.querySelector('footer');
+    if (!footer) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          // Only move button up if footer is visible AND user has scrolled
+          setIsNearFooter(entry.isIntersecting && hasScrolled);
+        });
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px' // Trigger slightly before footer is fully visible
+      }
+    );
+
+    observer.observe(footer);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasScrolled]);
 
   const handleEffectsToggle = () => {
     const newState = !effectsEnabled;
@@ -39,11 +78,28 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
     setIsExpanded(!isExpanded);
   };
 
+  // Dynamic positioning based on screen size and footer visibility
+  const getButtonPosition = () => {
+    if (isNearFooter) {
+      if (isSmallScreen) return 'bottom-20'; // Mobile
+      return 'bottom-24'; // Tablet/Desktop
+    }
+    return 'bottom-4'; // Default position
+  };
+
+  const getExpandedPanelPosition = () => {
+    if (isNearFooter) {
+      if (isSmallScreen) return 'bottom-32'; // Mobile
+      return 'bottom-36'; // Tablet/Desktop
+    }
+    return 'bottom-16'; // Default position
+  };
+
   return (
     <TooltipProvider>
-      <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50">
+      <div className={`fixed ${getButtonPosition()} right-4 md:right-6 z-50 transition-all duration-300 ease-in-out`}>
         {isExpanded && (
-          <div className="absolute bottom-16 md:bottom-20 right-0 bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 p-1.5 mb-2">
+          <div className={`absolute ${getExpandedPanelPosition()} right-0 bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 p-1.5 mb-2 transition-all duration-300 ease-in-out`}>
             <div className="flex flex-col items-center gap-1.5">
 
               {/* Hide Interactive Background */}
@@ -158,7 +214,7 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
         {/* Main Toggle Button */}
         <button
           onClick={toggleExpansion}
-          className="w-10 h-10 md:w-12 md:h-12 bg-white/90 hover:bg-white backdrop-blur-sm border border-gray-200/50 rounded-full shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary/20"
+          className="w-10 h-10 md:w-12 md:h-12 bg-white/90 hover:bg-white backdrop-blur-sm border border-gray-200/50 rounded-full shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary/20"
           aria-label={isExpanded ? 'Close options panel' : 'Open options panel'}
         >
           {isExpanded ? (
