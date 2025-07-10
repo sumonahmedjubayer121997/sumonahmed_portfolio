@@ -61,7 +61,7 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
                         <EyeOff className="w-4 h-4 md:w-5 md:h-5 text-gray-700" />
                       )}
                     </button>
-                    <span className="text-xs text-gray-600 mt-1">Hide BG</span>
+            
                   </>
                 ) : (
                   <Tooltip>
@@ -99,7 +99,6 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
                         <Sun className="w-4 h-4 text-gray-700" />
                       )}
                     </button>
-                    <span className="text-xs text-gray-600 mt-1">Theme</span>
                   </>
                 ) : (
                   <Tooltip>
@@ -133,7 +132,6 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
                     >
                       <Search className="w-4 h-4 text-gray-700" />
                     </button>
-                    <span className="text-xs text-gray-600 mt-1">Ask Me</span>
                   </>
                 ) : (
                   <Tooltip>
