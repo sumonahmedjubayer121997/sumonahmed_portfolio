@@ -403,7 +403,7 @@ const BlogDetail = () => {
 
                 {/* Article Content with improved typography */}
                  <div
-                      className="mt-2 text-gray-600 dark:text-gray-400 text-sm reak-words whitespace-pre-wrap overflow-hidden"
+                      className="blog-content mt-2 text-gray-600 dark:text-gray-400 text-base break-words whitespace-pre-wrap overflow-hidden"
                       dangerouslySetInnerHTML={{
                         __html: (() => {
                           const encodedHtml =
