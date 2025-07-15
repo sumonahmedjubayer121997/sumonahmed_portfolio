@@ -1,3 +1,4 @@
+
 import { NavLink } from "react-router-dom";
 import {
   Home,
@@ -23,7 +24,6 @@ const roles = [
 
 const Sidebar = () => {
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [isFocusMode, setIsFocusMode] = useState(false);
 
   const [index, setIndex] = useState(0);
@@ -46,15 +46,9 @@ const Sidebar = () => {
     { name: "Tools", path: "/tools", icon: Wrench },
   ];
 
-  // Initialize theme from localStorage
+  // Initialize focus mode from localStorage
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
     const savedFocusMode = localStorage.getItem("focusMode");
-
-    if (savedTheme === "dark") {
-      setIsDarkMode(true);
-      document.documentElement.classList.add("dark");
-    }
 
     if (savedFocusMode === "true") {
       setIsFocusMode(true);
@@ -62,7 +56,7 @@ const Sidebar = () => {
     }
   }, []);
 
-  // Handle keyboard shortcuts with updated logic
+  // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
@@ -70,15 +64,10 @@ const Sidebar = () => {
       if (key === "q") {
         event.preventDefault();
         if (isShortcutsOpen) {
-          setIsShortcutsOpen(false); // Close if open
+          setIsShortcutsOpen(false);
         } else {
-          setIsShortcutsOpen(true); // Open if closed
+          setIsShortcutsOpen(true);
         }
-      }
-      // D works globally now (not just when Quick Access is open)
-      else if (key === "d") {
-        event.preventDefault();
-        toggleDarkMode();
       }
       // F only works when Quick Access is open
       else if (isShortcutsOpen && key === "f") {
@@ -90,19 +79,6 @@ const Sidebar = () => {
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isShortcutsOpen]);
-
-  const toggleDarkMode = () => {
-    const newDarkMode = !isDarkMode;
-    setIsDarkMode(newDarkMode);
-
-    if (newDarkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  };
 
   const toggleFocusMode = () => {
     const newFocusMode = !isFocusMode;
@@ -126,11 +102,9 @@ const Sidebar = () => {
             {/* Profile Section */}
             <div className="text-center mb-6">
               <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 mx-auto mb-3 flex items-center justify-center backdrop-blur-sm">
-                {/* <span className="text-foreground font-semibold">S</span> */}
                 <img src="../../public/logo.png" />
               </div>
               <h2 className="text-lg font-semibold text-foreground mb-1">
-                {" "}
                 Sumon
               </h2>
               <p className="text-xs text-muted-foreground">{roles[index]}</p>

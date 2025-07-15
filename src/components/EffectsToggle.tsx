@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Info, EyeOff, Eye, Sun, Moon, Search, X } from 'lucide-react';
+import { Info, EyeOff, Eye, Search, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface EffectsToggleProps {
@@ -10,7 +10,6 @@ interface EffectsToggleProps {
 const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
   const [effectsEnabled, setEffectsEnabled] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [isNearFooter, setIsNearFooter] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
@@ -64,10 +63,6 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
     const newState = !effectsEnabled;
     setEffectsEnabled(newState);
     onToggle(newState);
-  };
-
-  const handleThemeToggle = () => {
-    setIsDarkTheme(!isDarkTheme);
   };
 
   const handleAskMe = () => {
@@ -135,44 +130,6 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
                     </TooltipTrigger>
                     <TooltipContent side="left" className="bg-gray-900 text-white text-sm font-medium px-3 py-2">
                       Hide Interactive Background
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-              </div>
-
-              {/* Change Theme */}
-              <div className="flex flex-col items-center">
-                {isSmallScreen ? (
-                  <>
-                    <button
-                      onClick={handleThemeToggle}
-                      className="w-10 h-10 rounded-full bg-gray-50/80 hover:bg-gray-100 flex items-center justify-center transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                      aria-label="Change Theme"
-                    >
-                      {isDarkTheme ? (
-                        <Moon className="w-4 h-4 text-gray-700" />
-                      ) : (
-                        <Sun className="w-4 h-4 text-gray-700" />
-                      )}
-                    </button>
-                 
-                  </>
-                ) : (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        onClick={handleThemeToggle}
-                        className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-50/80 hover:bg-gray-100 flex items-center justify-center transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                      >
-                        {isDarkTheme ? (
-                          <Moon className="w-4 h-4 md:w-5 md:h-5 text-gray-700" />
-                        ) : (
-                          <Sun className="w-4 h-4 md:w-5 md:h-5 text-gray-700" />
-                        )}
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="left" className="bg-gray-900 text-white text-sm font-medium px-3 py-2">
-                      Change Theme
                     </TooltipContent>
                   </Tooltip>
                 )}
