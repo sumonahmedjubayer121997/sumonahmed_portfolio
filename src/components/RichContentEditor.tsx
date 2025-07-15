@@ -1,10 +1,12 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import ReactQuill, { Quill } from 'react-quill';
 import 'quill/dist/quill.snow.css';
 // @ts-ignore
 import ImageResize from 'quill-image-resize-module-react';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github.css';
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 
 // Register modules
 Quill.register('modules/imageResize', ImageResize);
@@ -23,13 +25,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Save, Upload, ImageIcon, Loader2, Check, Film, Highlighter } from 'lucide-react';
-
-// Import our custom components
-import { EditorToolbar } from './editor/EditorToolbar';
-import { MarkdownPreview } from './editor/MarkdownPreview';
-import { AccessibilityChecker } from './editor/AccessibilityChecker';
-import { MediaEmbedModal } from './editor/MediaEmbedModal';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { 
+  Save, Upload, ImageIcon, Loader2, Check, Film, Highlighter, 
+  Undo2, Redo2, Table, Search, Eye, Keyboard, FileText, Clock,
+  AlertTriangle, Zap
+} from 'lucide-react';
 
 interface RichContentEditorProps {
   initialContent?: string;
@@ -63,6 +67,14 @@ const RichContentEditor = ({
   const [redoStack, setRedoStack] = useState<string[]>([]);
   const [wordCount, setWordCount] = useState(0);
   const [readTime, setReadTime] = useState(0);
+  const [tableRows, setTableRows] = useState(3);
+  const [tableCols, setTableCols] = useState(3);
+  const [findText, setFindText] = useState('');
+  const [replaceText, setReplaceText] = useState('');
+  const [fontSize, setFontSize] = useState('14');
+  const [fontFamily, setFontFamily] = useState('Arial');
+  const [mediaType, setMediaType] = useState('youtube');
+  const [mediaUrl, setMediaUrl] = useState('');
   const quillRef = useRef<ReactQuill>(null);
   const { toast } = useToast();
 
@@ -192,13 +204,29 @@ const RichContentEditor = ({
   };
 
   // Media embed
-  const handleMediaEmbed = (type: string, embedContent: string) => {
+  const handleMediaEmbed = () => {
+    if (!mediaUrl) return;
+
     const quill = quillRef.current?.getEditor();
-    if (quill) {
-      const range = quill.getSelection();
-      if (range) {
-        quill.clipboard.dangerouslyPasteHTML(range.index, embedContent + '<br>');
+    if (!quill) return;
+
+    let embedHtml = '';
+    const range = quill.getSelection();
+    
+    if (mediaType === 'youtube') {
+      const videoId = mediaUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)?.[1];
+      if (videoId) {
+        embedHtml = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`;
       }
+    } else if (mediaType === 'twitter') {
+      embedHtml = `<blockquote class="twitter-tweet"><a href="${mediaUrl}"></a></blockquote>`;
+    } else if (mediaType === 'html') {
+      embedHtml = DOMPurify.sanitize(mediaUrl);
+    }
+
+    if (embedHtml && range) {
+      quill.clipboard.dangerouslyPasteHTML(range.index, embedHtml + '<br>');
+      setMediaUrl('');
     }
   };
 
@@ -409,20 +437,81 @@ const RichContentEditor = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [undoStack, redoStack]);
 
+  // Apply formatting to selected text
+  const applyFormat = (format: string, value?: any) => {
+    const quill = quillRef.current?.getEditor();
+    if (quill) {
+      const range = quill.getSelection();
+      if (range && range.length > 0) {
+        quill.format(format, value);
+      }
+    }
+  };
+
+  // Check accessibility issues
+  const checkAccessibility = () => {
+    const issues = [];
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+    
+    const images = tempDiv.querySelectorAll('img');
+    images.forEach((img, index) => {
+      if (!img.alt) {
+        issues.push(`Image ${index + 1} missing alt text`);
+      }
+    });
+    
+    const headings = tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    if (headings.length === 0 && wordCount > 100) {
+      issues.push('Consider adding headings for better structure');
+    }
+    
+    return issues;
+  };
+
+  const renderMarkdownPreview = () => {
+    try {
+      const markdownText = content.replace(/<[^>]*>/g, '');
+      const htmlContent = typeof marked.parse === 'function' 
+        ? marked.parse(markdownText) as string
+        : marked(markdownText) as string;
+      const sanitizedHtml = DOMPurify.sanitize(htmlContent);
+      return <div dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />;
+    } catch (error) {
+      return <div className="text-destructive">Error rendering markdown preview</div>;
+    }
+  };
+
+  const shortcuts = [
+    { key: 'Ctrl+B', action: 'Bold' },
+    { key: 'Ctrl+I', action: 'Italic' },
+    { key: 'Ctrl+U', action: 'Underline' },
+    { key: 'Ctrl+Z', action: 'Undo' },
+    { key: 'Ctrl+Y', action: 'Redo' },
+    { key: 'Ctrl+S', action: 'Save' }
+  ];
+
+  const fontOptions = [
+    { value: 'Arial', label: 'Arial' },
+    { value: 'Georgia', label: 'Georgia' },
+    { value: 'Times New Roman', label: 'Times New Roman' },
+    { value: 'Helvetica', label: 'Helvetica' },
+    { value: 'Courier New', label: 'Courier New' },
+    { value: 'Verdana', label: 'Verdana' }
+  ];
+
+  const sizeOptions = [
+    { value: '10', label: '10px' },
+    { value: '12', label: '12px' },
+    { value: '14', label: '14px' },
+    { value: '16', label: '16px' },
+    { value: '18', label: '18px' },
+    { value: '24', label: '24px' },
+    { value: '32', label: '32px' }
+  ];
+
   const modules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-      [{ 'font': [] }],
-      [{ 'size': ['small', false, 'large', 'huge'] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'color': [] }, { 'background': [] }],
-      [{ 'script': 'sub' }, { 'script': 'super' }],
-      [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-      [{ 'direction': 'rtl' }, { 'align': [] }],
-      ['blockquote', 'code-block'],
-      ['link', 'image', 'video'],
-      ['clean']
-    ],
+    toolbar: false, // Disable default toolbar to prevent conflicts
     syntax: {
       highlight: (text: string) => hljs.highlightAuto(text).value
     },
@@ -431,7 +520,7 @@ const RichContentEditor = ({
     },
     imageResize: {
       parchment: true,
-      modules: ['Resize', 'DisplaySize', 'Toolbar']
+      modules: ['Resize', 'DisplaySize']
     }
   };
 
@@ -447,112 +536,339 @@ const RichContentEditor = ({
 
   return (
     <TooltipProvider>
-      <Card className="w-full">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            Advanced Rich Content Editor
-            {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
-            {autoSave && lastAutoSaved && (
-              <Tooltip open={showAutoSaveTooltip}>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center">
-                    <Check className="h-4 w-4 text-green-500" />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Auto-saved at {lastAutoSaved.toLocaleTimeString()}</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-          </CardTitle>
-          <div className="flex items-center gap-2">
-            {uploadedImages.length > 0 && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                <ImageIcon className="h-3 w-3" />
-                {uploadedImages.length} image{uploadedImages.length !== 1 ? 's' : ''}
-              </Badge>
-            )}
+      <Card className="w-full max-w-6xl mx-auto">
+        <CardHeader className="border-b">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              Rich Content Editor
+              {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+              {autoSave && lastAutoSaved && showAutoSaveTooltip && (
+                <Tooltip open={showAutoSaveTooltip}>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center">
+                      <Check className="h-4 w-4 text-green-500" />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Auto-saved at {lastAutoSaved.toLocaleTimeString()}</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </CardTitle>
             
-            <AccessibilityChecker content={content} />
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <FileText className="h-3 w-3" />
+                <span>{wordCount} words</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                <span>{readTime} min read</span>
+              </div>
+              {checkAccessibility().length > 0 && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1 text-orange-500">
+                      <AlertTriangle className="h-3 w-3" />
+                      <span>{checkAccessibility().length} issues</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div className="max-w-sm">
+                      {checkAccessibility().map((issue, i) => (
+                        <div key={i} className="text-xs">{issue}</div>
+                      ))}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+          </div>
+
+          {/* Enhanced Toolbar */}
+          <div className="flex items-center justify-between pt-3 border-t mt-3">
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Undo/Redo */}
+              <div className="flex items-center gap-1 border-r pr-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="sm" onClick={handleUndo} disabled={undoStack.length <= 1}>
+                      <Undo2 className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Undo (Ctrl+Z)</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="sm" onClick={handleRedo} disabled={redoStack.length === 0}>
+                      <Redo2 className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Redo (Ctrl+Y)</TooltipContent>
+                </Tooltip>
+              </div>
+
+              {/* Font Controls */}
+              <div className="flex items-center gap-2 border-r pr-2">
+                <Select value={fontFamily} onValueChange={(value) => {
+                  setFontFamily(value);
+                  applyFormat('font', value);
+                }}>
+                  <SelectTrigger className="w-32 h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {fontOptions.map(font => (
+                      <SelectItem key={font.value} value={font.value}>
+                        {font.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={fontSize} onValueChange={(value) => {
+                  setFontSize(value);
+                  applyFormat('size', `${value}px`);
+                }}>
+                  <SelectTrigger className="w-20 h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sizeOptions.map(size => (
+                      <SelectItem key={size.value} value={size.value}>
+                        {size.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Advanced Tools */}
+              <div className="flex items-center gap-1">
+                {/* Table */}
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <Table className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Insert Table</TooltipContent>
+                    </Tooltip>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Insert Table</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label>Rows</Label>
+                        <Input
+                          type="number"
+                          value={tableRows}
+                          onChange={(e) => setTableRows(Number(e.target.value))}
+                          min={1}
+                          max={20}
+                        />
+                      </div>
+                      <div>
+                        <Label>Columns</Label>
+                        <Input
+                          type="number"
+                          value={tableCols}
+                          onChange={(e) => setTableCols(Number(e.target.value))}
+                          min={1}
+                          max={10}
+                        />
+                      </div>
+                      <Button onClick={() => handleInsertTable(tableRows, tableCols)} className="w-full">
+                        Insert Table
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
+                {/* Find & Replace */}
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <Search className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Find & Replace</TooltipContent>
+                    </Tooltip>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Find & Replace</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label>Find</Label>
+                        <Input
+                          value={findText}
+                          onChange={(e) => setFindText(e.target.value)}
+                          placeholder="Text to find"
+                        />
+                      </div>
+                      <div>
+                        <Label>Replace with</Label>
+                        <Input
+                          value={replaceText}
+                          onChange={(e) => setReplaceText(e.target.value)}
+                          placeholder="Replacement text"
+                        />
+                      </div>
+                      <Button onClick={() => handleFindReplace(findText, replaceText)} className="w-full">
+                        Replace All
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
+                {/* Media Embed */}
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <Film className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Embed Media</TooltipContent>
+                    </Tooltip>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Embed Media</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label>Type</Label>
+                        <Select value={mediaType} onValueChange={setMediaType}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="youtube">YouTube</SelectItem>
+                            <SelectItem value="twitter">Twitter</SelectItem>
+                            <SelectItem value="html">Custom HTML</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>URL/HTML</Label>
+                        <Input
+                          value={mediaUrl}
+                          onChange={(e) => setMediaUrl(e.target.value)}
+                          placeholder={mediaType === 'html' ? 'Enter HTML code' : 'Enter URL'}
+                        />
+                      </div>
+                      <Button onClick={handleMediaEmbed} className="w-full">
+                        Embed
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
+                {/* Highlight */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="sm" onClick={handleHighlight}>
+                      <Highlighter className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Highlight Text</TooltipContent>
+                </Tooltip>
+
+                {/* Keyboard Shortcuts */}
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <Keyboard className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Shortcuts</TooltipContent>
+                    </Tooltip>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Keyboard Shortcuts</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-2">
+                      {shortcuts.map((shortcut, index) => (
+                        <div key={index} className="flex justify-between py-1">
+                          <span className="text-sm">{shortcut.action}</span>
+                          <code className="text-xs bg-muted px-2 py-1 rounded">{shortcut.key}</code>
+                        </div>
+                      ))}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
             
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFileSelect}
-              className="hidden"
-              id="image-upload"
-            />
-            <label htmlFor="image-upload">
-              <Button variant="outline" size="sm" asChild>
-                <span className="flex items-center gap-2">
-                  <Upload className="h-4 w-4" />
-                  Images
-                </span>
-              </Button>
-            </label>
-
-            <MediaEmbedModal onEmbed={handleMediaEmbed}>
-              <Button variant="outline" size="sm">
-                <Film className="h-4 w-4 mr-2" />
-                Embed
-              </Button>
-            </MediaEmbedModal>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="sm" onClick={handleHighlight}>
-                  <Highlighter className="h-4 w-4" />
+            <div className="flex items-center gap-2">
+              {/* Image Upload */}
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFileSelect}
+                className="hidden"
+                id="image-upload"
+              />
+              <label htmlFor="image-upload">
+                <Button variant="outline" size="sm" asChild>
+                  <span className="flex items-center gap-2">
+                    <Upload className="h-4 w-4" />
+                    Images
+                  </span>
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent>Highlight Selected Text</TooltipContent>
-            </Tooltip>
+              </label>
 
-            {!hideManualSave && (
-              <Button onClick={handleSave} disabled={isSaving} size="sm">
-                <Save className="h-4 w-4 mr-2" />
-                {isSaving ? 'Saving...' : 'Save'}
-              </Button>
-            )}
+              {uploadedImages.length > 0 && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <ImageIcon className="h-3 w-3" />
+                  {uploadedImages.length}
+                </Badge>
+              )}
+
+              {!hideManualSave && (
+                <Button onClick={handleSave} disabled={isSaving} size="sm">
+                  <Save className="h-4 w-4 mr-2" />
+                  {isSaving ? 'Saving...' : 'Save'}
+                </Button>
+              )}
+            </div>
           </div>
         </CardHeader>
 
-        <EditorToolbar
-          quillRef={quillRef}
-          onUndo={handleUndo}
-          onRedo={handleRedo}
-          onInsertTable={handleInsertTable}
-          onToggleMarkdown={() => setIsMarkdownMode(!isMarkdownMode)}
-          onFindReplace={handleFindReplace}
-          wordCount={wordCount}
-          readTime={readTime}
-          isMarkdownMode={isMarkdownMode}
-        />
-
         <CardContent className="p-0">
           <Tabs value={isMarkdownMode ? "preview" : "editor"} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="editor" onClick={() => setIsMarkdownMode(false)}>
+            <TabsList className="grid w-full grid-cols-2 rounded-none border-b">
+              <TabsTrigger value="editor" onClick={() => setIsMarkdownMode(false)} className="rounded-none">
                 Editor
               </TabsTrigger>
-              <TabsTrigger value="preview" onClick={() => setIsMarkdownMode(true)}>
+              <TabsTrigger value="preview" onClick={() => setIsMarkdownMode(true)} className="rounded-none">
                 Preview
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="editor" className="mt-0">
+            <TabsContent value="editor" className="mt-0 border-0">
               <div
-                className={`relative transition-colors ${
-                  isDragOver 
-                    ? 'bg-primary/10 border-primary border-2 border-dashed rounded-lg' 
-                    : ''
-                }`}
+                className={`relative ${isDragOver ? 'bg-primary/5 border-primary/20 border-2 border-dashed' : ''}`}
                 onDrop={handleImageDrop}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
               >
                 {isDragOver && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-primary/5 rounded-lg z-10 pointer-events-none">
+                  <div className="absolute inset-0 flex items-center justify-center bg-primary/5 z-10 pointer-events-none">
                     <div className="text-center">
                       <ImageIcon className="h-12 w-12 mx-auto mb-2 text-primary" />
                       <p className="text-sm font-medium text-primary">Drop images here to upload</p>
@@ -568,20 +884,20 @@ const RichContentEditor = ({
                   modules={modules}
                   formats={formats}
                   placeholder={placeholder}
-                  className="min-h-[400px] border-0"
+                  className="min-h-[500px] [&_.ql-editor]:border-0 [&_.ql-toolbar]:hidden"
                 />
               </div>
             </TabsContent>
             
             <TabsContent value="preview" className="mt-0">
-              <div className="border rounded-md p-6 min-h-[400px] bg-background">
-                <MarkdownPreview content={content} />
+              <div className="p-6 min-h-[500px] prose prose-slate max-w-none">
+                {renderMarkdownPreview()}
               </div>
             </TabsContent>
           </Tabs>
 
           {isUploading && (
-            <div className="m-4 p-3 bg-muted rounded-lg">
+            <div className="border-t p-4 bg-muted/30">
               <div className="flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span className="text-sm">{uploadProgress}</span>
@@ -590,8 +906,11 @@ const RichContentEditor = ({
           )}
 
           {autoSave && (
-            <div className="m-4 text-xs text-muted-foreground">
-              Auto-save enabled • Content saves automatically every 3 seconds
+            <div className="border-t px-4 py-2 text-xs text-muted-foreground bg-muted/30">
+              <div className="flex items-center gap-2">
+                <Zap className="h-3 w-3" />
+                Auto-save enabled • Content saves automatically every 3 seconds
+              </div>
             </div>
           )}
         </CardContent>
