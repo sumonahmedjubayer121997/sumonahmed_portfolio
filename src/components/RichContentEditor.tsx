@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import ReactQuill, { Quill } from 'react-quill';
 import 'quill/dist/quill.snow.css';
+import './QuillCustomStyles.css';
 // @ts-ignore
 import ImageResize from 'quill-image-resize-module-react';
 import hljs from 'highlight.js';
@@ -511,7 +512,21 @@ const RichContentEditor = ({
   ];
 
   const modules = {
-    toolbar: false, // Disable default toolbar to prevent conflicts
+    toolbar: {
+      container: [
+        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+        [{ 'font': ['Arial', 'Georgia', 'Times New Roman', 'Helvetica', 'Courier New', 'Verdana'] }],
+        [{ 'size': ['small', false, 'large', 'huge'] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ 'color': [] }, { 'background': [] }],
+        [{ 'script': 'sub' }, { 'script': 'super' }],
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+        [{ 'direction': 'rtl' }, { 'align': [] }],
+        ['blockquote', 'code-block'],
+        ['link', 'image', 'video'],
+        ['clean']
+      ]
+    },
     syntax: {
       highlight: (text: string) => hljs.highlightAuto(text).value
     },
@@ -884,7 +899,7 @@ const RichContentEditor = ({
                   modules={modules}
                   formats={formats}
                   placeholder={placeholder}
-                  className="min-h-[500px] [&_.ql-editor]:border-0 [&_.ql-toolbar]:hidden"
+                  className="min-h-[500px] [&_.ql-editor]:min-h-[400px] [&_.ql-toolbar]:border-b [&_.ql-toolbar]:bg-muted/30 [&_.ql-container]:border-0"
                 />
               </div>
             </TabsContent>

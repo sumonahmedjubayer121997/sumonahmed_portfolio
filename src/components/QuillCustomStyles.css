@@ -1,0 +1,165 @@
+/* Custom Quill Toolbar Styling */
+.ql-toolbar {
+  background: hsl(var(--muted) / 0.3) !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  padding: 12px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+.ql-toolbar .ql-formats {
+  margin-right: 12px !important;
+  display: flex !important;
+  gap: 4px !important;
+  align-items: center !important;
+  padding: 4px 8px !important;
+  border-right: 1px solid hsl(var(--border)) !important;
+}
+
+.ql-toolbar .ql-formats:last-child {
+  border-right: none !important;
+}
+
+.ql-toolbar button {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.ql-toolbar button:hover {
+  background: hsl(var(--accent)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.ql-toolbar button.ql-active {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  border-color: hsl(var(--primary)) !important;
+}
+
+.ql-toolbar .ql-picker {
+  color: hsl(var(--foreground)) !important;
+}
+
+.ql-toolbar .ql-picker-label {
+  padding: 6px 12px !important;
+  border-radius: 4px !important;
+  border: 1px solid hsl(var(--border)) !important;
+  background: hsl(var(--background)) !important;
+  transition: all 0.2s ease !important;
+  min-width: 80px !important;
+}
+
+.ql-toolbar .ql-picker-label:hover {
+  background: hsl(var(--accent)) !important;
+  border-color: hsl(var(--primary)) !important;
+}
+
+.ql-toolbar .ql-picker-options {
+  background: hsl(var(--popover)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important;
+  padding: 4px !important;
+  z-index: 1000 !important;
+}
+
+.ql-toolbar .ql-picker-item {
+  padding: 6px 12px !important;
+  border-radius: 4px !important;
+  transition: all 0.2s ease !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.ql-toolbar .ql-picker-item:hover {
+  background: hsl(var(--accent)) !important;
+}
+
+.ql-toolbar .ql-picker-item.ql-selected {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+/* Color picker styling */
+.ql-toolbar .ql-color .ql-picker-options,
+.ql-toolbar .ql-background .ql-picker-options {
+  padding: 8px !important;
+  width: auto !important;
+}
+
+.ql-toolbar .ql-color .ql-picker-item,
+.ql-toolbar .ql-background .ql-picker-item {
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 3px !important;
+  margin: 2px !important;
+  border: 1px solid hsl(var(--border)) !important;
+}
+
+/* Editor container styling */
+.ql-container {
+  border: none !important;
+  font-family: inherit !important;
+}
+
+.ql-editor {
+  padding: 24px !important;
+  font-size: 16px !important;
+  line-height: 1.6 !important;
+  color: hsl(var(--foreground)) !important;
+  background: hsl(var(--background)) !important;
+}
+
+.ql-editor.ql-blank::before {
+  color: hsl(var(--muted-foreground)) !important;
+  font-style: italic !important;
+}
+
+/* Focus states */
+.ql-editor:focus {
+  outline: none !important;
+}
+
+.ql-container.ql-snow {
+  border: none !important;
+}
+
+/* Syntax highlighting in code blocks */
+.ql-editor pre.ql-syntax {
+  background: hsl(var(--muted)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 6px !important;
+  padding: 16px !important;
+  margin: 16px 0 !important;
+  overflow-x: auto !important;
+}
+
+/* Blockquotes */
+.ql-editor blockquote {
+  border-left: 4px solid hsl(var(--primary)) !important;
+  background: hsl(var(--muted) / 0.3) !important;
+  padding: 16px !important;
+  margin: 16px 0 !important;
+  border-radius: 0 6px 6px 0 !important;
+}
+
+/* Links */
+.ql-editor a {
+  color: hsl(var(--primary)) !important;
+  text-decoration: underline !important;
+}
+
+.ql-editor a:hover {
+  opacity: 0.8 !important;
+}
