@@ -161,7 +161,7 @@ const RichContentEditor = ({
       const range = quill.getSelection();
       const index = range ? range.index : quill.getLength();
       quill.insertEmbed(index, 'image', imageUrl);
-      quill.setSelection(index + 1);
+      quill.setSelection(index + 1, 0);
     }
   };
 
