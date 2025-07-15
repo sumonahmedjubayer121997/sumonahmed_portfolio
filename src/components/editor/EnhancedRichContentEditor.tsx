@@ -1,4 +1,5 @@
 
+
 import { useState, useRef, useEffect, useCallback } from 'react';
 import ReactQuill, { Quill } from 'react-quill';
 import 'quill/dist/quill.snow.css';
@@ -39,7 +40,7 @@ interface EnhancedRichContentEditorProps {
 const EnhancedRichContentEditor = ({
   initialContent = '',
   onSave,
-  autoSave = false,
+  autoSave = true,
   documentId,
   collectionName = 'content',
   placeholder = 'Start writing your content...',
@@ -64,43 +65,105 @@ const EnhancedRichContentEditor = ({
   const quillRef = useRef<ReactQuill>(null);
   const { toast } = useToast();
 
-  // Auto-save functionality
+  // Auto-save functionality - trigger after 2 seconds of inactivity
   useEffect(() => {
-    if (autoSave && content && documentId && collectionName) {
+    if (autoSave && content && content.trim() !== '') {
       const timeoutId = setTimeout(() => {
         handleAutoSave();
-      }, 30000); // Auto-save every 30 seconds
+      }, 2000); // Auto-save after 2 seconds of inactivity
 
       return () => clearTimeout(timeoutId);
     }
-  }, [content, autoSave, documentId, collectionName]);
+  }, [content, autoSave]);
 
   const handleContentChange = (value: string) => {
     setContent(value);
   };
 
   const handleAutoSave = async () => {
-    if (!documentId || !collectionName) return;
+    if (!content || content.trim() === '') return;
+    
+    if (documentId && collectionName) {
+      try {
+        setIsSaving(true);
+        await saveAndUpdateDynamicContent(
+          collectionName,
+          {
+            content,
+            images: uploadedImages,
+            updated_at: new Date().toISOString(),
+          },
+          documentId
+        );
+        
+        const now = new Date();
+        setLastAutoSaved(now);
+        setShowAutoSaveTooltip(true);
+        
+        // Hide tooltip after 2 seconds
+        setTimeout(() => setShowAutoSaveTooltip(false), 2000);
+        
+      } catch (error) {
+        console.error('Auto-save failed:', error);
+      } finally {
+        setIsSaving(false);
+      }
+    } else if (onSave) {
+      // If no documentId but onSave callback exists, use that for auto-save
+      try {
+        setIsSaving(true);
+        onSave(content, uploadedImages);
+        
+        const now = new Date();
+        setLastAutoSaved(now);
+        setShowAutoSaveTooltip(true);
+        
+        // Hide tooltip after 2 seconds
+        setTimeout(() => setShowAutoSaveTooltip(false), 2000);
+        
+      } catch (error) {
+        console.error('Auto-save failed:', error);
+      } finally {
+        setIsSaving(false);
+      }
+    }
+  };
 
+  // Manual save functionality
+  const handleManualSave = async () => {
     try {
       setIsSaving(true);
-      await saveAndUpdateDynamicContent(
-        collectionName,
-        {
-          content,
-          images: uploadedImages,
-          updated_at: new Date().toISOString(),
-        },
-        documentId
-      );
       
-      const now = new Date();
-      setLastAutoSaved(now);
-      setShowAutoSaveTooltip(true);
-      setTimeout(() => setShowAutoSaveTooltip(false), 2000);
-      
-    } catch (error) {
-      console.error('Auto-save failed:', error);
+      if (onSave) {
+        onSave(content, uploadedImages);
+        toast({
+          title: 'Saved',
+          description: 'Content saved successfully!',
+        });
+      }
+
+      if (documentId && collectionName) {
+        await saveAndUpdateDynamicContent(
+          collectionName,
+          {
+            content,
+            images: uploadedImages,
+            updated_at: new Date().toISOString(),
+          },
+          documentId
+        );
+
+        toast({
+          title: 'Saved',
+          description: 'Content saved successfully!',
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Save Failed',
+        description: error.message || 'Failed to save content',
+        variant: 'destructive',
+      });
     } finally {
       setIsSaving(false);
     }
@@ -272,44 +335,6 @@ const EnhancedRichContentEditor = ({
     e.target.value = '';
   };
 
-  const handleSave = async () => {
-    if (onSave) {
-      onSave(content, uploadedImages);
-      toast({
-        title: 'Saved',
-        description: 'Content updated successfully!',
-      });
-    }
-
-    if (documentId && collectionName) {
-      try {
-        setIsSaving(true);
-        await saveAndUpdateDynamicContent(
-          collectionName,
-          {
-            content,
-            images: uploadedImages,
-            updated_at: new Date().toISOString(),
-          },
-          documentId
-        );
-
-        toast({
-          title: 'Saved',
-          description: 'Content saved successfully!',
-        });
-      } catch (error: any) {
-        toast({
-          title: 'Save Failed',
-          description: error.message || 'Failed to save content',
-          variant: 'destructive',
-        });
-      } finally {
-        setIsSaving(false);
-      }
-    }
-  };
-
   // Simplified Quill modules - only the built-in toolbar
   const modules = {
     toolbar: [
@@ -400,7 +425,7 @@ const EnhancedRichContentEditor = ({
               </Button>
             </label>
             {!hideManualSave && (
-              <Button onClick={handleSave} disabled={isSaving} size="sm">
+              <Button onClick={handleManualSave} disabled={isSaving} size="sm">
                 <Save className="h-4 w-4 mr-2" />
                 {isSaving ? 'Saving...' : 'Save'}
               </Button>
@@ -466,7 +491,7 @@ const EnhancedRichContentEditor = ({
                   <span>{content.length} characters</span>
                 </div>
                 {autoSave && (
-                  <span>Auto-save enabled</span>
+                  <span>Auto-save enabled • Saves after 2 seconds of inactivity</span>
                 )}
               </div>
             </TabsContent>
@@ -523,3 +548,4 @@ const EnhancedRichContentEditor = ({
 };
 
 export default EnhancedRichContentEditor;
+
