@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect, useCallback } from 'react';
 import ReactQuill, { Quill } from 'react-quill';
 import 'quill/dist/quill.snow.css';
@@ -18,7 +19,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Save, Upload, ImageIcon, Loader2, Check, FileText, Eye, BarChart3 } from 'lucide-react';
 
 // Import new components
-import EditorToolbar from './EditorToolbar';
 import FindReplaceDialog from './FindReplaceDialog';
 import TableInsertDialog from './TableInsertDialog';
 import MediaEmbedDialog from './MediaEmbedDialog';
@@ -61,10 +61,6 @@ const EnhancedRichContentEditor = ({
   const [showMediaEmbed, setShowMediaEmbed] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
   
-  // History for undo/redo
-  const [history, setHistory] = useState<string[]>([initialContent]);
-  const [historyIndex, setHistoryIndex] = useState(0);
-  
   const quillRef = useRef<ReactQuill>(null);
   const { toast } = useToast();
 
@@ -79,26 +75,8 @@ const EnhancedRichContentEditor = ({
     }
   }, [content, autoSave, documentId, collectionName]);
 
-  // Add content to history
-  const addToHistory = useCallback((newContent: string) => {
-    setHistory(prev => {
-      const newHistory = prev.slice(0, historyIndex + 1);
-      newHistory.push(newContent);
-      // Keep only last 50 changes
-      if (newHistory.length > 50) {
-        newHistory.shift();
-      }
-      return newHistory;
-    });
-    setHistoryIndex(prev => Math.min(prev + 1, 49));
-  }, [historyIndex]);
-
   const handleContentChange = (value: string) => {
     setContent(value);
-    // Add to history with debounce
-    setTimeout(() => {
-      addToHistory(value);
-    }, 1000);
   };
 
   const handleAutoSave = async () => {
@@ -125,31 +103,6 @@ const EnhancedRichContentEditor = ({
       console.error('Auto-save failed:', error);
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  // Undo/Redo functionality
-  const handleUndo = () => {
-    if (historyIndex > 0) {
-      const newIndex = historyIndex - 1;
-      setHistoryIndex(newIndex);
-      setContent(history[newIndex]);
-      const quill = quillRef.current?.getEditor();
-      if (quill) {
-        quill.setText(history[newIndex]);
-      }
-    }
-  };
-
-  const handleRedo = () => {
-    if (historyIndex < history.length - 1) {
-      const newIndex = historyIndex + 1;
-      setHistoryIndex(newIndex);
-      setContent(history[newIndex]);
-      const quill = quillRef.current?.getEditor();
-      if (quill) {
-        quill.setText(history[newIndex]);
-      }
     }
   };
 
@@ -357,7 +310,7 @@ const EnhancedRichContentEditor = ({
     }
   };
 
-  // Enhanced Quill modules - simplified and stable
+  // Simplified Quill modules - only the built-in toolbar
   const modules = {
     toolbar: [
       [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
@@ -473,18 +426,6 @@ const EnhancedRichContentEditor = ({
             </TabsList>
             
             <TabsContent value="editor" className="space-y-4">
-              {/* Custom Toolbar */}
-              <EditorToolbar
-                onUndo={handleUndo}
-                onRedo={handleRedo}
-                onFindReplace={() => setShowFindReplace(true)}
-                onInsertTable={() => setShowTableInsert(true)}
-                onInsertMedia={() => setShowMediaEmbed(true)}
-                onToggleShortcuts={() => setShowShortcuts(true)}
-                canUndo={historyIndex > 0}
-                canRedo={historyIndex < history.length - 1}
-              />
-              
               {/* Editor Area */}
               <div
                 className={`relative transition-colors ${
