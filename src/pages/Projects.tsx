@@ -153,10 +153,10 @@ const Projects = () => {
 
         {/* Header Section */}
         <div className="mb-12 relative z-10">
-          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
             Projects
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-lg">
+          <p className="text-gray-600 text-lg">
             A timeline of my personal and client-based projects.
           </p>
         </div>
@@ -164,13 +164,13 @@ const Projects = () => {
         {/* Project Cards Section */}
         {loading ? (
           <div className="flex justify-center items-center py-12">
-            <div className="text-lg text-gray-600 dark:text-gray-400">
+            <div className="text-lg text-gray-600 ">
               Loading projects...
             </div>
           </div>
         ) : projects.length === 0 ? (
           <div className="flex justify-center items-center py-12">
-            <div className="text-lg text-gray-600 dark:text-gray-400">
+            <div className="text-lg text-gray-600">
               No projects found
             </div>
           </div>
@@ -193,7 +193,7 @@ const Projects = () => {
                     )
                   }
                 >
-                  <div className="flex flex-col w-full h-full p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+                  <div className="flex flex-col w-full h-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
                     <img
                       src={
                         project.screenshots && project.screenshots.length > 0
@@ -216,9 +216,9 @@ const Projects = () => {
                         ))}
                       </div>
                     </div>
-                    <p className="mt-2 text-gray-600 dark:text-gray-400 text-sm">
+                    <p className="mt-2 text-gray-600 text-sm">
                       <div
-                        className="mt-2 text-gray-600 dark:text-gray-400 text-sm break-words whitespace-pre-wrap overflow-hidden"
+                        className="mt-2 text-gray-600 text-sm break-words whitespace-pre-wrap overflow-hidden"
                         dangerouslySetInnerHTML={{
                           __html: (() => {
                             const rawHtml =

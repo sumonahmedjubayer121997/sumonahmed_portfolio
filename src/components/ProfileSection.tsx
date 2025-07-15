@@ -117,7 +117,7 @@ useEffect(() => {
 
     <div className="flex items-center gap-3">
   <Link to="/contact">
-    <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-gray-600 shadow h-9 px-4 py-2 text-white dark:text-black bg-black dark:bg-oldsilver hover:text-black hover:bg-white dark:hover:bg-slate dark:hover:text-white">
+    <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-gray-600 shadow h-9 px-4 py-2 text-white  bg-black hover:text-black hover:bg-white">
       <span className="text-sm pr-2">
         <svg
           stroke="currentColor"

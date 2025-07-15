@@ -152,11 +152,11 @@ const Apps = () => {
         </div>
 
         {/* Header Section */}
-        <div className="mb-12 relative z-10">
-          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+        <div className="mb-12 relative z-10 ">
+          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
             Apps
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-lg">
+          <p className="text-gray-600 text-lg">
             A timeline of my apps projects.
           </p>
         </div>
@@ -164,18 +164,18 @@ const Apps = () => {
         {/* App Cards Section */}
         {loading ? (
           <div className="flex justify-center items-center py-12">
-            <div className="text-lg text-gray-600 dark:text-gray-400">
+            <div className="text-lg text-gray-600">
               Loading apps...
             </div>
           </div>
         ) : apps.length === 0 ? (
           <div className="flex justify-center items-center py-12">
-            <div className="text-lg text-gray-600 dark:text-gray-400">
+            <div className="text-lg text-gray-600">
               No apps found
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-5xl mx-auto relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-5xl mx-auto relative z-10 ">
             {apps.map((app) => {
               const appLink = `/apps/${encodeURIComponent(app.title)}`;
               console.log(`Creating link for ${app.title}: ${appLink}`);
@@ -191,7 +191,7 @@ const Apps = () => {
                     )
                   }
                 >
-                  <div className="flex flex-col w-full h-full p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+                  <div className="flex flex-col w-full h-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
                     <img
                       src={
                         app.screenshots && app.screenshots.length > 0
@@ -214,9 +214,9 @@ const Apps = () => {
                         ))}
                       </div>
                     </div>
-                    <p className="mt-2 text-gray-600 dark:text-gray-400 text-sm">
+                    <p className="mt-2 text-gray-600 text-sm">
                       <div
-                        className="mt-2 text-gray-600 dark:text-gray-400 text-sm break-words whitespace-pre-wrap overflow-hidden"
+                        className="mt-2 text-gray-600 text-sm break-words whitespace-pre-wrap overflow-hidden"
                         dangerouslySetInnerHTML={{
                           __html: (() => {
                             const rawHtml =
