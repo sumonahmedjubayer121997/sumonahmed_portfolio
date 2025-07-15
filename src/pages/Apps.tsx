@@ -191,7 +191,7 @@ const Apps = () => {
                     )
                   }
                 >
-                  <div className="flex flex-col w-full h-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+                  <div className="flex flex-col w-full h-full p-4 bg-white rounded-lg shadow-sm hover:bg-gray-50 transition-colors duration-200">
                     <img
                       src={
                         app.screenshots && app.screenshots.length > 0
@@ -199,11 +199,11 @@ const Apps = () => {
                           : "https://firebasestorage.googleapis.com/v0/b/taskwise-n03h6.firebasestorage.app/o/public%2Fimages%2Fblood-donation-preview.png?alt=media"
                       }
                       alt={app.title}
-                      className="w-full max-h-52 mb-4 object-cover rounded-lg"
+                      className="w-full max-h-52 mb-4 object-cover rounded-lg pointer-events-none"
                       style={{ borderRadius: "8px" }}
                     />
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-md font-bold group-hover:text-primary transition-colors duration-200">
+                    <div className="flex items-center justify-between pointer-events-none">
+                      <h2 className="text-md font-bold transition-colors duration-200">
                         {app.title}
                       </h2>
                       <div className="flex mt-1 space-x-2">
@@ -214,7 +214,7 @@ const Apps = () => {
                         ))}
                       </div>
                     </div>
-                    <p className="mt-2 text-gray-600 text-sm">
+                    <p className="mt-2 text-gray-600 text-sm pointer-events-none">
                       <div
                         className="mt-2 text-gray-600 text-sm break-words whitespace-pre-wrap overflow-hidden"
                         dangerouslySetInnerHTML={{
