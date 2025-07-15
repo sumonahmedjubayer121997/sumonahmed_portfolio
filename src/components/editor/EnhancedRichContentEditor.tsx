@@ -96,10 +96,9 @@ const EnhancedRichContentEditor = ({
   const handleContentChange = (value: string) => {
     setContent(value);
     // Add to history with debounce
-    const timeoutId = setTimeout(() => {
+    setTimeout(() => {
       addToHistory(value);
     }, 1000);
-    return () => clearTimeout(timeoutId);
   };
 
   const handleAutoSave = async () => {
@@ -358,49 +357,38 @@ const EnhancedRichContentEditor = ({
     }
   };
 
-  // Enhanced Quill modules without problematic table module
+  // Enhanced Quill modules - simplified and stable
   const modules = {
-    toolbar: false, // We'll use custom toolbar
+    toolbar: [
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      [{ 'font': [] }],
+      [{ 'size': ['small', false, 'large', 'huge'] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'color': [] }, { 'background': [] }],
+      [{ 'script': 'sub'}, { 'script': 'super' }],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'indent': '-1'}, { 'indent': '+1' }],
+      [{ 'align': [] }],
+      ['blockquote', 'code-block'],
+      ['link', 'image'],
+      ['clean']
+    ],
     clipboard: {
       matchVisual: false,
     },
     imageResize: {
       parchment: true,
       modules: ['Resize', 'DisplaySize', 'Toolbar']
-    },
-    keyboard: {
-      bindings: {
-        // Add custom keyboard shortcuts
-        bold: {
-          key: 'B',
-          ctrlKey: true,
-          handler: function(range: any, context: any) {
-            this.quill.format('bold', !context.format.bold);
-          }
-        },
-        italic: {
-          key: 'I',
-          ctrlKey: true,
-          handler: function(range: any, context: any) {
-            this.quill.format('italic', !context.format.italic);
-          }
-        },
-        underline: {
-          key: 'U',
-          ctrlKey: true,
-          handler: function(range: any, context: any) {
-            this.quill.format('underline', !context.format.underline);
-          }
-        }
-      }
     }
   };
 
   const formats = [
-    'header', 'bold', 'italic', 'underline', 'strike',
-    'list', 'bullet', 'blockquote', 'code-block',
-    'link', 'image', 'align', 'color', 'background', 
-    'size', 'font', 'width', 'height', 'style'
+    'header', 'font', 'size',
+    'bold', 'italic', 'underline', 'strike',
+    'color', 'background', 'script',
+    'list', 'bullet', 'indent', 'align',
+    'blockquote', 'code-block',
+    'link', 'image', 'width', 'height', 'style'
   ];
 
   // Word count calculation
