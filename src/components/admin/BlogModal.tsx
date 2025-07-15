@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { saveDynamicContent, updateDynamicContent } from '@/integrations/firebase/firestore';
 import { uploadFile } from '@/integrations/firebase/storage';
-import RichContentEditor from '@/components/RichContentEditor';
+import EnhancedRichContentEditor from '@/components/editor/EnhancedRichContentEditor';
 import type { BlogItem } from '@/pages/AdminBlogManager';
 
 const blogSchema = z.object({
@@ -399,7 +399,7 @@ const BlogModal: React.FC<BlogModalProps> = ({ blog, mode, onClose }) => {
               <CardTitle className="text-lg">Content *</CardTitle>
             </CardHeader>
             <CardContent>
-              <RichContentEditor
+              <EnhancedRichContentEditor
                 initialContent={blogContent}
                 onSave={(content) => setBlogContent(content)}
                 hideManualSave={true}
@@ -588,7 +588,7 @@ const BlogModal: React.FC<BlogModalProps> = ({ blog, mode, onClose }) => {
                     />
                     <div className="space-y-2">
                       <Label>Section Content</Label>
-                      <RichContentEditor
+                      <EnhancedRichContentEditor
                         initialContent={section.body}
                         onSave={(content) => updateExtraSection(index, 'body', content)}
                         hideManualSave={true}
