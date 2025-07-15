@@ -402,6 +402,7 @@ const BlogModal: React.FC<BlogModalProps> = ({ blog, mode, onClose }) => {
               <RichContentEditor
                 initialContent={blogContent}
                 onSave={(content) => setBlogContent(content)}
+                hideManualSave={true}
                 placeholder="Write your blog content here..."
               />
               {errors.content && (
@@ -590,6 +591,7 @@ const BlogModal: React.FC<BlogModalProps> = ({ blog, mode, onClose }) => {
                       <RichContentEditor
                         initialContent={section.body}
                         onSave={(content) => updateExtraSection(index, 'body', content)}
+                        hideManualSave={true}
                         placeholder="Write section content here..."
                       />
                     </div>

@@ -23,6 +23,7 @@ interface RichContentEditorProps {
   documentId?: string;
   collectionName?: string;
   placeholder?: string;
+  hideManualSave?: boolean; // Option to hide the manual Save button
 }
 
 const RichContentEditor = ({
@@ -31,7 +32,8 @@ const RichContentEditor = ({
   autoSave = false,
   documentId,
   collectionName = 'content',
-  placeholder = 'Start writing your content...'
+  placeholder = 'Start writing your content...',
+  hideManualSave = false
 }: RichContentEditorProps) => {
   const [content, setContent] = useState(initialContent);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
@@ -219,6 +221,11 @@ const RichContentEditor = ({
   const handleSave = async () => {
     if (onSave) {
       onSave(content, uploadedImages);
+      // Show success message for manual save
+      toast({
+        title: 'Saved',
+        description: 'Content updated successfully!',
+      });
     }
 
     if (documentId && collectionName) {
@@ -292,7 +299,7 @@ const RichContentEditor = ({
                     <Check className="h-4 w-4 text-green-500" />
                   </div>
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent side="bottom">
                   <p>Auto-saved at {lastAutoSaved.toLocaleTimeString()}</p>
                 </TooltipContent>
               </Tooltip>
@@ -321,10 +328,12 @@ const RichContentEditor = ({
               </span>
             </Button>
           </label>
-          <Button onClick={handleSave} disabled={isSaving} size="sm">
-            <Save className="h-4 w-4 mr-2" />
-            {isSaving ? 'Saving...' : 'Save'}
-          </Button>
+          {!hideManualSave && (
+            <Button onClick={handleSave} disabled={isSaving} size="sm">
+              <Save className="h-4 w-4 mr-2" />
+              {isSaving ? 'Saving...' : 'Save'}
+            </Button>
+          )}
         </div>
       </CardHeader>
       <CardContent>
