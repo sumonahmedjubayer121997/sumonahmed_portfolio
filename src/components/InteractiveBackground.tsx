@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { useInteractiveEffects } from "@/contexts/InteractiveEffectsContext";
 
 interface Particle {
   x: number;
@@ -15,6 +16,7 @@ const InteractiveBackground: React.FC = () => {
   const particlesRef = useRef<Particle[]>([]);
   const mouseRef = useRef({ x: 0, y: 0 });
   const animationRef = useRef<number>();
+  const { isVisible } = useInteractiveEffects();
 
   const colors = [
     "rgba(59, 130, 246, 0.8)", // blue
@@ -137,7 +139,9 @@ const InteractiveBackground: React.FC = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 w-full h-full pointer-events-none z-0"
+      className={`fixed inset-0 w-full h-full pointer-events-none z-0 transition-opacity duration-300 ${
+        isVisible ? 'opacity-100' : 'opacity-0'
+      }`}
       style={{
         background:
           "radial-gradient(ellipse at center, rgba(59, 130, 246, 0.1) 0%, transparent 70%)",

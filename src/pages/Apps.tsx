@@ -5,6 +5,7 @@ import Layout from "../components/Layout";
 import { getDynamicContent } from "@/integrations/firebase/firestore";
 import { toast } from "sonner";
 import DOMPurify from "dompurify";
+import { useInteractiveEffects } from "@/contexts/InteractiveEffectsContext";
 
 interface AppItem {
   id: string;
@@ -31,6 +32,7 @@ function stripHtmlTags(html: string): string {
 const Apps = () => {
   const [apps, setApps] = useState<AppItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const { setIsVisible } = useInteractiveEffects();
 
   useEffect(() => {
     const fetchApps = async () => {
@@ -61,6 +63,10 @@ const Apps = () => {
 
     fetchApps();
   }, []);
+
+  const handleCardHover = (isHovering: boolean) => {
+    setIsVisible(!isHovering);
+  };
 
   console.log("Apps page rendered", { apps, loading });
 
@@ -190,6 +196,8 @@ const Apps = () => {
                       `Clicked on ${app.title}, navigating to ${appLink}`
                     )
                   }
+                  onMouseEnter={() => handleCardHover(true)}
+                  onMouseLeave={() => handleCardHover(false)}
                 >
                   <div className="flex flex-col w-full h-full p-4 bg-white rounded-lg shadow-sm hover:bg-gray-50 transition-colors duration-200">
                     <img

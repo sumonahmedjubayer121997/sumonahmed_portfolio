@@ -35,6 +35,7 @@ import FluidCursor from "./components/FluidCursor";
 import EffectsToggle from "./components/EffectsToggle";
 import Preloader from "./components/Preloader";
 import { usePreloader } from "./hooks/usePreloader";
+import { InteractiveEffectsProvider } from "./contexts/InteractiveEffectsContext";
 
 const queryClient = new QueryClient();
 
@@ -49,10 +50,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
+        <InteractiveEffectsProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
             <Route path="/experience" element={<Experience />} />
@@ -184,8 +185,8 @@ function App() {
         )}
         
         <EffectsToggle onToggle={setEffectsEnabled} />
-      </TooltipProvider>
-    </QueryClientProvider>
+      </InteractiveEffectsProvider>
+    </TooltipProvider>
   );
 }
 
