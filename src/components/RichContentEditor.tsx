@@ -13,7 +13,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Save, Upload, ImageIcon, Loader2 } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Save, Upload, ImageIcon, Loader2, Check } from 'lucide-react';
 
 interface RichContentEditorProps {
   initialContent?: string;
@@ -38,6 +39,8 @@ const RichContentEditor = ({
   const [uploadProgress, setUploadProgress] = useState<string>('');
   const [isDragOver, setIsDragOver] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [lastAutoSaved, setLastAutoSaved] = useState<Date | null>(null);
+  const [showAutoSaveTooltip, setShowAutoSaveTooltip] = useState(false);
   const quillRef = useRef<ReactQuill>(null);
   const { toast } = useToast();
 
@@ -66,6 +69,15 @@ const RichContentEditor = ({
         },
         documentId
       );
+      
+      // Show auto-save success
+      const now = new Date();
+      setLastAutoSaved(now);
+      setShowAutoSaveTooltip(true);
+      
+      // Hide tooltip after 2 seconds
+      setTimeout(() => setShowAutoSaveTooltip(false), 2000);
+      
     } catch (error) {
       console.error('Auto-save failed:', error);
     } finally {
@@ -267,12 +279,25 @@ const RichContentEditor = ({
   ];
 
   return (
-    <Card className="w-full">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="flex items-center gap-2">
-          Rich Content Editor
-          {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
-        </CardTitle>
+    <TooltipProvider>
+      <Card className="w-full">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            Rich Content Editor
+            {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+            {autoSave && lastAutoSaved && (
+              <Tooltip open={showAutoSaveTooltip}>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center">
+                    <Check className="h-4 w-4 text-green-500" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Auto-saved at {lastAutoSaved.toLocaleTimeString()}</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </CardTitle>
         <div className="flex items-center gap-2">
           {uploadedImages.length > 0 && (
             <Badge variant="secondary" className="flex items-center gap-1">
@@ -350,6 +375,7 @@ const RichContentEditor = ({
         )}
       </CardContent>
     </Card>
+    </TooltipProvider>
   );
 };
 
