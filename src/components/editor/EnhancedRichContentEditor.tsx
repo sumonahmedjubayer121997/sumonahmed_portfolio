@@ -3,12 +3,8 @@ import ReactQuill, { Quill } from 'react-quill';
 import 'quill/dist/quill.snow.css';
 // @ts-ignore
 import ImageResize from 'quill-image-resize-module-react';
-// Register table support
-import QuillBetterTable from 'quill-better-table';
-
-// Register modules
+// Register image resize module only
 Quill.register('modules/imageResize', ImageResize);
-Quill.register('modules/better-table', QuillBetterTable);
 
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/integrations/firebase/config';
@@ -158,14 +154,29 @@ const EnhancedRichContentEditor = ({
     }
   };
 
-  // Table insertion
+  // Table insertion - simple HTML table
   const handleInsertTable = (rows: number, cols: number, hasHeader: boolean) => {
     const quill = quillRef.current?.getEditor();
     if (quill) {
-      const tableModule = quill.getModule('better-table');
-      if (tableModule) {
-        tableModule.insertTable(rows, cols);
+      // Create simple HTML table
+      let tableHTML = '<table border="1" style="border-collapse: collapse; width: 100%;">';
+      
+      for (let i = 0; i < rows; i++) {
+        tableHTML += '<tr>';
+        for (let j = 0; j < cols; j++) {
+          if (i === 0 && hasHeader) {
+            tableHTML += '<th style="border: 1px solid #ccc; padding: 8px;">Header</th>';
+          } else {
+            tableHTML += '<td style="border: 1px solid #ccc; padding: 8px;">Cell</td>';
+          }
+        }
+        tableHTML += '</tr>';
       }
+      tableHTML += '</table><br>';
+      
+      const range = quill.getSelection();
+      const index = range ? range.index : quill.getLength();
+      quill.clipboard.dangerouslyPasteHTML(index, tableHTML);
     }
   };
 
@@ -347,7 +358,7 @@ const EnhancedRichContentEditor = ({
     }
   };
 
-  // Enhanced Quill modules with new features
+  // Enhanced Quill modules without problematic table module
   const modules = {
     toolbar: false, // We'll use custom toolbar
     clipboard: {
@@ -356,15 +367,6 @@ const EnhancedRichContentEditor = ({
     imageResize: {
       parchment: true,
       modules: ['Resize', 'DisplaySize', 'Toolbar']
-    },
-    'better-table': {
-      operationMenu: {
-        items: {
-          unmergeCells: {
-            text: 'Another unmerge cells name'
-          }
-        }
-      }
     },
     keyboard: {
       bindings: {
@@ -398,10 +400,7 @@ const EnhancedRichContentEditor = ({
     'header', 'bold', 'italic', 'underline', 'strike',
     'list', 'bullet', 'blockquote', 'code-block',
     'link', 'image', 'align', 'color', 'background', 
-    'size', 'font', 'width', 'height', 'style',
-    'table', 'table-cell-line', 'table-cell-line-height',
-    'table-cell-background-color', 'table-cell-border-color',
-    'table-cell-border-width', 'table-cell-border-style'
+    'size', 'font', 'width', 'height', 'style'
   ];
 
   // Word count calculation
