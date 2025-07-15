@@ -122,9 +122,9 @@
 }
 
 .blur-navbar {
-  background-color: rgba(255, 255, 255, 0.7); /* Light translucent background */
-  backdrop-filter: blur(5px); /* The blur effect */
-  -webkit-backdrop-filter: blur(5px); /* For Safari support */
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 
 /* Keyboard shortcut styles */
