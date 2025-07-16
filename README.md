@@ -2,7 +2,7 @@
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/85304468-8bd4-4ef6-8553-3d8a7524235b
+**URL**: https://sumonahmed.info
 
 ## How can I edit this code?
 
@@ -10,7 +10,7 @@ There are several ways of editing your application.
 
 **Use Lovable**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/85304468-8bd4-4ef6-8553-3d8a7524235b) and start prompting.
+Simply visit the https://sumonahmed.info and start prompting.
 
 Changes made via Lovable will be committed automatically to this repo.
 
