@@ -1,0 +1,40 @@
+name: Deploy to Firebase Hosting
+
+on:
+  push:
+    branches:
+      - main  # or your production branch
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'  # Match your project Node version
+
+      - name: Install dependencies
+        run: npm install
+
+      # Optional: build step if your project uses a build process
+      - name: Build project
+        run: npm run build
+
+      - name: Deploy to Firebase
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
+          firebaseServiceAccount: "${{ secrets.FIREBASE_TOKEN }}"
+          channelId: live
+          projectId: your-project-id-here
+           - name: Post-deployment cleanup
+        if: always()
+        run: |
+          echo "Cleaning up build artifacts..."
+          rm -rf dist  # Or build/ or whatever your output dir is
+          echo "✅ Cleanup complete."
