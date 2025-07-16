@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import AdminLayout from "@/components/AdminLayout";
+import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getContentCounts, getDynamicContent } from '@/integrations/firebase/firestore';
 import { Home, User, Briefcase, FolderOpen, BookOpen, Info, Mail, Wrench, MessageSquare } from "lucide-react";
