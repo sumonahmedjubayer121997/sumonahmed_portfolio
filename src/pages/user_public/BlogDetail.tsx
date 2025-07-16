@@ -306,89 +306,95 @@ const BlogDetail = () => {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Main Content */}
           <div className="flex-1 max-w-4xl">
-            {/* Back Button */}
-             <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 min-h-screen overflow-x-hidden">
-        {/* Back Button */}
-        <div className="mb-8">
-          <Link to="/blogs">
-            <Button variant="outline">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Apps
-            </Button>
-          </Link>
-        </div>
+             <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-12 min-h-screen overflow-x-hidden">
+               {/* Back Button */}
+                  <div className="mb-8">
+                    <Link to="/blogs">
+                      <Button variant="outline">
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Back to Apps
+                      </Button>
+                    </Link>
+                  </div>
 
-       <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-gray-500">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
-                    {blog.date}
+                  <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-gray-500">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        {blog.date}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        {blog.readTime || calculateReadTime(blog.content)}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Eye className="w-4 h-4" />
+                        {views.toLocaleString()} views
+                      </div>
+                      <div className="flex items-center gap-1">
+                        By {blog.author}
+                      </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    {blog.readTime || calculateReadTime(blog.content)}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Eye className="w-4 h-4" />
-                    {views.toLocaleString()} views
-                  </div>
-                  <div className="flex items-center gap-1">
-                    By {blog.author}
-                  </div>
-                </div>
 
-                {/* Tags */}
-                {blog.tags && blog.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-8">
-                    {blog.tags.map((tag, index) => (
-                      <Badge
-                        key={index}
-                        variant="secondary"
-                        className="text-xs px-2 py-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      >
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
+                  {/* Tages and Share Button */}
+                    <div className="flex items-center justify-between mb-8">
+                      {/* Tags */}
+                                  {blog.tags && blog.tags.length > 0 && (
+                                    <div className="flex flex-wrap gap-2 mb-8">
+                                      {blog.tags.map((tag, index) => (
+                                        <Badge
+                                          key={index}
+                                          variant="secondary"
+                                          className="text-xs px-2 py-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                        >
+                                          {tag}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                  )}
+                                  <div className="flex justify-end mb-8">
+                                    <Button onClick={handleShare} variant="outline" size="sm">
+                                      <Share2 className="w-4 h-4 mr-2" />
+                                      Share
+                                    </Button>
+                                  </div>
+                    </div>
+               
 
         {/* App Header */}
         
         <div className="mb-12">
-          <div className="flex flex-wrap items-center gap-4 mb-4">
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
-              <div dangerouslySetInnerHTML={{ __html: blog.title }} />
-            </h1>
-          </div>
-           <div className="flex justify-end mb-8">
-                  <Button onClick={handleShare} variant="outline" size="sm">
-                    <Share2 className="w-4 h-4 mr-2" />
-                    Share
-                  </Button>
-                </div>
+              <h1 className="text-4xl lg:text-5xl font-bold">
+                <div
+                  className="text-black dark:text-white"
+                  dangerouslySetInnerHTML={{ __html: blog.title }}
+                />
+              </h1>
 
 
-           {/* Feature Image */}
-              {blog.coverImage && (
-                <div className="aspect-[2/1] overflow-hidden">
-                  <img
-                    src={blog.coverImage}
-                    alt={blog.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
+                {/* Feature Image */}
+          
+          {blog.coverImage && (
+            <div className="aspect-[2/1] overflow-hidden">
+              <img
+                src={blog.coverImage}
+                alt={blog.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+          
 
-          {/* <p className="text-xl text-gray-600 dark:text-gray-400 mb-6 break-words whitespace-pre-wrap overflow-hidden">
-            <div
-              dangerouslySetInnerHTML={{
-                __html:
-                  blog.about ||
-                  blog.longDescription ||
-                  "No description available",
-              }}
-            />
-          </p> */}
-          </div>
+                                      {/* <p className="text-xl text-gray-600 dark:text-gray-400 mb-6 break-words whitespace-pre-wrap overflow-hidden">
+                                        <div
+                                          dangerouslySetInnerHTML={{
+                                            __html:
+                                              blog.about ||
+                                              blog.longDescription ||
+                                              "No description available",
+                                          }}
+                                        />
+                                      </p> */}
+        </div>
 
           
         </div>

@@ -199,7 +199,7 @@ const Apps = () => {
                   onMouseEnter={() => handleCardHover(true)}
                   onMouseLeave={() => handleCardHover(false)}
                 >
-                  <div className="flex flex-col w-full h-full p-4 bg-white rounded-lg shadow-sm hover:bg-gray-50 transition-colors duration-200">
+                  <div className="flex flex-col w-full h-full p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-200 transition-colors duration-200">
                     <img
                       src={
                         app.screenshots && app.screenshots.length > 0
