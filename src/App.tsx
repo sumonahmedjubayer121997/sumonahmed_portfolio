@@ -28,7 +28,7 @@ import AdminProjectsManager from "./pages/admin_pages/AdminProjectsManager";
 import AdminBlogManager from "./pages/admin_pages/AdminBlogManager";
 import AdminContactManager from "./pages/admin_pages/AdminContactManager";
 import AdminClientsMessages from "./pages/admin_pages/AdminClientsMessages";
-import AdminProtectedRoute from "./components/AdminProtectedRoute";
+import AdminProtectedRoute from "./components/admin/AdminProtectedRoute";
 import InteractiveBackground from "./components/InteractiveBackground";
 import FluidCursor from "./components/FluidCursor";
 import EffectsToggle from "./components/EffectsToggle";
