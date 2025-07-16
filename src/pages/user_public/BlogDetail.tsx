@@ -272,10 +272,10 @@ const BlogDetail = () => {
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-6 sm:py-8 lg:py-12 max-w-7xl">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
+        <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 lg:py-12 max-w-7xl">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8">
             {/* Main Content */}
-            <div className="lg:col-span-3 space-y-6 sm:space-y-8 min-w-0">
+            <div className="lg:col-span-3 space-y-4 sm:space-y-6 lg:space-y-8 min-w-0 overflow-hidden">
               {/* Blog Header */}
               <BlogHeader
                 title={blog.title}
@@ -289,7 +289,7 @@ const BlogDetail = () => {
               />
 
               {/* Blog Content */}
-              <div className="overflow-hidden">
+              <div className="min-w-0 overflow-hidden">
                 <BlogContent
                   content={blog.content}
                   codeSnippets={blog.codeSnippets}
