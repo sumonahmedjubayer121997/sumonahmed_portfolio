@@ -31,8 +31,9 @@ jobs:
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
           firebaseServiceAccount: "${{ secrets.FIREBASE_TOKEN }}"
           channelId: live
-          projectId: your-project-id-here
-           - name: Post-deployment cleanup
+          projectId: sumon-ahemd-info
+
+      - name: Post-deployment cleanup
         if: always()
         run: |
           echo "Cleaning up build artifacts..."
