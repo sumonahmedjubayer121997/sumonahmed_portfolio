@@ -3,7 +3,7 @@ name: Deploy to Firebase Hosting
 on:
   push:
     branches:
-      - main  # or your production branch
+      - main  # production branch
 
 jobs:
   build_and_deploy:
@@ -32,7 +32,7 @@ jobs:
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
           channelId: live
           projectId: sumon-ahemd-info
-          
+
       - name: Post-deployment cleanup
         if: always()
         run: |
