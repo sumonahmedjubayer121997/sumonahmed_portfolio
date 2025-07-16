@@ -25,7 +25,7 @@ import RichContentEditor from "@/components/RichContentEditor";
 import TechnologySelector from "@/components/admin/TechnologySelector";
 import ScreenshotUploader from "@/components/admin/ScreenshotUploader";
 import { saveAndUpdateDynamicContent } from "@/integrations/firebase/firestore";
-import type { ProjectItem } from "@/pages/AdminProjectsManager";
+import type { ProjectItem } from "@/pages/admin_pages/AdminProjectsManager";
 const projectSchema = z.object({
   title: z.string().min(1, "Title is required"),
   status: z.enum(["draft", "published", "archived"]),

@@ -9,7 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Code, Download, Calendar, Clock } from "lucide-react";
-import { ProjectItem } from "@/pages/AdminProjectsManager";
+import { ProjectItem } from "@/pages/admin_pages/AdminProjectsManager";
 
 interface ProjectPreviewModalProps {
   isOpen: boolean;

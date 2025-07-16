@@ -1,7 +1,7 @@
 
 import FluidCursor from "@/components/FluidCursor";
-import Layout from "../components/Layout";
-import ProfileSection from "../components/ProfileSection";
+import Layout from "../../components/Layout";
+import ProfileSection from "../../components/ProfileSection";
 import { useState } from "react";
 
 const Index = () => {

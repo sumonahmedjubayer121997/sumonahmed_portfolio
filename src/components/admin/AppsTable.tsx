@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ArrowUpDown, Eye, Edit, Trash2, EyeOff } from 'lucide-react';
-import type { AppItem } from '@/pages/AdminAppsManager';
+import type { AppItem } from '@/pages/admin_pages/AdminAppsManager';
 
 interface AppsTableProps {
   apps: AppItem[];

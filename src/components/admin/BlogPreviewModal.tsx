@@ -4,7 +4,7 @@ import { X, Calendar, User, Tag, Code, Download, ExternalLink } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { BlogItem } from '@/pages/AdminBlogManager';
+import type { BlogItem } from '@/pages/admin_pages/AdminBlogManager';
 
 interface BlogPreviewModalProps {
   blog: BlogItem;

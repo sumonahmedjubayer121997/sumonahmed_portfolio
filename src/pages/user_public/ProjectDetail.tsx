@@ -10,7 +10,7 @@ import {
   Code,
   Zap,
 } from "lucide-react";
-import Layout from "../components/Layout";
+import Layout from "../../components/Layout";
 import TechIcon from "@/components/TechIcon";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

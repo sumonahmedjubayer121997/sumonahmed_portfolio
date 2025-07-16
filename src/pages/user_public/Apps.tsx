@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import TechIcon from "@/components/TechIcon";
-import Layout from "../components/Layout";
+import Layout from "../../components/Layout";
 import { getDynamicContent } from "@/integrations/firebase/firestore";
 import { toast } from "sonner";
 import DOMPurify from "dompurify";

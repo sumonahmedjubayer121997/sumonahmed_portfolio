@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import { saveDynamicContent, updateDynamicContent } from '@/integrations/firebase/firestore';
 import { uploadFile } from '@/integrations/firebase/storage';
 import EnhancedRichContentEditor from '@/components/editor/EnhancedRichContentEditor';
-import type { BlogItem } from '@/pages/AdminBlogManager';
+import type { BlogItem } from '@/pages/admin_pages/AdminBlogManager';
 
 const blogSchema = z.object({
   title: z.string().min(1, 'Title is required'),

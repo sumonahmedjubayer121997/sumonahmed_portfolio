@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import Layout from "../components/Layout";
+import Layout from "../../components/Layout";
 import { getDynamicContent } from "@/integrations/firebase/firestore";
 
 interface Tool {

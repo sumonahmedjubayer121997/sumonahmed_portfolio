@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import Layout from "../components/Layout";
+import Layout from "@/components/Layout";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, ExternalLink } from "lucide-react";
 import { getDynamicContent } from "@/integrations/firebase/firestore";

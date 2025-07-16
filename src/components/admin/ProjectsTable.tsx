@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ArrowUpDown, Eye, Edit, Trash2, EyeOff } from "lucide-react";
-import type { ProjectItem } from "@/pages/AdminProjectsManager";
+import type { ProjectItem } from "@/pages/admin_pages/AdminProjectsManager";
 
 interface ProjectsTableProps {
   projects: ProjectItem[];
