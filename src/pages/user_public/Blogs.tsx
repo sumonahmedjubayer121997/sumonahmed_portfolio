@@ -10,6 +10,7 @@ import { getDynamicContent } from "@/integrations/firebase/firestore";
 import { toast } from "sonner";
 import DOMPurify from "dompurify";
 import { Share2 } from "lucide-react";
+import { useInteractiveEffects } from "@/contexts/InteractiveEffectsContext";
 
 function decodeHTML(encoded) {
   const txt = document.createElement("textarea");
@@ -38,6 +39,7 @@ const Blogs = () => {
   const [selectedTag, setSelectedTag] = useState<string>("");
   const [blogs, setBlogs] = useState<BlogItem[]>([]);
   const [loading, setLoading] = useState(true);
+    const { setIsVisible } = useInteractiveEffects();
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -69,6 +71,10 @@ const Blogs = () => {
 
     fetchBlogs();
   }, []);
+
+   const handleCardHover = (isHovering: boolean) => {
+    setIsVisible(!isHovering);
+  };
 
   // Get all unique tags
   const allTags = Array.from(new Set(blogs.flatMap(blog => blog.tags || [])));
@@ -108,7 +114,7 @@ const Blogs = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-6xl mx-auto">
+        <div className="pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-6xl mx-auto" >
           <div className="flex justify-center items-center py-12">
             <div className="text-lg text-gray-600">Loading blogs...</div>
           </div>
@@ -197,15 +203,22 @@ const Blogs = () => {
         )}
 
         {/* Blog Cards Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 ">
           {filteredBlogs.length > 0 ? (
             filteredBlogs.map((blog) => (
               <Link
                 key={blog.id}
                 to={`/blogs/${blog.slug}`}
                 className="block"
+                 onClick={() =>
+                    console.log(
+                      `Clicked on ${blog.title}`
+                    )
+                  }
+                  onMouseEnter={() => handleCardHover(true)}
+                  onMouseLeave={() => handleCardHover(false)}
               >
-                <article className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02] overflow-hidden cursor-pointer border border-gray-100 h-full">
+                <article className="bg-gray-50 shadow-sm hover:bg-gray-200 transition-colors  rounded-2xl hover:shadow-md  duration-300 hover:scale-[1.02] overflow-hidden cursor-pointer border border-gray-100 h-full">
                   {/* Feature Image */}
                   {blog.coverImage && (
                     <div className="aspect-[2/1] overflow-hidden">
