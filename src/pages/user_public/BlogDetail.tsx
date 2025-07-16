@@ -1,9 +1,8 @@
-
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Layout from "../../components/Layout";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Menu } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getDynamicContent } from "@/integrations/firebase/firestore";
 import { toast } from "sonner";
@@ -12,6 +11,7 @@ import BlogContent from "@/components/blog/BlogContent";
 import BlogTableOfContents from "@/components/blog/BlogTableOfContents";
 import BlogFeedback from "@/components/blog/BlogFeedback";
 import RelatedBlogs from "@/components/blog/RelatedBlogs";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 interface BlogPost {
   id: string;
@@ -54,6 +54,7 @@ const BlogDetail = () => {
   const [activeSection, setActiveSection] = useState<string>("");
   const [views, setViews] = useState(0);
   const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
+  const [tocOpen, setTocOpen] = useState(false);
 
   useEffect(() => {
     const fetchBlogData = async () => {
@@ -167,6 +168,7 @@ const BlogDetail = () => {
         behavior: 'smooth',
         block: 'start'
       });
+      setTocOpen(false); // Close mobile TOC after navigation
     }
   };
 
@@ -198,7 +200,7 @@ const BlogDetail = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center px-4">
           <div className="text-center space-y-4">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
             <p className="text-muted-foreground">Loading article...</p>
@@ -211,9 +213,9 @@ const BlogDetail = () => {
   if (!blog) {
     return (
       <Layout>
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center px-4">
           <div className="text-center space-y-6 max-w-md">
-            <h1 className="text-3xl font-bold text-foreground">Article not found</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Article not found</h1>
             <p className="text-muted-foreground">The article you're looking for doesn't exist or has been removed.</p>
             <Button onClick={() => navigate('/blogs')} variant="outline">
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -236,20 +238,44 @@ const BlogDetail = () => {
       <div className="min-h-screen bg-background">
         {/* Navigation */}
         <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
-          <div className="container mx-auto px-4 py-4">
-            <Link to="/blogs">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Articles
-              </Button>
-            </Link>
+          <div className="container mx-auto px-4 py-3 sm:py-4">
+            <div className="flex items-center justify-between">
+              <Link to="/blogs">
+                <Button variant="ghost" size="sm">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">Back to Articles</span>
+                  <span className="sm:hidden">Back</span>
+                </Button>
+              </Link>
+              
+              {/* Mobile TOC Toggle */}
+              {tableOfContents.length > 0 && (
+                <Sheet open={tocOpen} onOpenChange={setTocOpen}>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="sm" className="lg:hidden">
+                      <Menu className="w-4 h-4 mr-2" />
+                      Contents
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-80">
+                    <div className="mt-6">
+                      <BlogTableOfContents
+                        items={tableOfContents}
+                        activeSection={activeSection}
+                        onSectionClick={scrollToSection}
+                      />
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-8 lg:py-12 max-w-7xl">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="container mx-auto px-4 py-6 sm:py-8 lg:py-12 max-w-7xl">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
             {/* Main Content */}
-            <div className="lg:col-span-3 space-y-8">
+            <div className="lg:col-span-3 space-y-6 sm:space-y-8 min-w-0">
               {/* Blog Header */}
               <BlogHeader
                 title={blog.title}
@@ -263,13 +289,15 @@ const BlogDetail = () => {
               />
 
               {/* Blog Content */}
-              <BlogContent
-                content={blog.content}
-                codeSnippets={blog.codeSnippets}
-                resources={blog.resources}
-                extraSections={blog.extraSections}
-                onCopyCode={copyToClipboard}
-              />
+              <div className="overflow-hidden">
+                <BlogContent
+                  content={blog.content}
+                  codeSnippets={blog.codeSnippets}
+                  resources={blog.resources}
+                  extraSections={blog.extraSections}
+                  onCopyCode={copyToClipboard}
+                />
+              </div>
 
               {/* Feedback Section */}
               <BlogFeedback
@@ -278,13 +306,15 @@ const BlogDetail = () => {
               />
             </div>
 
-            {/* Sidebar */}
-            <div className="lg:col-span-1">
-              <BlogTableOfContents
-                items={tableOfContents}
-                activeSection={activeSection}
-                onSectionClick={scrollToSection}
-              />
+            {/* Desktop Sidebar */}
+            <div className="hidden lg:block lg:col-span-1">
+              {tableOfContents.length > 0 && (
+                <BlogTableOfContents
+                  items={tableOfContents}
+                  activeSection={activeSection}
+                  onSectionClick={scrollToSection}
+                />
+              )}
             </div>
           </div>
 
