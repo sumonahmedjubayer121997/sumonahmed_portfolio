@@ -69,8 +69,8 @@ const BlogHeader = ({
         )}
 
         {/* Share Button */}
-        <Button onClick={onShare} variant="outline" size="sm" className="w-fit">
-          <Share2 className="w-4 h-4 mr-2" />
+        <Button onClick={onShare} variant="outline" size="sm" className="w-fit dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
+          <Share2 className="w-4 h-4 mr-2 dark:text-gray-400" />
           Share
         </Button>
       </div>

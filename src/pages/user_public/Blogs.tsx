@@ -39,11 +39,8 @@ const Blogs = () => {
   const [loading, setLoading] = useState(true);
   const { setIsVisible } = useInteractiveEffects();
 
-  useEffect(() => {
-    setIsVisible(true);
-    return () => {
-      setIsVisible(true);
-    };
+useEffect(() => {
+    setIsVisible(true); // Ensure effects are shown on mount
   }, [setIsVisible]);
 
   useEffect(() => {
@@ -112,6 +109,10 @@ const Blogs = () => {
     return `${readTime || 1} min read`;
   };
 
+  const handleClick = () => {
+  setIsVisible(true); // Ensure visibility before route change
+};
+
   if (loading) {
     return (
       <Layout>
@@ -128,8 +129,8 @@ const Blogs = () => {
     <Layout>
       <div className="pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-6xl mx-auto relative">
         <div className="mb-12">
-          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Pensieve</h1>
-          <p className="text-gray-600 text-lg mb-6">
+          <h1 className="text-4xl lg:text-5xl font-bold text-black mb-4 dark:text-gray-50 ">Pensieve</h1>
+          <p className="text-gray-600 text-lg mb-6 dark:text-gray-100">
             A collection of thoughts, ideas, and musings. You can check more of my writings on my{" "}
             <a 
               href="https://medium.com/@sumon" 
@@ -198,14 +199,14 @@ const Blogs = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {filteredBlogs.length > 0 ? (
             filteredBlogs.map((blog) => (
-              <Link
-                key={blog.id}
-                to={`/blogs/${blog.slug}`}
-                className="block"
-                onClick={() => console.log(`Clicked on ${blog.title}`)}
-                onMouseEnter={() => handleCardHover(true)}
-                onMouseLeave={() => handleCardHover(false)}
-              >
+                  <Link
+        key={blog.id}
+        to={`/blogs/${blog.slug}`}
+        className="block"
+        onClick={handleClick}
+        onMouseEnter={() => handleCardHover(true)}
+        onMouseLeave={() => handleCardHover(false)}
+      >
                 <article className="bg-gray-50 shadow-sm hover:bg-gray-200 transition-colors rounded-2xl hover:shadow-md duration-300 hover:scale-[1.02] overflow-hidden cursor-pointer border border-gray-100 h-full">
                   {blog.coverImage && (
                     <div className="aspect-[2/1] overflow-hidden">

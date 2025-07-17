@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 type Theme = 'light' | 'dark' | 'system';
@@ -25,27 +24,28 @@ interface ThemeProviderProps {
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>(() => {
-    const stored = localStorage.getItem('theme') as Theme;
-    return stored || 'system';
+    if (typeof window === 'undefined') return 'system';
+    return (localStorage.getItem('theme') as Theme) || 'system';
   });
 
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
     const updateTheme = () => {
-      let resolved: 'light' | 'dark';
-      
-      if (theme === 'system') {
-        resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      } else {
-        resolved = theme;
-      }
+      let resolved: 'light' | 'dark' =
+        theme === 'system'
+          ? window.matchMedia('(prefers-color-scheme: dark)').matches
+            ? 'dark'
+            : 'light'
+          : theme;
 
       setResolvedTheme(resolved);
-      
-      const root = window.document.documentElement;
-      root.classList.remove('light', 'dark');
-      root.classList.add(resolved);
+
+      const root = document.documentElement;
+      if (!root.classList.contains(resolved)) {
+        root.classList.remove('light', 'dark');
+        root.classList.add(resolved);
+      }
     };
 
     updateTheme();
@@ -58,7 +58,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   }, [theme]);
 
   useEffect(() => {
-    localStorage.setItem('theme', theme);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('theme', theme);
+    }
   }, [theme]);
 
   return (
