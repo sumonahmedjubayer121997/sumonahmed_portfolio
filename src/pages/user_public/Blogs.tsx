@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Layout from "../../components/Layout";
@@ -39,7 +38,17 @@ const Blogs = () => {
   const [selectedTag, setSelectedTag] = useState<string>("");
   const [blogs, setBlogs] = useState<BlogItem[]>([]);
   const [loading, setLoading] = useState(true);
-    const { setIsVisible } = useInteractiveEffects();
+  const { setIsVisible } = useInteractiveEffects();
+
+  // Ensure interactive effects are visible when component mounts
+  useEffect(() => {
+    setIsVisible(true);
+    
+    // Cleanup function to ensure effects are visible when leaving
+    return () => {
+      setIsVisible(true);
+    };
+  }, [setIsVisible]);
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -72,7 +81,7 @@ const Blogs = () => {
     fetchBlogs();
   }, []);
 
-   const handleCardHover = (isHovering: boolean) => {
+  const handleCardHover = (isHovering: boolean) => {
     setIsVisible(!isHovering);
   };
 
@@ -210,13 +219,13 @@ const Blogs = () => {
                 key={blog.id}
                 to={`/blogs/${blog.slug}`}
                 className="block"
-                 onClick={() =>
-                    console.log(
-                      `Clicked on ${blog.title}`
-                    )
-                  }
-                  onMouseEnter={() => handleCardHover(true)}
-                  onMouseLeave={() => handleCardHover(false)}
+                onClick={() =>
+                  console.log(
+                    `Clicked on ${blog.title}`
+                  )
+                }
+                onMouseEnter={() => handleCardHover(true)}
+                onMouseLeave={() => handleCardHover(false)}
               >
                 <article className="bg-gray-50 shadow-sm hover:bg-gray-200 transition-colors  rounded-2xl hover:shadow-md  duration-300 hover:scale-[1.02] overflow-hidden cursor-pointer border border-gray-100 h-full">
                   {/* Feature Image */}
@@ -239,24 +248,22 @@ const Blogs = () => {
                       </h2>
                       
                       {/* Excerpt */}
-                       <p className="mt-2 text-gray-600 dark:text-gray-400 text-sm">
-                     <div
-  className="mt-2 text-gray-600 dark:text-gray-400 text-sm break-words whitespace-pre-wrap overflow-hidden"
-  dangerouslySetInnerHTML={{
-    __html: (() => {
-      const encodedHtml = blog?.content || "No description available";
-      const decodedHtml = decodeHTML(encodedHtml);
-      const sanitizedHtml = DOMPurify.sanitize(decodedHtml);
+                      <p className="mt-2 text-gray-600 dark:text-gray-400 text-sm">
+                        <div
+                          className="mt-2 text-gray-600 dark:text-gray-400 text-sm break-words whitespace-pre-wrap overflow-hidden"
+                          dangerouslySetInnerHTML={{
+                            __html: (() => {
+                              const encodedHtml = blog?.content || "No description available";
+                              const decodedHtml = decodeHTML(encodedHtml);
+                              const sanitizedHtml = DOMPurify.sanitize(decodedHtml);
 
-      // Truncate the sanitized HTML if it's too long
-      return sanitizedHtml.length > 150
-        ? sanitizedHtml.substring(0, 147) + "..."
-        : sanitizedHtml;
-    })(),
-  }}
-></div>
-
-                    </p>
+                              return sanitizedHtml.length > 150
+                                ? sanitizedHtml.substring(0, 147) + "..."
+                                : sanitizedHtml;
+                            })(),
+                          }}
+                        />
+                      </p>
 
                       {/* Tags */}
                       {blog.tags && blog.tags.length > 0 && (
