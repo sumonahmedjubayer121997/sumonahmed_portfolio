@@ -37,25 +37,33 @@ const EnhancedIconSelector = ({ selectedIcons, onIconsChange }: EnhancedIconSele
       const normalizedName = normalizeIconName(name);
       
       // Try exact match first
-      let iconKey = Object.keys(simpleIcons).find(key => 
-        key.toLowerCase() === `si${normalizedName}`
-      );
+      const iconKey = `si${normalizedName.charAt(0).toUpperCase() + normalizedName.slice(1)}`;
+      const icon = (simpleIcons as any)[iconKey];
 
-      // If not found, try partial matches
-      if (!iconKey) {
-        iconKey = Object.keys(simpleIcons).find(key => 
-          key.toLowerCase().includes(normalizedName) ||
-          normalizedName.includes(key.toLowerCase().replace('si', ''))
-        );
-      }
-
-      if (iconKey) {
-        const icon = (simpleIcons as any)[iconKey];
+      if (icon) {
         return {
           name: normalizedName,
           displayName: icon.title || name,
           svg: icon.svg,
           color: `#${icon.hex}`,
+          found: true
+        };
+      }
+
+      // If not found, try partial matches
+      const allIconKeys = Object.keys(simpleIcons).filter(key => key.startsWith('si'));
+      const partialMatch = allIconKeys.find(key => 
+        key.toLowerCase().includes(normalizedName) ||
+        normalizedName.includes(key.toLowerCase().replace('si', ''))
+      );
+
+      if (partialMatch) {
+        const matchedIcon = (simpleIcons as any)[partialMatch];
+        return {
+          name: normalizedName,
+          displayName: matchedIcon.title || name,
+          svg: matchedIcon.svg,
+          color: `#${matchedIcon.hex}`,
           found: true
         };
       }
