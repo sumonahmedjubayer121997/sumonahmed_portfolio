@@ -99,10 +99,9 @@ const BlogDetail = () => {
     fetchBlogData();
   }, [slug]);
 
-  // Scroll tracking for table of contents
   useEffect(() => {
     const handleScroll = () => {
-      const sections = document.querySelectorAll('h2[id], h3[id]');
+      const sections = document.querySelectorAll('h1[id], h2[id], h3[id]');
       let currentSection = '';
       
       sections.forEach((section) => {
@@ -180,21 +179,21 @@ const BlogDetail = () => {
   };
 
   const extractTableOfContents = (content: string) => {
-    const headings = content.match(/<h[2-3][^>]*id="([^"]*)"[^>]*>([^<]*)<\/h[2-3]>/g);
+    const headings = content.match(/<h[1-3][^>]*id="([^"]*)"[^>]*>([^<]*)<\/h[1-3]>/g);
     
     if (!headings) return [];
 
     return headings.map(heading => {
       const idMatch = heading.match(/id="([^"]*)"/);
       const textMatch = heading.match(/>([^<]*)</);
-      const levelMatch = heading.match(/<h([2-3])/);
+      const levelMatch = heading.match(/<h([1-3])/);
       
       return {
         id: idMatch ? idMatch[1] : '',
-        title: textMatch ? textMatch[1] : '',
-        level: levelMatch ? parseInt(levelMatch[1]) : 2
+        title: textMatch ? textMatch[1].trim() : '',
+        level: levelMatch ? parseInt(levelMatch[1]) : 1
       };
-    });
+    }).filter(item => item.id && item.title);
   };
 
   if (loading) {
