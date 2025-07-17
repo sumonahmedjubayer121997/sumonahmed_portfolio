@@ -4,20 +4,14 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Save, Eye, EyeOff, Info } from "lucide-react";
 import { 
-  getContentByPageType, 
-  createContent, 
-  updateContent,
-  ContentType,
-  ContentItem ,
   saveAndUpdateDynamicContent,
   listenDynamicContent
 } from '@/integrations/firebase/firestore';
-import IconSelector from "@/components/IconSelector";
+import EnhancedIconSelector from "@/components/EnhancedIconSelector";
 import RichTextEditor from "@/components/RichTextEditor";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -95,54 +89,6 @@ const AdminHomeManager = () => {
     };
 
   }, []); // empty deps = runs once on mount
-
-
-// const fetchExistingContent = async () => {
-//   try {
-//     setIsInitialLoading(true);
-//     console.log('Fetching existing content...');
-
-//     const { data, error } = await getDynamicContent('home', '7E1fmebGEixv8p2mjJfy');  // Fetch 'home/main'
-
-//     if (error) {
-//       console.error('Error fetching content:', error);
-//       toast({
-//         title: "Error",
-//         description: error,
-//         variant: "destructive",
-//       });
-//       return;
-//     }
-
-//     if (data) {
-//       console.log('Fetched content:', data);
-//       setExistingContent(data);  // Includes id and content
-
-//       const portfolioData = data.content as PortfolioData;
-//       setFormData({
-//         name: portfolioData.name || '',
-//         position: portfolioData.position || '',
-//         onlineLink: portfolioData.onlineLink || '',
-//         aboutMe: portfolioData.aboutMe || '',
-//         selectedIcons: portfolioData.selectedIcons || []
-//       });
-
-//       console.log('Form data set:', portfolioData);
-//     } else {
-//       console.log('No content found.');
-//     }
-
-//   } catch (error: any) {
-//     console.error('Unexpected error fetching content:', error);
-//     toast({
-//       title: "Error",
-//       description: "Failed to load existing content. Please try again.",
-//       variant: "destructive",
-//     });
-//   } finally {
-//     setIsInitialLoading(false);
-//   }
-// };
 
   const validateForm = (): boolean => {
     const errors: string[] = [];
@@ -245,7 +191,6 @@ const handleSave = async () => {
     setIsLoading(false);
   }
 };
-
 
   const handleInputChange = (field: keyof PortfolioData, value: string | string[]) => {
     console.log(`Updating field ${field} with value:`, value);
@@ -381,7 +326,7 @@ const handleSave = async () => {
                   />
                 </div>
 
-                {/* Icons Selector */}
+                {/* Enhanced Icons Selector */}
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <Label>Technology & Social Icons</Label>
@@ -390,11 +335,11 @@ const handleSave = async () => {
                         <Info size={14} className="text-gray-400" />
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>Select icons representing your skills and social presence</p>
+                        <p>Select icons with real-time preview from Simple Icons library</p>
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                  <IconSelector
+                  <EnhancedIconSelector
                     selectedIcons={formData.selectedIcons}
                     onIconsChange={(icons) => handleInputChange('selectedIcons', icons)}
                   />
