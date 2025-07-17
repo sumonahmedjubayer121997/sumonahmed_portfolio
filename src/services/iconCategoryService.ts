@@ -144,7 +144,7 @@ export const getAllCategorizedIcons = async () => {
     const categories = categoriesSnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
-    }));
+    })) as IconCategory[];
     
     const icons = iconsSnapshot.docs.map(doc => {
       const iconData = doc.data();
