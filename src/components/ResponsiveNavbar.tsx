@@ -179,7 +179,7 @@ const ResponsiveNavbar = () => {
     return (
       <>
         {/* Mobile Navbar - Fixed at top */}
-        <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+        <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm dark:bg-black dark:border-gray-700">
           <div className="flex items-center justify-between p-4 h-16">
             {/* Profile Info */}
             <div className="flex items-center gap-3">
@@ -335,7 +335,7 @@ const ResponsiveNavbar = () => {
   return (
     <>
       {/* Vertical Navbar */}
-      <div className="fixed left-0 top-0 h-full w-64 z-40 bg-white border-r border-gray-200 shadow-sm">
+      <div className="fixed left-0 top-0 h-full w-64 z-40 bg-white border-r border-gray-200 shadow-sm dark:bg-black dark:border-gray-700">
         <div className="p-6 flex flex-col h-full">
           {/* Logo/Profile Section */}
           <div className="text-left mb-8">
@@ -344,8 +344,8 @@ const ResponsiveNavbar = () => {
                 <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
               </div>
             </div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-1">Sumon</h2>
-            <p className="text-sm text-gray-600">{roles[index]}</p>
+            <h2 className="text-lg font-semibold text-gray-900 mb-1 dark:text-gray-400 ">Sumon</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-300">{roles[index]}</p>
           </div>
 
           {/* Navigation */}
@@ -359,8 +359,8 @@ const ResponsiveNavbar = () => {
                     className={({ isActive }) =>
                       `flex items-center px-3 py-3 rounded-lg transition-all duration-200 group text-sm ${
                         isActive
-                          ? "bg-gray-900 text-white shadow-sm"
-                          : "text-gray-700 hover:bg-gray-100"
+                          ? "bg-gray-900 text-white shadow-sm hover:bg-gray-800"
+                          : "text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
                       }`
                     }
                   >

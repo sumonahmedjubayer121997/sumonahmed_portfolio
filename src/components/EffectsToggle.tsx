@@ -1,11 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
-import { Info, EyeOff, Eye, Search, X } from 'lucide-react';
+import { Info, EyeOff, Eye, Search, X, Sun, Moon, Monitor } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface EffectsToggleProps {
   onToggle: (enabled: boolean) => void;
 }
+
+
 
 const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
   const [effectsEnabled, setEffectsEnabled] = useState(true);
@@ -13,6 +15,7 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [isNearFooter, setIsNearFooter] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
+  const { theme, setTheme } = useTheme(); 
 
   useEffect(() => {
     const updateScreenSize = () => {
@@ -69,6 +72,25 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
     console.log('Ask me clicked');
   };
 
+ const handleThemeToggle = () => {
+  const themes = ['light', 'dark'] as const;
+  const currentIndex = themes.indexOf(theme);
+  const nextIndex = (currentIndex + 1) % themes.length;
+  setTheme(themes[nextIndex]);
+};
+
+
+  const getThemeIcon = () => {
+    switch (theme) {
+      case 'light':
+        return Sun;
+      case 'dark':
+        return Moon;
+      default:
+        return Sun;
+    }
+  };
+
   const toggleExpansion = () => {
     setIsExpanded(!isExpanded);
   };
@@ -77,15 +99,15 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
   const getButtonPosition = () => {
     if (isNearFooter) {
       if (isSmallScreen) return 'bottom-20'; // Mobile
-      return 'bottom-24'; // Tablet/Desktop
+      return 'bottom-20'; // Tablet/Desktop
     }
     return 'bottom-4'; // Default position
   };
 
   const getExpandedPanelPosition = () => {
     if (isNearFooter) {
-      if (isSmallScreen) return 'bottom-32'; // Mobile
-      return 'bottom-36'; // Tablet/Desktop
+      if (isSmallScreen) return 'bottom-20'; // Mobile
+      return 'bottom-20'; // Tablet/Desktop
     }
     return 'bottom-16'; // Default position
   };
@@ -96,6 +118,35 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
         {isExpanded && (
           <div className={`absolute ${getExpandedPanelPosition()} right-0 bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 p-1.5 mb-2 transition-all duration-300 ease-in-out`}>
             <div className="flex flex-col items-center gap-1.5">
+
+              {/* Theme Toggle */}
+              <div className="flex flex-col items-center">
+                {isSmallScreen ? (
+                  <>
+                    <button
+                      onClick={handleThemeToggle}
+                      className="w-10 h-10 rounded-full bg-gray-50/80 hover:bg-gray-100 flex items-center justify-center transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      aria-label="Toggle Theme"
+                    >
+                      {React.createElement(getThemeIcon(), { className: "w-4 h-4 text-gray-700" })}
+                    </button>
+                  </>
+                ) : (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={handleThemeToggle}
+                        className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-50/80 hover:bg-gray-100 flex items-center justify-center transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      >
+                        {React.createElement(getThemeIcon(), { className: "w-4 h-4 md:w-5 md:h-5 text-gray-700" })}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="left" className="bg-gray-900 text-white text-sm font-medium px-3 py-2">
+                      Toggle Theme ({theme})
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
 
               {/* Hide Interactive Background */}
               <div className="flex flex-col items-center">
