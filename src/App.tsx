@@ -36,6 +36,7 @@ import Preloader from "./components/Preloader";
 import { usePreloader } from "./hooks/usePreloader";
 import { InteractiveEffectsProvider } from "./contexts/InteractiveEffectsContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { useTheme } from "./contexts/ThemeContext";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,9 @@ function App() {
   const { isLoading } = usePreloader({ minDuration: 2000, checkAssets: true });
   const [effectsEnabled, setEffectsEnabled] = useState(true);
 
+  const { theme ,setTheme} = useTheme();
+
+  setTheme('light'); // Set default theme to light
   if (isLoading) {
     return <Preloader />;
   }
@@ -169,22 +173,23 @@ function App() {
               </Routes>
             </BrowserRouter>
 
-            {effectsEnabled && (
-              <div
-                style={{
-                  pointerEvents: "none",
-                  position: "fixed",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  zIndex: 5,
-                }}
-              >
-                <InteractiveBackground />
-                <FluidCursor />
-              </div>
-            )}
+           {effectsEnabled && (
+  <div
+    style={{
+      pointerEvents: "none",
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      zIndex: 5,
+    }}
+  >
+   <InteractiveBackground />
+   <FluidCursor />
+  </div>
+)}
+
             
             <EffectsToggle onToggle={setEffectsEnabled} />
           </InteractiveEffectsProvider>
