@@ -6,6 +6,8 @@ import { getDynamicContent } from "@/integrations/firebase/firestore";
 import { toast } from "sonner";
 import DOMPurify from "dompurify";
 import { useInteractiveEffects } from "@/contexts/InteractiveEffectsContext";
+import Title from "./uif/Title";
+import CardDesign from "./uif/CardDesign";
 
 interface AppItem {
   id: string;
@@ -33,6 +35,10 @@ const Apps = () => {
   const [apps, setApps] = useState<AppItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { setIsVisible } = useInteractiveEffects();
+  
+  useEffect(() => {
+      setIsVisible(true); // Ensure effects are shown on mount
+    }, [setIsVisible]);
 
   useEffect(() => {
     const fetchApps = async () => {
@@ -67,8 +73,10 @@ const Apps = () => {
   const handleCardHover = (isHovering: boolean) => {
     setIsVisible(!isHovering);
   };
-
-  console.log("Apps page rendered", { apps, loading });
+ const handleClick = () => {
+  setIsVisible(true); // Ensure visibility before route change
+};
+ 
 
   return (
     <Layout>
@@ -159,10 +167,10 @@ const Apps = () => {
 
         {/* Header Section */}
         <div className="mb-12 relative z-10 ">
-          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4 dark:text-gray-200">
             Apps
           </h1>
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-600 text-lg dark:text-gray-300">
             A timeline of my apps projects.
           </p>
         </div>
@@ -191,15 +199,11 @@ const Apps = () => {
                   key={app.id}
                   to={appLink}
                   className="w-full group"
-                  onClick={() =>
-                    console.log(
-                      `Clicked on ${app.title}, navigating to ${appLink}`
-                    )
-                  }
+                  onClick={handleClick}
                   onMouseEnter={() => handleCardHover(true)}
                   onMouseLeave={() => handleCardHover(false)}
                 >
-                  <div className="flex flex-col w-full h-full p-4 bg-white rounded-lg shadow-sm hover:bg-gray-50 transition-colors duration-200">
+                  <CardDesign>
                     <img
                       src={
                         app.screenshots && app.screenshots.length > 0
@@ -211,9 +215,7 @@ const Apps = () => {
                       style={{ borderRadius: "8px" }}
                     />
                     <div className="flex items-center justify-between pointer-events-none">
-                      <h2 className="text-md font-bold transition-colors duration-200">
-                        {app.title}
-                      </h2>
+                       <Title title={app.title} />
                       <div className="flex mt-1 space-x-2">
                         {app.technologies?.map((tech, index) => (
                           <div key={index} title={tech}>
@@ -224,7 +226,7 @@ const Apps = () => {
                     </div>
                     <p className="mt-2 text-gray-600 text-sm pointer-events-none">
                       <div
-                        className="mt-2 text-gray-600 text-sm break-words whitespace-pre-wrap overflow-hidden"
+                        className="mt-2 text-gray-600 text-sm break-words whitespace-pre-wrap overflow-hidden dark:text-gray-400"
                         dangerouslySetInnerHTML={{
                           __html: (() => {
                             const rawHtml =
@@ -239,7 +241,7 @@ const Apps = () => {
                         }}
                       ></div>
                     </p>
-                  </div>
+                  </CardDesign>
                 </Link>
               );
             })}

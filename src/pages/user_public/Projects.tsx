@@ -5,6 +5,8 @@ import Layout from "../../components/Layout";
 import { getDynamicContent } from "@/integrations/firebase/firestore";
 import { toast } from "sonner";
 import DOMPurify from "dompurify";
+import Title from "./uif/Title";
+
 
 interface ProjectItem {
   id: string;
@@ -193,7 +195,7 @@ const Projects = () => {
                     )
                   }
                 >
-                  <div className="flex flex-col w-full h-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+                  <div className="flex flex-col w-full h-full p-4 bg-white rounded-lg shadow-sm hover:bg-gray-50 transition-colors duration-200 border border-gray-200 group-hover:border-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-700">
                     <img
                       src={
                         project.screenshots && project.screenshots.length > 0
@@ -205,9 +207,7 @@ const Projects = () => {
                       style={{ borderRadius: "8px" }}
                     />
                     <div className="flex items-center justify-between">
-                      <h2 className="text-md font-bold group-hover:text-primary transition-colors duration-200">
-                        {project.title}
-                      </h2>
+                      <Title title={project.title} />
                       <div className="flex mt-1 space-x-2">
                         {project.technologies?.map((tech, index) => (
                           <div key={index} title={tech}>

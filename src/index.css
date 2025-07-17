@@ -3,7 +3,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Clean Light Theme Design System */
+/* Clean Light & Dark Theme Design System */
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -45,6 +45,45 @@
     --sidebar-border: 0 0% 90%;
     --sidebar-ring: 142 76% 36%;
   }
+
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 142 76% 36%;
+
+    --sidebar-background: 0 0% 3.9%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 142 76% 36%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 0 0% 14.9%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 14.9%;
+    --sidebar-ring: 142 76% 36%;
+  }
 }
 
 @layer base {
@@ -64,6 +103,12 @@
     position: relative;
   }
 
+  .dark body {
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  }
+
   body::after {
     content: '';
     position: fixed;
@@ -79,6 +124,15 @@
       rgba(255, 255, 255, 1) 100%);
     pointer-events: none;
     z-index: 1;
+  }
+
+  .dark body::after {
+    background: linear-gradient(to bottom, 
+      transparent 0%, 
+      transparent 60%, 
+      rgba(0, 0, 0, 0.3) 80%, 
+      rgba(0, 0, 0, 0.8) 95%, 
+      rgba(0, 0, 0, 1) 100%);
   }
 
   /* Ensure content appears above the fade overlay */
@@ -114,6 +168,15 @@
   .card-subtle {
     @apply bg-card/60 border border-border/30 shadow-sm rounded-lg;
   }
+
+  /* Glass effect for sidebar */
+  .glass {
+    @apply bg-background/80 backdrop-blur-sm border-r border-border/50;
+  }
+
+  .dark .glass {
+    @apply bg-background/90 backdrop-blur-md border-r border-border/30;
+  }
 }
 
 /* Navbar transition animations */
@@ -125,6 +188,10 @@
   background-color: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
+}
+
+.dark .blur-navbar {
+  background-color: rgba(0, 0, 0, 0.7);
 }
 
 /* Keyboard shortcut styles */

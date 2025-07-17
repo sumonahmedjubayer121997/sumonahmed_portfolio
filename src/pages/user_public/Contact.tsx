@@ -75,10 +75,14 @@ const Contact = () => {
   return (
     <Layout>
       <div className="pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-4xl mx-auto">
-        <div className="text-center mb-16">
+        <div className=" mb-16">
           <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">Get In Touch</h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            I'm always excited to connect with fellow developers, AI enthusiasts, and curious minds.
+          <p className="text-lg text-gray-600 leading-relaxed mb-8">
+            Whether you have a question, want to collaborate, or just want to say hi,
+            I'm here to help! Feel free to reach out using the form below or through any of
+            the contact methods listed. I strive to respond to all messages within 24-48 hours,
+            but please allow a bit more time during weekends or holidays.
+            Alongside, I'm always excited to connect with fellow developers, AI enthusiasts, and curious minds.
             Whether you want to discuss the latest in AI technology, explore potential collaborations,
             or simply say hello, I'd love to hear from you!
           </p>
