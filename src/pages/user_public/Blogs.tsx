@@ -9,6 +9,8 @@ import { getDynamicContent } from "@/integrations/firebase/firestore";
 import { toast } from "sonner";
 import DOMPurify from "dompurify";
 import { useInteractiveEffects } from "@/contexts/InteractiveEffectsContext";
+import CardDesign from "./uif/CardDesign";
+import Title from "./uif/Title";
 
 function decodeHTML(encoded: string) {
   const txt = document.createElement("textarea");
@@ -202,12 +204,12 @@ useEffect(() => {
                   <Link
         key={blog.id}
         to={`/blogs/${blog.slug}`}
-        className="block"
+        className="block" 
         onClick={handleClick}
         onMouseEnter={() => handleCardHover(true)}
         onMouseLeave={() => handleCardHover(false)}
       >
-                <article className="bg-gray-50 shadow-sm hover:bg-gray-200 transition-colors rounded-2xl hover:shadow-md duration-300 hover:scale-[1.02] overflow-hidden cursor-pointer border border-gray-100 h-full">
+                <CardDesign>
                   {blog.coverImage && (
                     <div className="aspect-[2/1] overflow-hidden">
                       <img
@@ -220,9 +222,7 @@ useEffect(() => {
 
                   <div className="p-6 relative flex flex-col justify-between h-full">
                     <div>
-                      <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 leading-tight">
-                        {blog.title}
-                      </h2>
+                      <Title title={blog.title} />
 
                       <div className="mt-2 text-gray-600 dark:text-gray-400 text-sm break-words whitespace-pre-wrap overflow-hidden">
                         <div
@@ -276,7 +276,7 @@ useEffect(() => {
                       </Badge>
                     </div>
                   </div>
-                </article>
+                </CardDesign>
               </Link>
             ))
           ) : (

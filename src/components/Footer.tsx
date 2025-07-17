@@ -42,14 +42,12 @@ const Footer = () => {
       case 'light':
         return <Sun className="w-4 h-4" />;
       case 'dark':
-        return <Moon className="w-4 h-4" />;
-      case 'system':
-        return <Monitor className="w-4 h-4" />;
+        return <Moon className="w-4 h-4" />
     }
   };
 
   return (
-    <footer className="bg-background border-t border-border py-4 px-6">
+    <footer className="bg-background border-t border-border py-4 px-6 dark:bg-black dark:border-gray-800">
       <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
         
         {/* Left - Reach out or Dashboard button */}
@@ -108,11 +106,7 @@ const Footer = () => {
               <DropdownMenuItem onClick={() => setTheme('dark')} className="cursor-pointer">
                 <Moon className="w-4 h-4 mr-2" />
                 Dark
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme('system')} className="cursor-pointer">
-                <Monitor className="w-4 h-4 mr-2" />
-                System
-              </DropdownMenuItem>
+              </DropdownMenuItem> 
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

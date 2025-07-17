@@ -7,13 +7,15 @@ interface EffectsToggleProps {
   onToggle: (enabled: boolean) => void;
 }
 
+
+
 const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
   const [effectsEnabled, setEffectsEnabled] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [isNearFooter, setIsNearFooter] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme } = useTheme(); 
 
   useEffect(() => {
     const updateScreenSize = () => {
@@ -70,12 +72,13 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
     console.log('Ask me clicked');
   };
 
-  const handleThemeToggle = () => {
-    const themes = ['light', 'dark', 'system'] as const;
-    const currentIndex = themes.indexOf(theme);
-    const nextIndex = (currentIndex + 1) % themes.length;
-    setTheme(themes[nextIndex]);
-  };
+ const handleThemeToggle = () => {
+  const themes = ['light', 'dark'] as const;
+  const currentIndex = themes.indexOf(theme);
+  const nextIndex = (currentIndex + 1) % themes.length;
+  setTheme(themes[nextIndex]);
+};
+
 
   const getThemeIcon = () => {
     switch (theme) {
@@ -83,8 +86,6 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
         return Sun;
       case 'dark':
         return Moon;
-      case 'system':
-        return Monitor;
       default:
         return Sun;
     }
@@ -98,15 +99,15 @@ const EffectsToggle: React.FC<EffectsToggleProps> = ({ onToggle }) => {
   const getButtonPosition = () => {
     if (isNearFooter) {
       if (isSmallScreen) return 'bottom-20'; // Mobile
-      return 'bottom-24'; // Tablet/Desktop
+      return 'bottom-20'; // Tablet/Desktop
     }
     return 'bottom-4'; // Default position
   };
 
   const getExpandedPanelPosition = () => {
     if (isNearFooter) {
-      if (isSmallScreen) return 'bottom-32'; // Mobile
-      return 'bottom-36'; // Tablet/Desktop
+      if (isSmallScreen) return 'bottom-20'; // Mobile
+      return 'bottom-20'; // Tablet/Desktop
     }
     return 'bottom-16'; // Default position
   };
