@@ -17,6 +17,7 @@ import {
   saveAndUpdateDynamicContent,
   listenDynamicContent 
 } from '@/integrations/firebase/firestore';
+import EnhancedRichContentEditor from '@/components/editor/EnhancedRichContentEditor';
 
 // Zod schema for form validation
 const aboutSchema = z.object({
@@ -274,11 +275,10 @@ const AdminAboutManager = () => {
                     <FormItem>
                       <FormLabel>Biography *</FormLabel>
                       <FormControl>
-                        <RichContentEditor
-                          initialContent={field.value}
+                        <EnhancedRichContentEditor
+                          initialContent={field.value || ""}
                           onSave={(content) => field.onChange(content)}
-                          placeholder="Write your biography here..."
-                          autoSave={false}
+                          placeholder="Write your biography here" 
                         />
                       </FormControl>
                       <FormMessage />

@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Edit, Trash2, Eye, EyeOff, MoveUp, MoveDown } from "lucide-react";
 import { toast } from "sonner";
 import { getDynamicContent, saveAndUpdateDynamicContent, deleteDynamicContent } from "@/integrations/firebase/firestore";
+import EnhancedRichContentEditor from "../editor/EnhancedRichContentEditor";
 
 const experienceSchema = z.object({
   position: z.string().min(1, "Position is required"),
@@ -385,10 +386,10 @@ const AdminExperienceManager = () => {
                       <FormItem>
                         <FormLabel>Description *</FormLabel>
                         <FormControl>
-                          <Textarea
-                            placeholder="Describe your role and responsibilities..."
-                            {...field}
-                            rows={4}
+                         <EnhancedRichContentEditor
+                            initialContent={field.value || ""}
+                            onSave={(content) => field.onChange(content)}
+                            placeholder="Describe your role and responsibilities"
                           />
                         </FormControl>
                         <FormMessage />

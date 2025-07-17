@@ -2,6 +2,7 @@
 import React from "react";
 import { Input } from "@/components/ui/input";
 import RichContentEditor from "@/components/RichContentEditor";
+import EnhancedRichContentEditor from "../editor/EnhancedRichContentEditor";
 
 interface ResponseTimeItem {
   id: string;
@@ -66,7 +67,7 @@ const ResponseTimeForm: React.FC<ResponseTimeFormProps> = ({ formData, setFormDa
 
       <div>
         <label className="block text-sm font-medium mb-2">Description</label>
-        <RichContentEditor
+        <EnhancedRichContentEditor 
           initialContent={formData.description}
           onSave={(content) => setFormData(prev => ({ ...prev, description: content }))}
           placeholder="Additional details about response times or conditions"

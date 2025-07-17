@@ -21,7 +21,7 @@ import AdminDashboard from "./pages/admin_pages/AdminDashboard";
 import AdminContentManager from "./pages/admin_pages/AdminContentManager";
 import AdminHomeManager from "./pages/admin_pages/AdminHomeManager";
 import AdminAboutManager from "./pages/admin_pages/AdminAboutManager";
-import AdminExperienceManager from "./pages/admin_pages/AdminExperienceManager";
+import AdminExperienceManager from "@/components/admin/AdminExperienceManager";
 import AdminToolsManager from "./pages/admin_pages/AdminToolsManager";
 import AdminAppsManager from "./pages/admin_pages/AdminAppsManager";
 import AdminProjectsManager from "./pages/admin_pages/AdminProjectsManager";
