@@ -178,23 +178,34 @@ const BlogDetail = () => {
     return `${readTime} min read`;
   };
 
-  const extractTableOfContents = (content: string) => {
-    const headings = content.match(/<h[1-3][^>]*id="([^"]*)"[^>]*>([^<]*)<\/h[1-3]>/g);
-    
-    if (!headings) return [];
+const extractTableOfContents = (content: string) => {
+  const headingRegex = /<h([1-3])[^>]*>(.*?)<\/h\1>/gi;
 
-    return headings.map(heading => {
-      const idMatch = heading.match(/id="([^"]*)"/);
-      const textMatch = heading.match(/>([^<]*)</);
-      const levelMatch = heading.match(/<h([1-3])/);
-      
-      return {
-        id: idMatch ? idMatch[1] : '',
-        title: textMatch ? textMatch[1].trim() : '',
-        level: levelMatch ? parseInt(levelMatch[1]) : 1
-      };
-    }).filter(item => item.id && item.title);
-  };
+  const toc = [];
+  let match;
+
+  while ((match = headingRegex.exec(content)) !== null) {
+    const level = parseInt(match[1]);
+    const rawHtml = match[2];
+
+    // Remove any inner tags and decode HTML entities if needed
+    const text = rawHtml
+      .replace(/<[^>]*>/g, '')  // strip HTML tags
+      .replace(/\s+/g, ' ')     // normalize whitespace
+      .trim();
+
+    if (text) {
+      toc.push({
+        title: text,
+        level,
+      });
+    }
+  }
+
+  return toc;
+};
+console.log(extractTableOfContents(blog?.content || ''));
+
 
   if (loading) {
     return (
