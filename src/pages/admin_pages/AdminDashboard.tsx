@@ -4,17 +4,87 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getContentCounts, getDynamicContent } from '@/integrations/firebase/firestore';
 import { Home, User, Briefcase, FolderOpen, BookOpen, Info, Mail, Wrench, MessageSquare } from "lucide-react";
-
+import { Link } from "react-router-dom";
 const AdminDashboard = () => {
   const [contentCounts, setContentCounts] = useState<Record<string, number>>({});
   const [messagesCount, setMessagesCount] = useState(0);
   const [projectsCount, setProjectsCount] = useState(0);
+  const [experienceCount, setExperienceCount] = useState(0);  
+  const [blogCount, setBlogCount] = useState(0);
+  const [appsCount, setAppsCount] = useState(0);
+  const [contactCount, setContactCount] = useState(0);  
+  const [toolsCount, setToolsCount] = useState(0);
+
+
 
   useEffect(() => {
     fetchContentCounts();
     fetchMessagesCount();
     fetchProjectsCount();
+    fetchExperienceCount();
+    fetchBlogCount();
+    fetchAppsCount();
+    fetchToolsCount();
+    fetchContactCount();
   }, []);
+
+  const fetchToolsCount = async () => {
+    try {
+      const { data, error } = await getDynamicContent('tools');
+      if (!error && data) {
+        setToolsCount(data.length);
+      }
+    } catch (error) {
+      console.error('Error fetching tools count:', error);
+    }
+  };    
+  const fetchContactCount = async () => {
+    try {
+      const { data, error } = await getDynamicContent('contact_items');     
+      if (!error && data) {
+        setContactCount(data.length);
+      }
+    } catch (error) {
+      console.error('Error fetching contact count:', error);
+    }
+
+  }
+
+  const fetchAppsCount = async () => {
+    try {
+      const { data, error } = await getDynamicContent('apps');
+      if (!error && data) {
+        setAppsCount(data.length);
+      }
+    } catch (error) {
+      console.error('Error fetching apps count:', error);
+    }
+  };    
+
+
+  const fetchBlogCount = async () => {
+    try {
+      const { data, error } = await getDynamicContent('blogs');
+      if (!error && data) {
+        setBlogCount(data.length);
+      }
+    } catch (error) {
+      console.error('Error fetching blog count:', error);
+    }
+  };
+
+
+  const fetchExperienceCount = async () => {
+    try {
+      const { data, error } = await getDynamicContent('experience');
+      if (!error && data) {
+        setExperienceCount(data.length);
+      }
+    } catch (error) {
+      console.error('Error fetching experience count:', error);
+    }
+  };  
+
 
   const fetchContentCounts = async () => {
     try {
@@ -24,6 +94,9 @@ const AdminDashboard = () => {
       console.error('Error fetching content counts:', error);
     }
   };
+
+    
+  // Fetch messages count from dynamic content
 
   const fetchMessagesCount = async () => {
     try {
@@ -48,13 +121,13 @@ const AdminDashboard = () => {
   };
 
   const pageTypes = [
-    { key: 'home', label: 'Home', icon: Home },
-    { key: 'experience', label: 'Experience', icon: User },
-    { key: 'apps', label: 'Apps', icon: Briefcase },
-    { key: 'blogs', label: 'Blogs', icon: BookOpen },
-    { key: 'about', label: 'About', icon: Info },
-    { key: 'tools', label: 'Tools', icon: Wrench },
-    { key: 'contact', label: 'Contact', icon: Mail },
+    { key: 'experience', label: 'Experience', icon: User, count: experienceCount || 0 },
+    { key: 'projects', label: 'Projects', icon: FolderOpen, count: projectsCount || 0 },
+    { key: 'apps', label: 'Apps', icon: Briefcase ,count: appsCount || 0 },
+    { key: 'blogs', label: 'Blogs', icon: BookOpen, count: blogCount || 0 },
+    { key: 'tools', label: 'Tools', icon: Wrench ,  count: toolsCount || 0 },
+    { key: 'contact', label: 'Contact', icon: Mail ,  count: contactCount || 0 },
+    { key: 'clientsMessages', label: 'Messages', icon: MessageSquare, count: messagesCount || 0 }
   ];
 
   return (
@@ -76,7 +149,7 @@ const AdminDashboard = () => {
                   <Icon className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{count}</div>
+                  <div className="text-2xl font-bold">{page.count}</div>
                   <CardDescription>
                     {count === 1 ? 'content item' : 'content items'}
                   </CardDescription>
@@ -84,38 +157,6 @@ const AdminDashboard = () => {
               </Card>
             );
           })}
-          
-          {/* Projects Card */}
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Projects
-              </CardTitle>
-              <FolderOpen className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{projectsCount}</div>
-              <CardDescription>
-                {projectsCount === 1 ? 'project' : 'projects'}
-              </CardDescription>
-            </CardContent>
-          </Card>
-          
-          {/* Client Messages Card */}
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Client Messages
-              </CardTitle>
-              <MessageSquare className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{messagesCount}</div>
-              <CardDescription>
-                {messagesCount === 1 ? 'message received' : 'messages received'}
-              </CardDescription>
-            </CardContent>
-          </Card>
         </div>
 
         <div className="mt-12">
@@ -124,33 +165,17 @@ const AdminDashboard = () => {
             {pageTypes.map((page) => (
               <Card key={`action-${page.key}`} className="cursor-pointer hover:bg-gray-50">
                 <CardHeader>
-                  <CardTitle className="text-lg">Manage {page.label}</CardTitle>
-                  <CardDescription>
-                    Create, edit, and delete {page.label.toLowerCase()} content
-                  </CardDescription>
+                 <Link to={`/myportadmin/dashboard/${page.key}`} className="flex flex-col">
+                    <CardTitle className="text-lg">{page.label}</CardTitle>
+                    <CardDescription>
+                      {`Manage your ${page.label.toLowerCase()} content`}
+                    </CardDescription>
+                  </Link>
                 </CardHeader>
               </Card>
             ))}
             
-            {/* Projects Quick Action */}
-            <Card className="cursor-pointer hover:bg-gray-50">
-              <CardHeader>
-                <CardTitle className="text-lg">Manage Projects</CardTitle>
-                <CardDescription>
-                  Create, edit, and showcase your portfolio projects
-                </CardDescription>
-              </CardHeader>
-            </Card>
-            
-            {/* Client Messages Quick Action */}
-            <Card className="cursor-pointer hover:bg-gray-50">
-              <CardHeader>
-                <CardTitle className="text-lg">View Client Messages</CardTitle>
-                <CardDescription>
-                  Review and manage messages from website visitors
-                </CardDescription>
-              </CardHeader>
-            </Card>
+          
           </div>
         </div>
       </div>
