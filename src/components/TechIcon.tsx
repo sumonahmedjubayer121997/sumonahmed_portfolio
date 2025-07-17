@@ -1,27 +1,6 @@
-import React from 'react';
-import {
-  SiPython,
-  SiFlask,
-  SiReact,
-  SiTailwindcss,
-  SiNodedotjs,
-  SiJavascript,
-  SiTypescript,
-  SiAngular
-} from 'react-icons/si';
 
-// Map tech names (lowercased) to icon components
-const techIconMap: Record<string, React.ComponentType<{ className?: string; title?: string }>> = {
-  python: SiPython,
-  flask: SiFlask,
-  react: SiReact,
-  'tailwind css': SiTailwindcss,
-  nodejs: SiNodedotjs,
-  javascript: SiJavascript,
-  typescript: SiTypescript,
-  angular : SiAngular
-  // Add more techs as needed
-};
+import React from 'react';
+import * as SimpleIcons from 'simple-icons';
 
 interface TechIconProps {
   techName: string;
@@ -29,12 +8,16 @@ interface TechIconProps {
 }
 
 const TechIcon: React.FC<TechIconProps> = ({ techName, className = '' }) => {
-  const Icon = techIconMap[techName.toLowerCase()];
-
-  if (!Icon) {
+  // Normalize the tech name to match Simple Icons format
+  const normalizedName = techName.toLowerCase().replace(/[^a-z0-9]/g, '');
+  
+  // Try to get the icon from Simple Icons
+  const icon = SimpleIcons.siIcons[`si${normalizedName.charAt(0).toUpperCase() + normalizedName.slice(1)}`];
+  
+  if (!icon) {
     return (
       <div
-        className={`w-5 h-5 flex items-center justify-center text-gray-400 border border-gray-300 rounded ${className}`}
+        className={`w-6 h-6 flex items-center justify-center text-gray-400 border border-gray-300 rounded transition-all duration-200 filter grayscale hover:grayscale-0 ${className}`}
         title={techName}
       >
         ?
@@ -42,7 +25,15 @@ const TechIcon: React.FC<TechIconProps> = ({ techName, className = '' }) => {
     );
   }
 
-  return <Icon className={`w-5 h-5 ${className}`} title={techName} />;
+  return (
+    <div
+      className={`w-6 h-6 transition-all duration-200 filter grayscale hover:grayscale-0 ${className}`}
+      title={techName}
+      dangerouslySetInnerHTML={{
+        __html: icon.svg.replace('<svg', `<svg fill="${icon.hex}" style="color: #${icon.hex}"`)
+      }}
+    />
+  );
 };
 
 export default TechIcon;
