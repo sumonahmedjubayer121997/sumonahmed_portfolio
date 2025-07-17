@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Copy, Download, Check } from "lucide-react";
 import DOMPurify from "dompurify";
@@ -27,6 +26,11 @@ interface BlogContentProps {
   resources?: Resource[];
   extraSections?: ExtraSection[];
   onCopyCode: (code: string) => void;
+  tableOfContents?: Array<{
+    id: string;
+    title: string;
+    level: number;
+  }>;
 }
 
 function decodeHTML(encoded: string) {
@@ -40,7 +44,8 @@ const BlogContent = ({
   codeSnippets,
   resources,
   extraSections,
-  onCopyCode
+  onCopyCode,
+  tableOfContents = []
 }: BlogContentProps) => {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
@@ -49,6 +54,30 @@ const BlogContent = ({
     setCopiedIndex(index);
     setTimeout(() => setCopiedIndex(null), 2000);
   };
+
+  // Function to add IDs to headings in the content
+  const addIdsToHeadings = (htmlContent: string) => {
+    return htmlContent.replace(/<h([1-3])([^>]*)>(.*?)<\/h\1>/gi, (match, level, attributes, text) => {
+      // Extract clean text for ID generation
+      const cleanText = text.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+      
+      // Find matching TOC item
+      const tocItem = tableOfContents.find(item => 
+        item.title === cleanText && item.level === parseInt(level)
+      );
+      
+      if (tocItem) {
+        // Check if ID already exists in attributes
+        if (!attributes.includes('id=')) {
+          return `<h${level}${attributes} id="${tocItem.id}">${text}</h${level}>`;
+        }
+      }
+      
+      return match; // Return original if no TOC match or ID already exists
+    });
+  };
+
+  const processedContent = addIdsToHeadings(content || "No content available");
 
   return (
     <article className="prose prose-lg max-w-none dark:prose-invert px-4 sm:px-0">
@@ -229,7 +258,7 @@ const BlogContent = ({
         className="blog-content"
         dangerouslySetInnerHTML={{
           __html: (() => {
-            const encodedHtml = content || "No content available";
+            const encodedHtml = processedContent;
             const decodedHtml = decodeHTML(encodedHtml);
             return DOMPurify.sanitize(decodedHtml);
           })(),

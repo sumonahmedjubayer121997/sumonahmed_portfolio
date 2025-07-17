@@ -56,6 +56,15 @@ const BlogDetail = () => {
   const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
   const [tocOpen, setTocOpen] = useState(false);
 
+  const generateId = (text: string) => {
+    return text
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '') // Remove special characters except hyphens
+      .replace(/\s+/g, '-')     // Replace spaces with hyphens
+      .replace(/-+/g, '-')      // Replace multiple hyphens with single
+      .trim();
+  };
+
   useEffect(() => {
     const fetchBlogData = async () => {
       if (!slug) return;
@@ -178,34 +187,33 @@ const BlogDetail = () => {
     return `${readTime} min read`;
   };
 
-const extractTableOfContents = (content: string) => {
-  const headingRegex = /<h([1-3])[^>]*>(.*?)<\/h\1>/gi;
+  const extractTableOfContents = (content: string) => {
+    const headingRegex = /<h([1-3])[^>]*>(.*?)<\/h\1>/gi;
+    const toc = [];
+    let match;
 
-  const toc = [];
-  let match;
+    while ((match = headingRegex.exec(content)) !== null) {
+      const level = parseInt(match[1]);
+      const rawHtml = match[2];
 
-  while ((match = headingRegex.exec(content)) !== null) {
-    const level = parseInt(match[1]);
-    const rawHtml = match[2];
+      // Remove any inner tags and decode HTML entities
+      const text = rawHtml
+        .replace(/<[^>]*>/g, '')  // strip HTML tags
+        .replace(/\s+/g, ' ')     // normalize whitespace
+        .trim();
 
-    // Remove any inner tags and decode HTML entities if needed
-    const text = rawHtml
-      .replace(/<[^>]*>/g, '')  // strip HTML tags
-      .replace(/\s+/g, ' ')     // normalize whitespace
-      .trim();
-
-    if (text) {
-      toc.push({
-        title: text,
-        level,
-      });
+      if (text) {
+        const id = generateId(text);
+        toc.push({
+          id,
+          title: text,
+          level,
+        });
+      }
     }
-  }
 
-  return toc;
-};
-console.log(extractTableOfContents(blog?.content || ''));
-
+    return toc;
+  };
 
   if (loading) {
     return (
@@ -238,7 +246,7 @@ console.log(extractTableOfContents(blog?.content || ''));
   }
 
   const tableOfContents = blog.tableOfContents?.map((title, index) => ({
-    id: title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, ''),
+    id: generateId(title),
     title,
     level: 2
   })) || extractTableOfContents(blog.content);
@@ -246,7 +254,6 @@ console.log(extractTableOfContents(blog?.content || ''));
   return (
     <Layout>
       <div className="min-h-screen bg-background">
-        {/* Navigation */}
         <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
           <div className="container mx-auto px-4 py-3 sm:py-4">
             <div className="flex items-center justify-between">
@@ -306,6 +313,7 @@ console.log(extractTableOfContents(blog?.content || ''));
                   resources={blog.resources}
                   extraSections={blog.extraSections}
                   onCopyCode={copyToClipboard}
+                  tableOfContents={tableOfContents}
                 />
               </div>
 
