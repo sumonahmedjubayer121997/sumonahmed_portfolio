@@ -8,10 +8,9 @@ import { Search, Filter } from "lucide-react";
 import { getDynamicContent } from "@/integrations/firebase/firestore";
 import { toast } from "sonner";
 import DOMPurify from "dompurify";
-import { Share2 } from "lucide-react";
 import { useInteractiveEffects } from "@/contexts/InteractiveEffectsContext";
 
-function decodeHTML(encoded) {
+function decodeHTML(encoded: string) {
   const txt = document.createElement("textarea");
   txt.innerHTML = encoded;
   return txt.value;
@@ -40,11 +39,8 @@ const Blogs = () => {
   const [loading, setLoading] = useState(true);
   const { setIsVisible } = useInteractiveEffects();
 
-  // Ensure interactive effects are visible when component mounts
   useEffect(() => {
     setIsVisible(true);
-    
-    // Cleanup function to ensure effects are visible when leaving
     return () => {
       setIsVisible(true);
     };
@@ -63,7 +59,6 @@ const Blogs = () => {
         }
 
         if (data && Array.isArray(data)) {
-          // Filter to only show published blogs and sort by date
           const publishedBlogs = (data as BlogItem[])
             .filter(blog => blog.status === 'Published')
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -85,10 +80,8 @@ const Blogs = () => {
     setIsVisible(!isHovering);
   };
 
-  // Get all unique tags
   const allTags = Array.from(new Set(blogs.flatMap(blog => blog.tags || [])));
 
-  // Filter blogs based on search term and selected tag
   const filteredBlogs = blogs.filter(blog => {
     const matchesSearch = searchTerm === "" || 
       blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -101,23 +94,22 @@ const Blogs = () => {
   });
 
   const getTagStyle = (status: string) => {
-    return "bg-slate-800 text-white hover:bg-slate-700";
+    switch (status) {
+      case 'Published':
+        return "bg-green-500 text-white hover:bg-green-600";
+      case 'Draft':
+        return "bg-yellow-500 text-white hover:bg-yellow-600";
+      default:
+        return "bg-slate-800 text-white hover:bg-slate-700";
+    }
   };
 
-  // Generate excerpt from content if not provided
-  const generateExcerpt = (content: string, maxLength: number = 150) => {
-    // Remove HTML tags and get plain text
-    const plainText = content.replace(/<[^>]*>/g, '').trim();
-    if (plainText.length <= maxLength) return plainText;
-    return plainText.substring(0, maxLength) + '...';
-  };
-
-  // Calculate read time based on content
   const calculateReadTime = (content: string) => {
+    if (!content) return "1 min read";
     const wordsPerMinute = 200;
-    const wordCount = content.replace(/<[^>]*>/g, '').split(/\s+/).length;
+    const wordCount = content.replace(/<[^>]*>/g, '').split(/\s+/).filter(Boolean).length;
     const readTime = Math.ceil(wordCount / wordsPerMinute);
-    return `${readTime} min read`;
+    return `${readTime || 1} min read`;
   };
 
   if (loading) {
@@ -135,11 +127,8 @@ const Blogs = () => {
   return (
     <Layout>
       <div className="pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-6xl mx-auto relative">
-        {/* Header Section */}
         <div className="mb-12">
-          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-            Pensieve
-          </h1>
+          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Pensieve</h1>
           <p className="text-gray-600 text-lg mb-6">
             A collection of thoughts, ideas, and musings. You can check more of my writings on my{" "}
             <a 
@@ -153,9 +142,7 @@ const Blogs = () => {
             profile.
           </p>
 
-          {/* Search and Filter Section */}
           <div className="flex flex-col sm:flex-row gap-4 mb-8">
-            {/* Search Input */}
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
@@ -166,7 +153,6 @@ const Blogs = () => {
               />
             </div>
 
-            {/* Tag Filter */}
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4 text-gray-400" />
               <select
@@ -182,7 +168,6 @@ const Blogs = () => {
             </div>
           </div>
 
-          {/* Filter Tags Display */}
           {allTags.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-6">
               {allTags.map(tag => (
@@ -200,7 +185,6 @@ const Blogs = () => {
           )}
         </div>
 
-        {/* Results Count */}
         {(searchTerm || selectedTag) && (
           <div className="mb-6">
             <p className="text-gray-600">
@@ -211,24 +195,18 @@ const Blogs = () => {
           </div>
         )}
 
-        {/* Blog Cards Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 ">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {filteredBlogs.length > 0 ? (
             filteredBlogs.map((blog) => (
               <Link
                 key={blog.id}
                 to={`/blogs/${blog.slug}`}
                 className="block"
-                onClick={() =>
-                  console.log(
-                    `Clicked on ${blog.title}`
-                  )
-                }
+                onClick={() => console.log(`Clicked on ${blog.title}`)}
                 onMouseEnter={() => handleCardHover(true)}
                 onMouseLeave={() => handleCardHover(false)}
               >
-                <article className="bg-gray-50 shadow-sm hover:bg-gray-200 transition-colors  rounded-2xl hover:shadow-md  duration-300 hover:scale-[1.02] overflow-hidden cursor-pointer border border-gray-100 h-full">
-                  {/* Feature Image */}
+                <article className="bg-gray-50 shadow-sm hover:bg-gray-200 transition-colors rounded-2xl hover:shadow-md duration-300 hover:scale-[1.02] overflow-hidden cursor-pointer border border-gray-100 h-full">
                   {blog.coverImage && (
                     <div className="aspect-[2/1] overflow-hidden">
                       <img
@@ -238,39 +216,33 @@ const Blogs = () => {
                       />
                     </div>
                   )}
-                  
-                  {/* Card Content */}
+
                   <div className="p-6 relative flex flex-col justify-between h-full">
                     <div>
-                      {/* Title */}
                       <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 leading-tight">
                         {blog.title}
                       </h2>
-                      
-                      {/* Excerpt */}
-                      <p className="mt-2 text-gray-600 dark:text-gray-400 text-sm">
+
+                      <div className="mt-2 text-gray-600 dark:text-gray-400 text-sm break-words whitespace-pre-wrap overflow-hidden">
                         <div
-                          className="mt-2 text-gray-600 dark:text-gray-400 text-sm break-words whitespace-pre-wrap overflow-hidden"
                           dangerouslySetInnerHTML={{
                             __html: (() => {
                               const encodedHtml = blog?.content || "No description available";
                               const decodedHtml = decodeHTML(encodedHtml);
                               const sanitizedHtml = DOMPurify.sanitize(decodedHtml);
-
                               return sanitizedHtml.length > 150
                                 ? sanitizedHtml.substring(0, 147) + "..."
                                 : sanitizedHtml;
                             })(),
                           }}
                         />
-                      </p>
+                      </div>
 
-                      {/* Tags */}
                       {blog.tags && blog.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mb-4">
-                          {blog.tags.slice(0, 3).map((tag, tagIndex) => (
+                          {blog.tags.slice(0, 3).map((tag) => (
                             <Badge
-                              key={tagIndex}
+                              key={tag}
                               variant="secondary"
                               className="text-xs px-2 py-1 bg-gray-100 text-gray-700"
                             >
@@ -285,25 +257,21 @@ const Blogs = () => {
                         </div>
                       )}
                     </div>
-                    
-                    {/* Date and Read Time */}
+
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <p className="text-xs text-gray-400">
-                          {blog.date}
-                        </p>
+                        <p className="text-xs text-gray-400">{blog.date}</p>
                         <span className="text-gray-300">•</span>
                         <p className="text-xs text-gray-400">
                           {blog.readTime || calculateReadTime(blog.content)}
                         </p>
                       </div>
-                      
-                      {/* Status Badge */}
+
                       <Badge 
                         variant="secondary" 
                         className={`text-xs px-2 py-1 rounded-full ${getTagStyle(blog.status)}`}
                       >
-                        Published
+                        {blog.status}
                       </Badge>
                     </div>
                   </div>
@@ -331,20 +299,13 @@ const Blogs = () => {
           )}
         </div>
 
-        {/* RSS Feed Link */}
         <div className="mt-16 text-center">
-          <p className="text-gray-600 mb-4">
-            Stay updated with my latest posts
-          </p>
+          <p className="text-gray-600 mb-4">Stay updated with my latest posts</p>
           <div className="flex justify-center gap-4">
             <Button variant="outline" asChild>
-              <a href="/rss.xml">
-                RSS Feed
-              </a>
+              <a href="/rss.xml">RSS Feed</a>
             </Button>
-            <Button variant="outline">
-              Subscribe to Newsletter
-            </Button>
+            <Button variant="outline">Subscribe to Newsletter</Button>
           </div>
         </div>
       </div>
