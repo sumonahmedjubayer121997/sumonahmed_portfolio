@@ -26,6 +26,9 @@ import TechnologySelector from "@/components/admin/TechnologySelector";
 import ScreenshotUploader from "@/components/admin/ScreenshotUploader";
 import { saveAndUpdateDynamicContent } from "@/integrations/firebase/firestore";
 import type { ProjectItem } from "@/pages/admin_pages/AdminProjectsManager";
+import EnhancedRichContentEditor from "@/components/editor/EnhancedRichContentEditor";
+import { CardContent } from "@/components/ui/card";
+
 const projectSchema = z.object({
   title: z.string().min(1, "Title is required"),
   status: z.enum(["draft", "published", "archived"]),
@@ -366,16 +369,22 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
                 {Object.entries(richTextFields).map(([field, content]) => (
                   <div key={field}>
                     <Label className="capitalize">{field}</Label>
-                    <RichContentEditor
-                      initialContent={content}
-                      onSave={(html) =>
+                   
+                   
+                    <CardContent>
+                                  <EnhancedRichContentEditor
+                                    initialContent={content}
+                                    onSave={(html) =>
                         handleRichTextChange(
                           field as keyof typeof richTextFields,
                           html
-                        )
-                      }
-                      placeholder={`Enter ${field}...`}
-                    />
+                        ) }
+                                    hideManualSave={true}
+                                    placeholder="Write your Project content here..."
+                                  />
+                                 
+                                </CardContent>
+                    
                   </div>
                 ))}
               </TabsContent>

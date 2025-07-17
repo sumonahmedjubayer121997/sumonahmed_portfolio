@@ -278,15 +278,7 @@ const handleSave = async () => {
             <h1 className="text-3xl font-bold text-gray-900">Portfolio Information</h1>
             <p className="text-gray-600 mt-2">Manage your personal portfolio details</p>
           </div>
-          <Button
-            onClick={() => setShowPreview(!showPreview)}
-            variant="outline"
-            className="flex items-center space-x-2"
-            disabled={isLoading}
-          >
-            {showPreview ? <EyeOff size={16} /> : <Eye size={16} />}
-            <span>{showPreview ? 'Hide Preview' : 'Show Preview'}</span>
-          </Button>
+         
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -421,7 +413,23 @@ const handleSave = async () => {
             </CardContent>
           </Card>
 
-          {/* Live Preview */}
+         
+        </div>
+        <div className="mt-8 flex">
+          <div className="text-sm text-gray-500 mb-2">
+           <Button
+            onClick={() => setShowPreview(!showPreview)}
+            variant="outline"
+            className="flex items-center space-x-2"
+            disabled={isLoading}
+          >
+            {showPreview ? <EyeOff size={16} /> : <Eye size={16} />}
+            <span>{showPreview ? 'Hide Preview' : 'Show Preview'}</span>
+          </Button>
+          </div>
+          
+        </div>
+         {/* Live Preview */}
           {showPreview && (
             <Card className="h-fit">
               <CardHeader>
@@ -471,7 +479,6 @@ const handleSave = async () => {
               </CardContent>
             </Card>
           )}
-        </div>
       </div>
     </AdminLayout>
   );

@@ -8,6 +8,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+
 import {
   Select,
   SelectContent,
@@ -29,6 +31,8 @@ import TechnologySelector from "@/components/admin/TechnologySelector";
 import ScreenshotUploader from "@/components/admin/ScreenshotUploader";
 import { saveAndUpdateDynamicContent } from "@/integrations/firebase/firestore";
 import type { AppItem } from "@/pages/admin_pages/AdminAppsManager";
+import EnhancedRichContentEditor from "@/components/editor/EnhancedRichContentEditor";
+
 
 const appSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -355,59 +359,28 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
                 </div>
               </TabsContent>
 
-              <TabsContent value="content" className="space-y-4 p-1">
-                <div>
-                  <Label>About</Label>
-                  <RichContentEditor
-                    initialContent={richTextFields.about}
-                    onSave={(content) => handleRichTextChange("about", content)}
-                    placeholder="Describe the app..."
-                  />
-                </div>
-
-                <div>
-                  <Label>Features</Label>
-                  <RichContentEditor
-                    initialContent={richTextFields.features}
-                    onSave={(content) =>
-                      handleRichTextChange("features", content)
-                    }
-                    placeholder="List the key features..."
-                  />
-                </div>
-
-                <div>
-                  <Label>Challenges</Label>
-                  <RichContentEditor
-                    initialContent={richTextFields.challenges}
-                    onSave={(content) =>
-                      handleRichTextChange("challenges", content)
-                    }
-                    placeholder="Describe challenges faced..."
-                  />
-                </div>
-
-                <div>
-                  <Label>Achievements</Label>
-                  <RichContentEditor
-                    initialContent={richTextFields.achievements}
-                    onSave={(content) =>
-                      handleRichTextChange("achievements", content)
-                    }
-                    placeholder="Highlight achievements..."
-                  />
-                </div>
-
-                <div>
-                  <Label>Accessibility</Label>
-                  <RichContentEditor
-                    initialContent={richTextFields.accessibility}
-                    onSave={(content) =>
-                      handleRichTextChange("accessibility", content)
-                    }
-                    placeholder="Describe accessibility features..."
-                  />
-                </div>
+                <TabsContent value="content" className="space-y-4 p-1">
+                {Object.entries(richTextFields).map(([field, content]) => (
+                  <div key={field}>
+                    <Label className="capitalize">{field}</Label>
+                   
+                   
+                    <CardContent>
+                                  <EnhancedRichContentEditor
+                                    initialContent={content}
+                                    onSave={(html) =>
+                        handleRichTextChange(
+                          field as keyof typeof richTextFields,
+                          html
+                        ) }
+                                    hideManualSave={true}
+                                    placeholder="Write your Project content here..."
+                                  />
+                                 
+                                </CardContent>
+                    
+                  </div>
+                ))}
               </TabsContent>
 
               <TabsContent value="links" className="space-y-4 p-1">
