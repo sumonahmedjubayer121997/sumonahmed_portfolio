@@ -83,12 +83,14 @@ const About = () => {
     <Layout>
       <div className="pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-4xl mx-auto">
         {/* Header Section */}
-        <div className="mb-12 text-center">
-          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+
+
+        <div className="mb-12 z-10">
+          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4 dark:text-white  ">
             About Me
           </h1>
           {aboutData.tagline && (
-            <p className="text-xl text-gray-600 mb-6">
+            <p className="text-xl text-gray-600 mb-6 dark:text-gray-300">
               {aboutData.tagline}
             </p>
           )}
@@ -97,7 +99,7 @@ const About = () => {
         {/* Bio Section */}
         <div className="mb-12">
           <div 
-            className="prose prose-lg max-w-none text-gray-700 leading-relaxed"
+            className="prose prose-lg max-w-none text-gray-700 leading-relaxed dark:text-gray-300"
             dangerouslySetInnerHTML={{ __html: aboutData.bio }}
           />
         </div>

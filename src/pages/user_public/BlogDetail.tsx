@@ -219,7 +219,7 @@ const BlogDetail = () => {
             <p className="text-muted-foreground">The article you're looking for doesn't exist or has been removed.</p>
             <Button onClick={() => navigate('/blogs')} variant="outline">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Articles
+              Back to Blogs
             </Button>
           </div>
         </div>
@@ -241,9 +241,9 @@ const BlogDetail = () => {
           <div className="container mx-auto px-4 py-3 sm:py-4">
             <div className="flex items-center justify-between">
               <Link to="/blogs">
-                <Button variant="ghost" size="sm">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Back to Articles</span>
+                <Button variant="ghost" size="sm" className="flex items-center dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
+                  <ArrowLeft className="w-4 h-4 mr-2 dark:text-gray-300" />
+                  <span className="hidden sm:inline dark:text-gray-300">Back to Blogs</span>
                   <span className="sm:hidden">Back</span>
                 </Button>
               </Link>

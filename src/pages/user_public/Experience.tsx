@@ -360,11 +360,12 @@ const Experience = () => {
 
         <div className="pt-16 lg:pt-0 px-6 py-12 lg:py-24 max-w-4xl mx-auto">
           {/* Header Section */}
-          <div className="mb-12 text-center">
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+
+          <div className="mb-12 relative z-10 ">
+            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4 dark:text-white ">
               Experiences
             </h1>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-gray-600 dark:text-gray-200">
               A timeline of my professional experiences.
             </p>
           </div>
@@ -379,33 +380,33 @@ const Experience = () => {
             /* Timeline */
             <div className="relative">
               {/* Timeline line */}
-              <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+              <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-800/50 dark:border-bg-gray-700 "></div>
 
               <div className="space-y-12">
                 {experiences.map((experience, index) => (
                   <div
                     key={experience.id}
-                    className="relative flex items-start space-x-6"
+                    className="relative flex items-start space-x-6 "
                   >
                     {/* Timeline dot and badge */}
-                    <div className="relative flex-shrink-0">
+                    <div className="relative flex-shrink-0 ">
                       {renderBadge(experience)}
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                    <div className="flex-1 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
                       {/* Header */}
                       <div className="mb-4">
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">
+                        <h3 className="text-xl font-bold text-gray-900 mb-2 dark:text-white ">
                           {experience.position}
                         </h3>
-                        <div className="flex items-center space-x-4 text-gray-600 mb-2">
+                        <div className="flex items-center space-x-4 text-gray-600 mb-2 dark:text-gray-300">
                           {experience.companyUrl ? (
                             <a
                               href={experience.companyUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                              className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 hover:underline font-medium dark:text-blue-400 dark:hover:text-blue-300"
                             >
                               <span>{experience.company}</span>
                               <ExternalLink className="h-4 w-4" />
@@ -417,7 +418,7 @@ const Experience = () => {
                           )}
                           <div className="flex items-center space-x-1">
                             <Calendar className="h-4 w-4" />
-                            <span className="text-sm">
+                            <span className="text-sm text-gray-500 dark:text-gray-400">
                               {experience.startDate} - {experience.endDate}
                             </span>
                           </div>
@@ -426,7 +427,7 @@ const Experience = () => {
 
                       {/* Description */}
                       <div
-                        className="prose prose-gray max-w-none mb-4 text-gray-700"
+                        className="prose prose-gray max-w-none mb-4 text-gray-700 dark:prose-invert dark:text-gray-300"
                         dangerouslySetInnerHTML={{
                           __html: experience.description,
                         }}
@@ -434,9 +435,11 @@ const Experience = () => {
 
                       {/* Bullet Points */}
                       {experience.bullets && experience.bullets.length > 0 && (
-                        <ul className="list-disc list-inside space-y-1 mb-4 text-gray-700">
+                        <ul className="list-disc list-inside space-y-1 mb-4 text-gray-700 dark:text-gray-300">
                           {experience.bullets.map((bullet, bulletIndex) => (
-                            <li key={bulletIndex} className="text-sm">
+                            <li key={bulletIndex} className="text-sm leading-relaxed">
+                             
+                              
                               {bullet}
                             </li>
                           ))}
@@ -447,10 +450,10 @@ const Experience = () => {
                       {experience.techStack &&
                         experience.techStack.length > 0 && (
                           <div>
-                            <h4 className="text-sm font-semibold text-gray-800 mb-2">
+                            <h4 className="text-sm font-semibold text-gray-800 mb-2 dark:text-gray-200">
                               Tech Stack
                             </h4>
-                            <div className="flex flex-wrap gap-2">
+                            <div className="flex flex-wrap gap-2 ">
                               {experience.techStack.map((tech, techIndex) => (
                                 <Badge
                                   key={techIndex}
@@ -471,14 +474,14 @@ const Experience = () => {
           )}
 
           {/* Core Skills & Technologies Section */}
-          <div className="mt-16 pt-12 border-t border-gray-200">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">
+          <div className="mt-16 pt-12 border-t border-gray-200 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+            <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center dark:text-white">
               Core Skills & Technologies
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 dark:text-gray-200">
                   Frontend
                 </h3>
                 <div className="flex flex-wrap justify-center gap-2">
@@ -497,7 +500,7 @@ const Experience = () => {
               </div>
 
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 dark:text-gray-200">
                   Backend
                 </h3>
                 <div className="flex flex-wrap justify-center gap-2">
@@ -516,7 +519,7 @@ const Experience = () => {
               </div>
 
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 dark:text-gray-200">
                   DevOps
                 </h3>
                 <div className="flex flex-wrap justify-center gap-2">
