@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import EnhancedIconSelector from "../EnhancedIconSelector";
 
 
 import {
@@ -352,10 +353,10 @@ const AppModal: React.FC<AppModalProps> = ({ isOpen, onClose, editingApp }) => {
 
                 <div>
                   <Label>Technologies</Label>
-                  <TechnologySelector
-                    selectedTechnologies={technologies}
-                    onTechnologiesChange={setTechnologies}
-                  />
+                  <EnhancedIconSelector
+                        selectedIcons={technologies}
+                        onIconsChange={setTechnologies}
+                   />
                 </div>
               </TabsContent>
 

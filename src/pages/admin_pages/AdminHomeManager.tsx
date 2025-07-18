@@ -19,7 +19,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 interface PortfolioData {
   name: string;
-  position: string;
+   position: string[]; // change from string to string[]
   onlineLink: string;
   aboutMe: string;
   selectedIcons: string[];
@@ -28,7 +28,7 @@ interface PortfolioData {
 const AdminHomeManager = () => {
   const [formData, setFormData] = useState<PortfolioData>({
     name: '',
-    position: '',
+    position: [],
     onlineLink: '',
     aboutMe: '',
     selectedIcons: []
@@ -53,19 +53,24 @@ const AdminHomeManager = () => {
           setExistingContent(data);
 
           const portfolioData = data.content as PortfolioData;
-          setFormData({
-            name: portfolioData.name || '',
-            position: portfolioData.position || '',
-            onlineLink: portfolioData.onlineLink || '',
-            aboutMe: portfolioData.aboutMe || '',
-            selectedIcons: portfolioData.selectedIcons || []
-          });
+setFormData({
+  name: portfolioData.name || '',
+  position: Array.isArray(portfolioData.position)
+    ? portfolioData.position
+    : typeof portfolioData.position === 'string'
+    ? [portfolioData.position]
+    : [''],
+  onlineLink: portfolioData.onlineLink || '',
+  aboutMe: portfolioData.aboutMe || '',
+  selectedIcons: portfolioData.selectedIcons || []
+});
+
         } else {
           console.log('Document does not exist or was deleted');
           setExistingContent(null);
           setFormData({
             name: '',
-            position: '',
+            position: [''],
             onlineLink: '',
             aboutMe: '',
             selectedIcons: []
@@ -91,6 +96,23 @@ const AdminHomeManager = () => {
 
   }, []);
 
+const handlePositionChange = (index: number, value: string) => {
+  const updatedPositions = [...formData.position];
+  updatedPositions[index] = value;
+  handleInputChange('position', updatedPositions);
+};
+
+const handleAddPosition = () => {
+  handleInputChange('position', [...formData.position, '']);
+};
+
+const handleRemovePosition = (index: number) => {
+  const updatedPositions = formData.position.filter((_, i) => i !== index);
+  handleInputChange('position', updatedPositions);
+};
+
+
+
   const validateForm = (): boolean => {
     const errors: string[] = [];
 
@@ -98,7 +120,7 @@ const AdminHomeManager = () => {
       errors.push("Name is required");
     }
 
-    if (!formData.position.trim()) {
+    if (!formData.position.length || formData.position.some(pos => !pos.trim())) {
       errors.push("Position is required");
     }
 
@@ -259,26 +281,46 @@ const AdminHomeManager = () => {
 
                 {/* Position Field */}
                 <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Label htmlFor="position">Position *</Label>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Info size={14} className="text-gray-400" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Your professional title or role</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <Input
-                    id="position"
-                    value={formData.position}
-                    onChange={(e) => handleInputChange('position', e.target.value)}
-                    placeholder="e.g. Software Engineer"
-                    className="w-full"
-                    disabled={isLoading}
-                  />
-                </div>
+  <div className="flex items-center justify-between">
+    <div className="flex items-center space-x-2">
+      <Label>Positions *</Label>
+      <Tooltip>
+        <TooltipTrigger>
+          <Info size={14} className="text-gray-400" />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Add one or more roles/titles you use professionally</p>
+        </TooltipContent>
+      </Tooltip>
+    </div>
+    <Button type="button" onClick={handleAddPosition} variant="outline" size="sm">
+      Add Position
+    </Button>
+  </div>
+
+  {formData.position.map((pos, index) => (
+    <div key={index} className="flex space-x-2 items-center">
+      <Input
+        value={pos}
+        onChange={(e) => handlePositionChange(index, e.target.value)}
+        placeholder={`e.g. Developer, Designer #${index + 1}`}
+        className="w-full"
+        disabled={isLoading}
+      />
+      {formData.position.length > 1 && (
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => handleRemovePosition(index)}
+          size="icon"
+        >
+          ✕
+        </Button>
+      )}
+    </div>
+  ))}
+</div>
+
 
                 {/* Online Link Field */}
                 <div className="space-y-2">
