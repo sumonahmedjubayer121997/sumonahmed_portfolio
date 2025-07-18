@@ -6,12 +6,6 @@ import { getFirestore, doc, onSnapshot } from "firebase/firestore";
 import { Link } from "react-router-dom";
 
 
-const roles = [
-  "Software Engineer",
-  "Full Stack Developer",
-  "DevOps Enthusiast",
-];
-
 const ProfileSection = () => {
   const [index, setIndex] = useState(0);
 
@@ -38,6 +32,11 @@ useEffect(() => {
   return () => unsubscribe();
 }, []);
 
+const roles = homeData?.position || [
+  "Software Engineer",
+  "Full Stack Developer",
+  "DevOps Enthusiast",
+];
 
   useEffect(() => {
     const interval = setInterval(() => {

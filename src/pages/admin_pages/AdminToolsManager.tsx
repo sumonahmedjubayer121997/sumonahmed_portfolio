@@ -43,6 +43,7 @@ import { Plus, Edit, Trash2, Eye, EyeOff, Upload, Search } from "lucide-react";
 import { toast } from "sonner";
 import { getDynamicContent, saveAndUpdateDynamicContent, deleteDynamicContent } from "@/integrations/firebase/firestore";
 import { uploadImage } from "@/integrations/firebase/storage";
+import { platform } from "os";
 
 const toolSchema = z.object({
   name: z.string().min(1, "Tool name is required"),
@@ -51,6 +52,7 @@ const toolSchema = z.object({
   url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   order: z.number().min(0, "Order must be 0 or greater"),
   visible: z.boolean(),
+  platforms: z.array(z.string()).optional(),  // <-- NEW LINE
 });
 
 type ToolFormData = z.infer<typeof toolSchema>;
@@ -79,6 +81,7 @@ const AdminToolsManager = () => {
       url: "",
       order: 0,
       visible: true,
+      platforms: [], // <-- NEW LINE
     },
   });
 
@@ -168,13 +171,14 @@ const AdminToolsManager = () => {
   const handleEdit = (tool: Tool) => {
     setEditingTool(tool);
     form.reset({
-      name: tool.name,
-      category: tool.category,
-      logo: tool.logo || "",
-      url: tool.url || "",
-      order: tool.order,
-      visible: tool.visible,
-    });
+  name: tool.name,
+  category: tool.category,
+  logo: tool.logo || "",
+  url: tool.url || "",
+  order: tool.order,
+  visible: tool.visible,
+  platforms: tool.platforms || [], // <-- ADD THIS
+});
     setLogoPreview(tool.logo || "");
     setDialogOpen(true);
   };
@@ -332,6 +336,35 @@ const AdminToolsManager = () => {
                       </FormItem>
                     )}
                   />
+
+                  <FormField
+  control={form.control}
+  name="platforms"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Platforms</FormLabel>
+      <div className="flex flex-wrap gap-3">
+        {["Web", "iOS", "Android", "Windows", "Mac"].map((platform) => (
+          <label key={platform} className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={field.value?.includes(platform)}
+              onChange={(e) => {
+                const value = e.target.checked
+                  ? [...(field.value || []), platform]
+                  : (field.value || []).filter(p => p !== platform);
+                field.onChange(value);
+              }}
+            />
+            <span>{platform}</span>
+          </label>
+        ))}
+      </div>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
 
                   <FormField
                     control={form.control}
