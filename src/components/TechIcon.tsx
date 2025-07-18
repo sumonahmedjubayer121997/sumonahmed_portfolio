@@ -1,48 +1,51 @@
 import React from 'react';
-import {
-  SiPython,
-  SiFlask,
-  SiReact,
-  SiTailwindcss,
-  SiNodedotjs,
-  SiJavascript,
-  SiTypescript,
-  SiAngular
-} from 'react-icons/si';
-
-// Map tech names (lowercased) to icon components
-const techIconMap: Record<string, React.ComponentType<{ className?: string; title?: string }>> = {
-  python: SiPython,
-  flask: SiFlask,
-  react: SiReact,
-  'tailwind css': SiTailwindcss,
-  nodejs: SiNodedotjs,
-  javascript: SiJavascript,
-  typescript: SiTypescript,
-  angular : SiAngular
-  // Add more techs as needed
-};
+import * as SimpleIcons from 'simple-icons';
 
 interface TechIconProps {
   techName: string;
   className?: string;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
-const TechIcon: React.FC<TechIconProps> = ({ techName, className = '' }) => {
-  const Icon = techIconMap[techName.toLowerCase()];
+const TechIcon: React.FC<TechIconProps> = ({
+  techName,
+  className = '',
+  onMouseEnter,
+  onMouseLeave
+}) => {
+  const normalizedName = techName.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const iconKey = `si${normalizedName.charAt(0).toUpperCase() + normalizedName.slice(1)}`;
+  const icon = (SimpleIcons as any)[iconKey];
 
-  if (!Icon) {
+  if (!icon) {
+    console.log(`Icon not found for: ${techName} (looking for: ${iconKey})`);
     return (
       <div
-        className={`w-5 h-5 flex items-center justify-center text-gray-400 border border-gray-300 rounded ${className}`}
+        className={`w-6 h-6 flex items-center justify-center text-gray-400 border border-gray-300 rounded transition-all duration-200 filter grayscale hover:grayscale-0 ${className}`}
         title={techName}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
       >
         ?
       </div>
     );
   }
 
-  return <Icon className={`w-5 h-5 ${className}`} title={techName} />;
+  return (
+    <div
+      className={`w-6 h-6 transition-all duration-200 filter grayscale hover:grayscale-0 ${className}`}
+      title={techName}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      dangerouslySetInnerHTML={{
+        __html: icon.svg.replace(
+          '<svg',
+          `<svg fill="#${icon.hex}" style="color: #${icon.hex}"`
+        )
+      }}
+    />
+  );
 };
 
 export default TechIcon;

@@ -4,20 +4,16 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Save, Eye, EyeOff, Info } from "lucide-react";
 import { 
-  getContentByPageType, 
-  createContent, 
-  updateContent,
-  ContentType,
-  ContentItem ,
   saveAndUpdateDynamicContent,
   listenDynamicContent
 } from '@/integrations/firebase/firestore';
-import IconSelector from "@/components/IconSelector";
+import EnhancedIconSelector from "@/components/EnhancedIconSelector";
+import CategoryIconSelector from "@/components/CategoryIconSelector";
 import RichTextEditor from "@/components/RichTextEditor";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -41,10 +37,10 @@ const AdminHomeManager = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [existingContent, setExistingContent] = useState(null);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [iconSelectorMode, setIconSelectorMode] = useState<'simple' | 'category'>('category');
   const { toast } = useToast();
 
   useEffect(() => {
-    // Setup listener
     console.log('Setting up listener...');
     setIsInitialLoading(true);
 
@@ -88,61 +84,12 @@ const AdminHomeManager = () => {
       }
     );
 
-    // Cleanup listener on unmount
     return () => {
       console.log('Cleaning up listener...');
       unsubscribe();
     };
 
-  }, []); // empty deps = runs once on mount
-
-
-// const fetchExistingContent = async () => {
-//   try {
-//     setIsInitialLoading(true);
-//     console.log('Fetching existing content...');
-
-//     const { data, error } = await getDynamicContent('home', '7E1fmebGEixv8p2mjJfy');  // Fetch 'home/main'
-
-//     if (error) {
-//       console.error('Error fetching content:', error);
-//       toast({
-//         title: "Error",
-//         description: error,
-//         variant: "destructive",
-//       });
-//       return;
-//     }
-
-//     if (data) {
-//       console.log('Fetched content:', data);
-//       setExistingContent(data);  // Includes id and content
-
-//       const portfolioData = data.content as PortfolioData;
-//       setFormData({
-//         name: portfolioData.name || '',
-//         position: portfolioData.position || '',
-//         onlineLink: portfolioData.onlineLink || '',
-//         aboutMe: portfolioData.aboutMe || '',
-//         selectedIcons: portfolioData.selectedIcons || []
-//       });
-
-//       console.log('Form data set:', portfolioData);
-//     } else {
-//       console.log('No content found.');
-//     }
-
-//   } catch (error: any) {
-//     console.error('Unexpected error fetching content:', error);
-//     toast({
-//       title: "Error",
-//       description: "Failed to load existing content. Please try again.",
-//       variant: "destructive",
-//     });
-//   } finally {
-//     setIsInitialLoading(false);
-//   }
-// };
+  }, []);
 
   const validateForm = (): boolean => {
     const errors: string[] = [];
@@ -180,72 +127,69 @@ const AdminHomeManager = () => {
     }
   };
 
-const handleSave = async () => {
-  console.log('Save button clicked, form data:', formData);
+  const handleSave = async () => {
+    console.log('Save button clicked, form data:', formData);
 
-  if (!validateForm()) {
-    console.log('Validation failed');
-    return;
-  }
-
-  setIsLoading(true);
-  try {
-    console.log('Starting save process...');
-    const collectionName = 'home';
-
-    if (existingContent) {
-      console.log('Updating existing content with ID:', existingContent.id);
-      const { error } = await saveAndUpdateDynamicContent(collectionName, {
-        title: 'Portfolio Information',
-        content: formData,
-        status: 'published',
-      }, existingContent.id);
-
-      if (error) {
-        console.error('Update error:', error);
-        throw new Error(error);
-      }
-
-      console.log('Content updated successfully');
-      toast({
-        title: 'Success!',
-        description: 'Portfolio updated successfully!',
-      });
-
-    } else {
-      console.log('Creating new content...');
-      const { error } = await saveAndUpdateDynamicContent(collectionName, {
-        title: 'Portfolio Information',
-        content: formData,
-        status: 'published',
-      });
-
-      if (error) {
-        console.error('Create error:', error);
-        throw new Error(error);
-      }
-
-      console.log('Content created successfully');
-      toast({
-        title: 'Success!',
-        description: 'Portfolio created successfully!',
-      });
-
-      // ✅ No need to call fetchExistingContent — listener will auto-update
+    if (!validateForm()) {
+      console.log('Validation failed');
+      return;
     }
 
-  } catch (error: any) {
-    console.error('Save error:', error);
-    toast({
-      title: 'Error',
-      description: error.message || 'Failed to save portfolio. Please try again.',
-      variant: 'destructive',
-    });
-  } finally {
-    setIsLoading(false);
-  }
-};
+    setIsLoading(true);
+    try {
+      console.log('Starting save process...');
+      const collectionName = 'home';
 
+      if (existingContent) {
+        console.log('Updating existing content with ID:', existingContent.id);
+        const { error } = await saveAndUpdateDynamicContent(collectionName, {
+          title: 'Portfolio Information',
+          content: formData,
+          status: 'published',
+        }, existingContent.id);
+
+        if (error) {
+          console.error('Update error:', error);
+          throw new Error(error);
+        }
+
+        console.log('Content updated successfully');
+        toast({
+          title: 'Success!',
+          description: 'Portfolio updated successfully!',
+        });
+
+      } else {
+        console.log('Creating new content...');
+        const { error } = await saveAndUpdateDynamicContent(collectionName, {
+          title: 'Portfolio Information',
+          content: formData,
+          status: 'published',
+        });
+
+        if (error) {
+          console.error('Create error:', error);
+          throw new Error(error);
+        }
+
+        console.log('Content created successfully');
+        toast({
+          title: 'Success!',
+          description: 'Portfolio created successfully!',
+        });
+      }
+
+    } catch (error: any) {
+      console.error('Save error:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to save portfolio. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleInputChange = (field: keyof PortfolioData, value: string | string[]) => {
     console.log(`Updating field ${field} with value:`, value);
@@ -278,10 +222,9 @@ const handleSave = async () => {
             <h1 className="text-3xl font-bold text-gray-900">Portfolio Information</h1>
             <p className="text-gray-600 mt-2">Manage your personal portfolio details</p>
           </div>
-         
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
           <Card className="h-fit">
             <CardHeader>
               <CardTitle>Edit Portfolio</CardTitle>
@@ -381,23 +324,27 @@ const handleSave = async () => {
                   />
                 </div>
 
-                {/* Icons Selector */}
+                {/* Icon Selector Mode Toggle */}
                 <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Label>Technology & Social Icons</Label>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Info size={14} className="text-gray-400" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Select icons representing your skills and social presence</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <IconSelector
-                    selectedIcons={formData.selectedIcons}
-                    onIconsChange={(icons) => handleInputChange('selectedIcons', icons)}
-                  />
+                  <Label>Technology & Social Icons</Label>
+                  <Tabs value={iconSelectorMode} onValueChange={(value) => setIconSelectorMode(value as 'simple' | 'category')}>
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="category">Organized by Category</TabsTrigger>
+                      <TabsTrigger value="simple">Simple Search</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="category">
+                      <CategoryIconSelector
+                        selectedIcons={formData.selectedIcons}
+                        onIconsChange={(icons) => handleInputChange('selectedIcons', icons)}
+                      />
+                    </TabsContent>
+                    <TabsContent value="simple">
+                      <EnhancedIconSelector
+                        selectedIcons={formData.selectedIcons}
+                        onIconsChange={(icons) => handleInputChange('selectedIcons', icons)}
+                      />
+                    </TabsContent>
+                  </Tabs>
                 </div>
 
                 {/* Save Button */}
@@ -412,9 +359,8 @@ const handleSave = async () => {
               </TooltipProvider>
             </CardContent>
           </Card>
-
-         
         </div>
+        
         <div className="mt-8 flex">
           <div className="text-sm text-gray-500 mb-2">
            <Button
@@ -427,8 +373,8 @@ const handleSave = async () => {
             <span>{showPreview ? 'Hide Preview' : 'Show Preview'}</span>
           </Button>
           </div>
-          
         </div>
+        
          {/* Live Preview */}
           {showPreview && (
             <Card className="h-fit">
