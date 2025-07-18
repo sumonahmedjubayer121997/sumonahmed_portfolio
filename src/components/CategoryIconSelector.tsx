@@ -354,7 +354,7 @@ useEffect(() => {
               <CardTitle className="text-sm">Add Icon to Category</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex gap-2">
+              <div className="flex gap-2 sm:flex-row flex-col">
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                   <SelectTrigger className="w-[200px]">
                     <SelectValue placeholder="Select category" />
@@ -379,7 +379,7 @@ useEffect(() => {
         
         {/* Search Input */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 sm:w-full" size={16} />
           <Input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
