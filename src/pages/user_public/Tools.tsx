@@ -11,6 +11,7 @@ interface Tool {
   url?: string;
   order: number;
   visible: boolean;
+  platforms?: string[]; // New field for platforms
 }
 
 const Tools = () => {
@@ -111,6 +112,9 @@ const Tools = () => {
                     </h3>
                     <p className="text-sm text-gray-500">
                       {tool.category}
+                    </p>
+                     <p className="text-sm text-gray-500">
+                      {tool.platforms && tool.platforms.length > 0 ? `Platforms: ${tool.platforms.join(', ')}` : 'No specific platforms listed'}  
                     </p>
                   </div>
                 </div>
