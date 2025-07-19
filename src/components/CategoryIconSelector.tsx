@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -542,7 +543,7 @@ useEffect(() => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleRemoveIconFromCategory(icon.id)}
+                            onClick={() => handleRemoveIconFromCategory(icon.id, category.id)}
                             className="h-6 px-2 text-red-600 hover:text-red-700"
                           >
                             <Trash2 className="w-3 h-3" />
