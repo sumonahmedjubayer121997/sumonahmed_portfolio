@@ -1,11 +1,14 @@
 
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+const functions = require('firebase-functions');
+const admin = require('firebase-admin');
+const { Configuration, OpenAIApi } = require('openai');
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+admin.initializeApp();
+
+const configuration = new Configuration({
+  apiKey: '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',
+});
+const openai = new OpenAIApi(configuration);
 
 const SYSTEM_PROMPT = {
   role: 'system',
@@ -102,42 +105,29 @@ Voilà, now you're ME. Let's go make this portfolio unforgettable 🚀
 `,
 };
 
-serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-
+exports.aiChat = functions.https.onCall(async (data, context) => {
   try {
-    const { message } = await req.json();
+    const { message } = data;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer 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`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          SYSTEM_PROMPT,
-          { role: 'user', content: message }
-        ],
-        max_tokens: 500,
-        temperature: 0.7,
-      }),
+    if (!message) {
+      throw new functions.https.HttpsError('invalid-argument', 'Message is required');
+    }
+
+    const completion = await openai.createChatCompletion({
+      model: 'gpt-3.5-turbo',
+      messages: [
+        SYSTEM_PROMPT,
+        { role: 'user', content: message }
+      ],
+      max_tokens: 500,
+      temperature: 0.7,
     });
 
-    const data = await response.json();
-    const reply = data.choices[0].message.content;
+    const reply = completion.data.choices[0]?.message?.content || 'Sorry, I could not process that request.';
 
-    return new Response(JSON.stringify({ reply }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return { reply };
   } catch (error) {
-    console.error('Error in ai-chat function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    console.error('Error in AI chat function:', error);
+    throw new functions.https.HttpsError('internal', 'Failed to process AI request');
   }
 });

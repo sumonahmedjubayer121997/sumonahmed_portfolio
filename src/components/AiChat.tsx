@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, Send, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
+import { sendMessageToAI } from '@/services/aiChatService';
 
 interface Message {
   id: string;
@@ -48,15 +48,11 @@ const AiChat = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('ai-chat', {
-        body: { message: inputMessage }
-      });
-
-      if (error) throw error;
+      const reply = await sendMessageToAI(inputMessage);
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: data.reply,
+        text: reply,
         isUser: false,
         timestamp: new Date(),
       };
