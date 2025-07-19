@@ -16,8 +16,17 @@ const TechStack = () => {
     const loadData = async () => {
       setIsLoading(true);
       const { icons, error } = await getAllCategorizedIcons();
-      if (!error && icons) {
-        setCategorizedIcons(icons);
+      if (!error && icons && Array.isArray(icons)) {
+        // Ensure the icons match the IconWithCategory interface
+        const validIcons = icons.filter((icon): icon is IconWithCategory => 
+          icon && 
+          typeof icon === 'object' && 
+          'iconName' in icon && 
+          'categoryId' in icon &&
+          'categoryName' in icon &&
+          'categoryColor' in icon
+        );
+        setCategorizedIcons(validIcons);
       }
 
       unsubscribeFn = listenDynamicContent(
@@ -81,7 +90,10 @@ const TechStack = () => {
       ) : hasSelectedIcons ? (
         <ul className="flex flex-wrap items-center text-slate-500 dark:text-slate-500">
           {Object.entries(groupedSelectedIcons).flatMap(([categoryName, icons], groupIndex, arr) => {
-            const items = icons.map((icon, i) => (
+            // Ensure icons is an array before mapping
+            const iconArray = Array.isArray(icons) ? icons : [];
+            
+            const items = iconArray.map((icon, i) => (
               <li
                 key={`${icon.categoryId}-${icon.iconName}-${i}`}
                 className="relative group w-10 h-10 flex items-center justify-center"
