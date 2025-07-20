@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { askOpenAI } from './api/openai';
 import { personalContext, isQueryAboutSumon } from './constants/personalContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SearchDialogProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
   const [showQuickOptions, setShowQuickOptions] = useState(true);
   const [isListening, setIsListening] = useState(false);
   const messagesEndRef = React.useRef<HTMLDivElement | null>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
   if (messagesEndRef.current) {
@@ -42,13 +44,18 @@ useEffect(() => {
   }
 }, [messages]);
 
+useEffect(() => { 
+  if(isMobile) {
+    setShowQuickOptions(false);
+  }
+}, [isMobile]);
 
   const userQuestions = {
     me: "Who are you? I want to know more about you.",
     projects: "Can you show me your recent projects?",
     skills: "What technologies do you work with?",
     fun: "Tell me something fun about yourself.",
-    contact: "How can I contact you?"
+    contact: "How can I contact you?",
   };
 
   const assistantResponses = {
@@ -78,24 +85,39 @@ useEffect(() => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) return;
+  e.preventDefault();
+  if (!query.trim()) return;
 
-    addMessage('user', query);
+  const normalizedQuery = query.toLowerCase().trim();
+  addMessage('user', query);
 
-    const prompt = isQueryAboutSumon(query)
-      ? `${personalContext}\n\nUser asked: "${query}"`
-      : query;
-
-    try {
-      const answer = await askOpenAI(prompt);
-      addMessage('assistant', answer);
-    } catch (err) {
-      addMessage('assistant', 'Something went wrong. Please try again.');
-    }
-
+  // Intercept "Are you ChatGPT?" or similar
+  if (
+    normalizedQuery.includes('are you chatgpt') ||
+    normalizedQuery.includes('r u chatgpt') ||
+    normalizedQuery.includes('are you gpt') ||
+    normalizedQuery.includes('is this chatgpt') ||
+    normalizedQuery.includes('chatgpt')
+  ) {
+    addMessage('assistant', 'I am not ChatGPT; I am your AI assistant.');
     setQuery('');
-  };
+    return;
+  }
+
+  const prompt = isQueryAboutSumon(query)
+    ? `${personalContext}\n\nUser asked: "${query}"`
+    : query;
+
+  try {
+    const answer = await askOpenAI(prompt);
+    addMessage('assistant', answer);
+  } catch (err) {
+    addMessage('assistant', 'Something went wrong. Please try again.');
+  }
+
+  setQuery('');
+};
+
 
   const handleQuickOption = (optionId: string) => {
     const userQuestion = userQuestions[optionId as keyof typeof userQuestions];
@@ -145,7 +167,7 @@ useEffect(() => {
               </div>
               <div>
                 <h2 className="text-xl font-semibold text-foreground">Portfolio Assistant</h2>
-                <p className="text-sm text-muted-foreground">Ask me anything about my work and experience</p>
+                <p className="text-sm text-muted-foreground">Ask me anything about myself or whatever you want</p>
               </div>
             </div>
           </div>
