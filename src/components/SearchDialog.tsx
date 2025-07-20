@@ -11,9 +11,16 @@ interface SearchDialogProps {
   onClose: () => void;
 }
 
+interface Message {
+  id: string;
+  type: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+}
+
 const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
   const [query, setQuery] = useState('');
-  const [response, setResponse] = useState('');
+  const [messages, setMessages] = useState<Message[]>([]);
   const [showQuickOptions, setShowQuickOptions] = useState(true);
   const [isListening, setIsListening] = useState(false);
   const { theme } = useTheme();
@@ -26,6 +33,14 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
     { id: 'contact', label: 'Contact', icon: Mail, color: 'bg-orange-500 hover:bg-orange-600' },
   ];
 
+  const userQuestions = {
+    me: "Who are you? I want to know more about you.",
+    projects: "Can you show me your recent projects?",
+    skills: "What technologies do you work with?",
+    fun: "Tell me something fun about yourself.",
+    contact: "How can I contact you?"
+  };
+
   const assistantResponses = {
     me: "Hi there! 👋 I'm a passionate developer who loves creating innovative solutions. I enjoy working with modern technologies and building user-friendly applications. Want to know something specific about my background?",
     projects: "I've worked on various exciting projects! 🚀 From web applications to mobile apps, each project taught me something new. Check out my portfolio section to see detailed case studies and live demos.",
@@ -34,40 +49,64 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
     contact: "Let's connect! 📫 Feel free to reach out through email, LinkedIn, or check out my GitHub. I'm always open to discussing new opportunities or collaborating on interesting projects."
   };
 
+  const addMessage = (type: 'user' | 'assistant', content: string) => {
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      type,
+      content,
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, newMessage]);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
 
-    // Simple keyword matching for demo purposes
-    const lowercaseQuery = query.toLowerCase();
-    let assistantResponse = '';
+    // Add user message
+    addMessage('user', query);
 
-    if (lowercaseQuery.includes('about') || lowercaseQuery.includes('who')) {
-      assistantResponse = assistantResponses.me;
-    } else if (lowercaseQuery.includes('project') || lowercaseQuery.includes('work') || lowercaseQuery.includes('portfolio')) {
-      assistantResponse = assistantResponses.projects;
-    } else if (lowercaseQuery.includes('skill') || lowercaseQuery.includes('tech') || lowercaseQuery.includes('experience')) {
-      assistantResponse = assistantResponses.skills;
-    } else if (lowercaseQuery.includes('fun') || lowercaseQuery.includes('hobby') || lowercaseQuery.includes('interest')) {
-      assistantResponse = assistantResponses.fun;
-    } else if (lowercaseQuery.includes('contact') || lowercaseQuery.includes('reach') || lowercaseQuery.includes('email')) {
-      assistantResponse = assistantResponses.contact;
-    } else {
-      assistantResponse = "Hey! How can I help? 😊 Feel free to ask about my work, skills, fun facts, or how to reach me. I'm here to help you learn more about my journey and experience!";
-    }
+    // Process query and add assistant response
+    setTimeout(() => {
+      const lowercaseQuery = query.toLowerCase();
+      let assistantResponse = '';
 
-    setResponse(assistantResponse);
+      if (lowercaseQuery.includes('about') || lowercaseQuery.includes('who')) {
+        assistantResponse = assistantResponses.me;
+      } else if (lowercaseQuery.includes('project') || lowercaseQuery.includes('work') || lowercaseQuery.includes('portfolio')) {
+        assistantResponse = assistantResponses.projects;
+      } else if (lowercaseQuery.includes('skill') || lowercaseQuery.includes('tech') || lowercaseQuery.includes('experience')) {
+        assistantResponse = assistantResponses.skills;
+      } else if (lowercaseQuery.includes('fun') || lowercaseQuery.includes('hobby') || lowercaseQuery.includes('interest')) {
+        assistantResponse = assistantResponses.fun;
+      } else if (lowercaseQuery.includes('contact') || lowercaseQuery.includes('reach') || lowercaseQuery.includes('email')) {
+        assistantResponse = assistantResponses.contact;
+      } else {
+        assistantResponse = "Hey! How can I help? 😊 Feel free to ask about my work, skills, fun facts, or how to reach me. I'm here to help you learn more about my journey and experience!";
+      }
+
+      addMessage('assistant', assistantResponse);
+    }, 500);
+
     setQuery('');
   };
 
   const handleQuickOption = (optionId: string) => {
-    setResponse(assistantResponses[optionId as keyof typeof assistantResponses]);
+    const userQuestion = userQuestions[optionId as keyof typeof userQuestions];
+    const assistantResponse = assistantResponses[optionId as keyof typeof assistantResponses];
+    
+    // Add user message first
+    addMessage('user', userQuestion);
+    
+    // Add assistant response after a short delay
+    setTimeout(() => {
+      addMessage('assistant', assistantResponse);
+    }, 500);
   };
 
   const toggleVoiceInput = () => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       setIsListening(!isListening);
-      // Voice input implementation would go here
       console.log('Voice input toggled:', !isListening);
     } else {
       console.log('Speech recognition not supported');
@@ -79,7 +118,6 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === '/' && !isOpen) {
         e.preventDefault();
-        // This would trigger opening the dialog from parent component
       }
     };
 
@@ -87,18 +125,19 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
-  // Clear response when dialog closes
+  // Clear messages when dialog closes
   useEffect(() => {
     if (!isOpen) {
-      setResponse('');
+      setMessages([]);
       setQuery('');
+      setShowQuickOptions(true);
     }
   }, [isOpen]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl mx-auto p-0 bg-background border-border/50 shadow-2xl">
-        <DialogHeader className="p-6 pb-4">
+      <DialogContent className="max-w-2xl mx-auto p-0 bg-background border-border/50 shadow-2xl max-h-[80vh] flex flex-col">
+        <DialogHeader className="p-6 pb-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -120,60 +159,81 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
           </div>
         </DialogHeader>
 
-        <div className="px-6 pb-6">
-          {/* Search Form */}
-          <form onSubmit={handleSubmit} className="mb-6">
-            <div className="flex gap-2">
-              <div className="flex-1 relative">
-                <Input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Ask me anything..."
-                  className="pr-12 h-12 text-base bg-muted/50 border-border/50 focus:bg-background"
-                  autoFocus
-                />
-                {('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={toggleVoiceInput}
-                    className={`absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full ${
-                      isListening ? 'bg-red-500 text-white hover:bg-red-600' : 'hover:bg-muted'
-                    }`}
-                  >
-                    {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                  </Button>
-                )}
-              </div>
-              <Button
-                type="submit"
-                size="icon"
-                className="h-12 w-12 rounded-full bg-primary hover:bg-primary/90"
-                disabled={!query.trim()}
-              >
-                <Send className="w-4 h-4" />
-              </Button>
-            </div>
-          </form>
-
-          {/* Assistant Response */}
-          {response && (
-            <div className="mb-6 p-4 bg-muted/30 rounded-xl border border-border/30 animate-fade-in">
-              <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
-                  <MessageCircle className="w-4 h-4 text-primary" />
+        <div className="px-6 flex-1 min-h-0 flex flex-col">
+          {/* Messages Container */}
+          {messages.length > 0 && (
+            <div className="flex-1 overflow-y-auto mb-6 space-y-4 max-h-60">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}
+                >
+                  <div className={`flex gap-3 max-w-[80%] ${message.type === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1 ${
+                      message.type === 'user' 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'bg-primary/10'
+                    }`}>
+                      {message.type === 'user' ? (
+                        <User className="w-4 h-4" />
+                      ) : (
+                        <MessageCircle className="w-4 h-4 text-primary" />
+                      )}
+                    </div>
+                    <div className={`p-3 rounded-2xl ${
+                      message.type === 'user'
+                        ? 'bg-primary text-primary-foreground rounded-br-md'
+                        : 'bg-muted/30 border border-border/30 rounded-bl-md'
+                    }`}>
+                      <p className="text-sm leading-relaxed">{message.content}</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="text-foreground leading-relaxed">{response}</p>
-                </div>
-              </div>
+              ))}
             </div>
           )}
 
+          {/* Search Form */}
+          <div className="flex-shrink-0 mb-6">
+            <form onSubmit={handleSubmit}>
+              <div className="flex gap-2">
+                <div className="flex-1 relative">
+                  <Input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Ask me anything..."
+                    className="pr-12 h-12 text-base bg-muted/50 border-border/50 focus:bg-background"
+                    autoFocus
+                  />
+                  {('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={toggleVoiceInput}
+                      className={`absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full ${
+                        isListening ? 'bg-red-500 text-white hover:bg-red-600' : 'hover:bg-muted'
+                      }`}
+                    >
+                      {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                    </Button>
+                  )}
+                </div>
+                <Button
+                  type="submit"
+                  size="icon"
+                  className="h-12 w-12 rounded-full bg-primary hover:bg-primary/90"
+                  disabled={!query.trim()}
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+            </form>
+          </div>
+
           {/* Quick Options */}
           {showQuickOptions && (
-            <div className="space-y-4">
+            <div className="flex-shrink-0 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-medium text-muted-foreground">Quick Questions</h3>
                 <Button
@@ -206,7 +266,7 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
 
           {/* Show Quick Questions button when hidden */}
           {!showQuickOptions && (
-            <div className="text-center">
+            <div className="flex-shrink-0 text-center">
               <Button
                 variant="outline"
                 size="sm"
@@ -217,9 +277,11 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
               </Button>
             </div>
           )}
+        </div>
 
-          {/* Keyboard Shortcut Hint */}
-          <div className="mt-6 text-center">
+        {/* Keyboard Shortcut Hint */}
+        <div className="px-6 pb-6 flex-shrink-0">
+          <div className="text-center">
             <p className="text-xs text-muted-foreground">
               💡 Pro tip: Press <kbd className="text-xs">/</kbd> to quickly open this assistant
             </p>
