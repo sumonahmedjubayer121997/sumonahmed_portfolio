@@ -27,6 +27,19 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
   const messagesEndRef = React.useRef<HTMLDivElement | null>(null);
   const isMobile = useIsMobile();
 
+  const funnyResponses = [
+  "Bro, I’m not ChatGPT – I’ve got more personality than that! 😂",
+  "15 messages in? You tryna break me or fall in love? 😏",
+  "Do I look like ChatGPT to you? I’ve got style. 😎",
+  "You again? At this point, we should get matching tattoos. 💬❤️",
+  "If this was Tinder, I’d have swiped right already. 😉",
+  "You’re keeping me busier than Stack Overflow on a Monday. 🧠💥",
+  "I need coffee. You need a hobby. ☕📵",
+  "Still here? I admire your curiosity or your boredom. Either way, respect. ✊",
+  "Are we writing a novel together or what? 📖🖊️",
+];
+
+
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -86,6 +99,11 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
 
     const normalizedQuery = query.toLowerCase().trim();
     addMessage('user', query);
+
+    if ((messages.length + 1) % 20 === 0) {
+  const randomFunny = funnyResponses[Math.floor(Math.random() * funnyResponses.length)];
+  addMessage('assistant', randomFunny);
+}
 
     // Intercept "Are you ChatGPT?" or similar
     if (
@@ -152,7 +170,7 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
             </div>
             <div>
               <h2 className="text-lg font-medium text-foreground tracking-tight">Portfolio Assistant</h2>
-              <p className="text-sm text-muted-foreground font-normal mt-0.5">Ask about my work or experience</p>
+              <p className="text-sm text-muted-foreground font-normal mt-0.5">Ask about my work or anything</p>
             </div>
           </div>
         </DialogHeader>
