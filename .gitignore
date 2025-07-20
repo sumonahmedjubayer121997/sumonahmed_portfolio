@@ -1,4 +1,9 @@
+#Logsas well as other files that should not be tracked by Git
 .env
+.env.local
+firebase-key.json
+*.key
+*.pem
 # Logs
 logs
 *.log
