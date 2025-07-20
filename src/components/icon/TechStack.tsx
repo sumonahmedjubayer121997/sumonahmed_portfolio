@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { listenDynamicContent } from "@/integrations/firebase/firestore";
 import { getAllCategorizedIcons } from "@/services/iconCategoryService";
@@ -16,18 +15,7 @@ const TechStack = () => {
     const loadData = async () => {
       setIsLoading(true);
       const { icons, error } = await getAllCategorizedIcons();
-      if (!error && icons && Array.isArray(icons)) {
-        // Ensure the icons match the IconWithCategory interface
-        const validIcons = icons.filter((icon): icon is IconWithCategory => 
-          icon && 
-          typeof icon === 'object' && 
-          'iconName' in icon && 
-          'categoryId' in icon &&
-          'categoryName' in icon &&
-          'categoryColor' in icon
-        );
-        setCategorizedIcons(validIcons);
-      }
+      if (!error) setCategorizedIcons(icons);
 
       unsubscribeFn = listenDynamicContent(
         'home',
@@ -51,7 +39,7 @@ const TechStack = () => {
   }, []);
 
   const itemStyle = { opacity: 1, transform: 'none' };
-  const selectedIcons = Array.isArray(homeData?.selectedIcons) ? homeData.selectedIcons : [];
+  const selectedIcons = homeData?.selectedIcons || [];
 
   const groupedSelectedIcons = selectedIcons.reduce(
     (acc: Record<string, IconWithCategory[]>, iconName: string) => {
@@ -89,42 +77,41 @@ const TechStack = () => {
         <p className="text-sm text-slate-400 dark:text-slate-500">Loading tech stack...</p>
       ) : hasSelectedIcons ? (
         <ul className="flex flex-wrap items-center text-slate-500 dark:text-slate-500">
-          {Object.entries(groupedSelectedIcons).flatMap(([categoryName, icons], groupIndex, arr) => {
-            // Ensure icons is an array before mapping
-            const iconArray = Array.isArray(icons) ? icons : [];
-            
-            const items = iconArray.map((icon, i) => (
-              <li
-                key={`${icon.categoryId}-${icon.iconName}-${i}`}
-                className="relative group w-10 h-10 flex items-center justify-center"
-                style={itemStyle}
-              >
-                {/* Tooltip */}
-                <div className="absolute top-full mt-1 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs px-2 py-1 rounded bg-slate-700 text-white shadow-md z-50 pointer-events-none whitespace-nowrap text-center">
-                  {icon.displayName?.charAt(0).toUpperCase() + icon.displayName?.slice(1)} 
-                  <span className="mx-1 opacity-60">|</span> 
-                  {icon.categoryName?.charAt(0).toUpperCase() + icon.categoryName?.slice(1)}
-                </div>
+  {Object.entries(groupedSelectedIcons).flatMap(([categoryName, icons], groupIndex, arr) => {
+    const items = icons.map((icon, i) => (
+      <li
+        key={`${icon.categoryId}-${icon.iconName}-${i}`}
+        className="relative group w-10 h-10 flex items-center justify-center"
+        style={itemStyle}
+      >
+        {/* Tooltip */}
+       <div className="absolute top-full mt-1 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs px-2 py-1 rounded bg-slate-700 text-white shadow-md z-50 pointer-events-none whitespace-nowrap text-center">
+  {icon.displayName?.charAt(0).toUpperCase() + icon.displayName?.slice(1)} 
+  <span className="mx-1 opacity-60">|</span> 
+  {icon.categoryName?.charAt(0).toUpperCase() + icon.categoryName?.slice(1)}
+</div>
 
-                <TechIcon
-                  techName={icon.iconName}
-                  className="hover:scale-110 transition-transform duration-200"
-                />
-              </li>
-            ));
 
-            // Add separator except after last group
-            if (groupIndex < arr.length - 1) {
-              items.push(
-                <li key={`separator-${groupIndex}`} className="mx-3">
-                  <div className="h-6 w-px bg-slate-400 dark:bg-slate-600 opacity-60" />
-                </li>
-              );
-            }
+        <TechIcon
+          techName={icon.iconName}
+          className="hover:scale-110 transition-transform duration-200"
+        />
+      </li>
+    ));
 
-            return items;
-          })}
-        </ul>
+    // Add separator except after last group
+    if (groupIndex < arr.length - 1) {
+      items.push(
+        <li key={`separator-${groupIndex}`} className="mx-3">
+          <div className="h-6 w-px bg-slate-400 dark:bg-slate-600 opacity-60" />
+        </li>
+      );
+    }
+
+    return items;
+  })}
+</ul>
+
       ) : (
         <p className="text-sm text-slate-400 dark:text-slate-500">
           No tech stack selected yet.
