@@ -1,10 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import { X, Send, MessageCircle, User, Briefcase, Code, Heart, Mail, Mic, MicOff } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useTheme } from '@/contexts/ThemeContext';
 import { askOpenAI } from './api/openai';
 import { personalContext, isQueryAboutSumon } from './constants/personalContext';
+
 
 interface SearchDialogProps {
   isOpen: boolean;
@@ -23,40 +26,27 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [showQuickOptions, setShowQuickOptions] = useState(true);
   const [isListening, setIsListening] = useState(false);
-  const messagesEndRef = React.useRef<HTMLDivElement | null>(null);
+  const { theme } = useTheme();
 
-  useEffect(() => {
-  if (messagesEndRef.current) {
-    messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-  }
+    const [query, setQuery] = useState('');
+  const [response, setResponse] = useState('');
+  const [loading, setLoading] = useState(false);
 
+  const handleSearch = async () => {
+    if (!query.trim()) return;
 
+    setLoading(true);
+    const prompt = isQueryAboutSumon(query)
+      ? `${personalContext}\n\nUser asked: "${query}"`
+      : query;
 
-}, [messages]);
-
-
-useEffect(() => {
-  const latestMessage = messages[messages.length - 1];
-  if (latestMessage?.type === 'assistant' && latestMessage.content.length > 300) {
-    setShowQuickOptions(false);
-  }
-}, [messages]);
-
-
-  const userQuestions = {
-    me: "Who are you? I want to know more about you.",
-    projects: "Can you show me your recent projects?",
-    skills: "What technologies do you work with?",
-    fun: "Tell me something fun about yourself.",
-    contact: "How can I contact you?"
-  };
-
-  const assistantResponses = {
-    me: "Hi there! 👋 I'm a passionate developer who loves creating innovative solutions. I enjoy working with modern technologies and building user-friendly applications. Want to know something specific about my background?",
-    projects: "I've worked on various exciting projects! 🚀 From web applications to mobile apps, each project taught me something new. Check out my portfolio section to see detailed case studies and live demos.",
-    skills: "I'm proficient in multiple technologies! 💻 Including React, TypeScript, Node.js, and more. I'm always learning new technologies to stay current with industry trends. What specific skill are you curious about?",
-    fun: "When I'm not coding, I love exploring new technologies, contributing to open source, and sharing knowledge with the developer community! 🎉 I believe in maintaining a good work-life balance.",
-    contact: "Let's connect! 📫 Feel free to reach out through email, LinkedIn, or check out my GitHub. I'm always open to discussing new opportunities or collaborating on interesting projects."
+    try {
+      const answer = await askOpenAI(prompt);
+      setResponse(answer);
+    } catch (err) {
+      setResponse('Something went wrong. Please try again.');
+    }
+    setLoading(false);
   };
 
   const quickOptions = [
@@ -66,6 +56,22 @@ useEffect(() => {
     { id: 'fun', label: 'Fun', icon: Heart, color: 'bg-pink-500 hover:bg-pink-600' },
     { id: 'contact', label: 'Contact', icon: Mail, color: 'bg-orange-500 hover:bg-orange-600' },
   ];
+
+  const userQuestions = {
+    me: "Who are you? I want to know more about you.",
+    projects: "Can you show me your recent projects?",
+    skills: "What technologies do you work with?",
+    fun: "Tell me something fun about yourself.",
+    contact: "How can I contact you?"
+  };
+
+  // const assistantResponses = {
+  //   me: "Hi there! 👋 I'm a passionate developer who loves creating innovative solutions. I enjoy working with modern technologies and building user-friendly applications. Want to know something specific about my background?",
+  //   projects: "I've worked on various exciting projects! 🚀 From web applications to mobile apps, each project taught me something new. Check out my portfolio section to see detailed case studies and live demos.",
+  //   skills: "I'm proficient in multiple technologies! 💻 Including React, TypeScript, Node.js, and more. I'm always learning new technologies to stay current with industry trends. What specific skill are you curious about?",
+  //   fun: "When I'm not coding, I love exploring new technologies, contributing to open source, and sharing knowledge with the developer community! 🎉 I believe in maintaining a good work-life balance.",
+  //   contact: "Let's connect! 📫 Feel free to reach out through email, LinkedIn, or check out my GitHub. I'm always open to discussing new opportunities or collaborating on interesting projects."
+  // };
 
   const addMessage = (type: 'user' | 'assistant', content: string) => {
     const newMessage: Message = {
@@ -77,31 +83,46 @@ useEffect(() => {
     setMessages(prev => [...prev, newMessage]);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
 
+    // Add user message
     addMessage('user', query);
 
-    const prompt = isQueryAboutSumon(query)
-      ? `${personalContext}\n\nUser asked: "${query}"`
-      : query;
+    // Process query and add assistant response
+    // setTimeout(() => {
+    //   const lowercaseQuery = query.toLowerCase();
+    //   let assistantResponse = '';
 
-    try {
-      const answer = await askOpenAI(prompt);
-      addMessage('assistant', answer);
-    } catch (err) {
-      addMessage('assistant', 'Something went wrong. Please try again.');
-    }
+    //   if (lowercaseQuery.includes('about') || lowercaseQuery.includes('who')) {
+    //     assistantResponse = assistantResponses.me;
+    //   } else if (lowercaseQuery.includes('project') || lowercaseQuery.includes('work') || lowercaseQuery.includes('portfolio')) {
+    //     assistantResponse = assistantResponses.projects;
+    //   } else if (lowercaseQuery.includes('skill') || lowercaseQuery.includes('tech') || lowercaseQuery.includes('experience')) {
+    //     assistantResponse = assistantResponses.skills;
+    //   } else if (lowercaseQuery.includes('fun') || lowercaseQuery.includes('hobby') || lowercaseQuery.includes('interest')) {
+    //     assistantResponse = assistantResponses.fun;
+    //   } else if (lowercaseQuery.includes('contact') || lowercaseQuery.includes('reach') || lowercaseQuery.includes('email')) {
+    //     assistantResponse = assistantResponses.contact;
+    //   } else {
+    //     assistantResponse = "Hey! How can I help? 😊 Feel free to ask about my work, skills, fun facts, or how to reach me. I'm here to help you learn more about my journey and experience!";
+    //   }
+
+    //   addMessage('assistant', assistantResponse);
+    // }, 500);
 
     setQuery('');
   };
 
   const handleQuickOption = (optionId: string) => {
     const userQuestion = userQuestions[optionId as keyof typeof userQuestions];
-    const assistantResponse = assistantResponses[optionId as keyof typeof assistantResponses];
-
+    // const assistantResponse = assistantResponses[optionId as keyof typeof assistantResponses];
+    
+    // Add user message first
     addMessage('user', userQuestion);
+    
+    // Add assistant response after a short delay
     setTimeout(() => {
       addMessage('assistant', assistantResponse);
     }, 500);
@@ -116,16 +137,19 @@ useEffect(() => {
     }
   };
 
+  // Keyboard shortcut to open search
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === '/' && !isOpen) {
         e.preventDefault();
       }
     };
+
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
+  // Clear messages when dialog closes
   useEffect(() => {
     if (!isOpen) {
       setMessages([]);
@@ -148,12 +172,14 @@ useEffect(() => {
                 <p className="text-sm text-muted-foreground">Ask me anything about my work and experience</p>
               </div>
             </div>
+           
           </div>
         </DialogHeader>
 
         <div className="px-6 flex-1 min-h-0 flex flex-col">
+          {/* Messages Container */}
           {messages.length > 0 && (
-            <div className="overflow-y-auto mb-6 space-y-4 grow">
+            <div className="flex-1 overflow-y-auto mb-6 space-y-4 max-h-60">
               {messages.map((message) => (
                 <div
                   key={message.id}
@@ -161,8 +187,8 @@ useEffect(() => {
                 >
                   <div className={`flex gap-3 max-w-[80%] ${message.type === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1 ${
-                      message.type === 'user'
-                        ? 'bg-primary text-primary-foreground'
+                      message.type === 'user' 
+                        ? 'bg-primary text-primary-foreground' 
                         : 'bg-primary/10'
                     }`}>
                       {message.type === 'user' ? (
@@ -181,11 +207,10 @@ useEffect(() => {
                   </div>
                 </div>
               ))}
-                <div ref={messagesEndRef} />
             </div>
           )}
 
-          {/* Input Form */}
+          {/* Search Form */}
           <div className="flex-shrink-0 mb-6">
             <form onSubmit={handleSubmit}>
               <div className="flex gap-2">
@@ -197,6 +222,8 @@ useEffect(() => {
                     className="pr-12 h-12 text-base bg-muted/50 border-border/50 focus:bg-background"
                     autoFocus
                   />
+
+                  
                   {('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) && (
                     <Button
                       type="button"
@@ -224,7 +251,7 @@ useEffect(() => {
           </div>
 
           {/* Quick Options */}
-          {showQuickOptions ? (
+          {showQuickOptions && (
             <div className="flex-shrink-0 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-medium text-muted-foreground">Quick Questions</h3>
@@ -237,6 +264,7 @@ useEffect(() => {
                   Hide Quick Questions
                 </Button>
               </div>
+              
               <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                 {quickOptions.map((option) => (
                   <Button
@@ -253,28 +281,31 @@ useEffect(() => {
                 ))}
               </div>
             </div>
-          ) : (
-            // Show quick options toggle
-<div className="flex-shrink-0 px-1 flex items-center justify-between gap-4 text-muted-foreground text-xs">
-  <Button
-    variant="outline"
-    size="sm"
-    onClick={() => setShowQuickOptions(true)}
-    className="text-xs"
-  >
-    Show Quick Questions
-  </Button>
+          )}
 
-  <p className="flex items-center gap-1 whitespace-nowrap">
-    💡 Tip: Press <kbd className="px-1 py-0.5 border rounded text-xs">/</kbd> to open
-  </p>
-</div>
-
-            
+          {/* Show Quick Questions button when hidden */}
+          {!showQuickOptions && (
+            <div className="flex-shrink-0 text-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowQuickOptions(true)}
+                className="text-sm"
+              >
+                Show Quick Questions
+              </Button>
+            </div>
           )}
         </div>
 
-       
+        {/* Keyboard Shortcut Hint */}
+        <div className="px-6 pb-6 flex-shrink-0">
+          <div className="text-center">
+            <p className="text-xs text-muted-foreground">
+              💡 Pro tip: Press <kbd className="text-xs">/</kbd> to quickly open this assistant
+            </p>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
