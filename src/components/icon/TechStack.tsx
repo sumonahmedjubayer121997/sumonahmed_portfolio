@@ -16,8 +16,17 @@ const TechStack = () => {
     const loadData = async () => {
       setIsLoading(true);
       const { icons, error } = await getAllCategorizedIcons();
-      if (!error && icons) {
-        setCategorizedIcons(icons);
+      if (!error && icons && Array.isArray(icons)) {
+        // Ensure icons have the correct shape for IconWithCategory
+        const validIcons = icons.filter((icon): icon is IconWithCategory => 
+          icon && 
+          typeof icon === 'object' && 
+          'categoryId' in icon && 
+          'iconName' in icon &&
+          'categoryName' in icon &&
+          'categoryColor' in icon
+        );
+        setCategorizedIcons(validIcons);
       }
 
       unsubscribeFn = listenDynamicContent(
@@ -42,7 +51,7 @@ const TechStack = () => {
   }, []);
 
   const itemStyle = { opacity: 1, transform: 'none' };
-  const selectedIcons: string[] = homeData?.selectedIcons || [];
+  const selectedIcons: string[] = Array.isArray(homeData?.selectedIcons) ? homeData.selectedIcons : [];
 
   const groupedSelectedIcons = selectedIcons.reduce(
     (acc: Record<string, IconWithCategory[]>, iconName: string) => {
