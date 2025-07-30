@@ -545,7 +545,7 @@ const EnhancedRichContentEditor = ({
         </CardContent>
       </Card>
 
-      <style jsx global>{`
+      <style>{`
         .ql-toolbar {
           position: sticky !important;
           top: 0 !important;
