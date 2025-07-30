@@ -19,8 +19,8 @@ import { useToast } from "@/components/ui/use-toast"
 import { exportTableToCSV, exportTableToHTML, insertTable, deleteTable, addRow, addColumn, deleteRow, deleteColumn } from './tableUtils';
 
 interface EnhancedRichContentEditorProps {
-  content: string;
-  onChange: (value: string) => void;
+  content?: string;
+  onChange?: (value: string) => void;
   initialContent?: string;
   onSave?: (content: string) => void;
   placeholder?: string;
@@ -73,7 +73,11 @@ const EnhancedRichContentEditor: React.FC<EnhancedRichContentEditorProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [selectedRange, setSelectedRange] = useState<any>(null);
   const [isTableSelected, setIsTableSelected] = useState(false);
-  const [editorContent, setEditorContent] = useState(initialContent || content || '');
+  
+  // Use internal state if no external content/onChange is provided
+  const [internalContent, setInternalContent] = useState(initialContent || content || '');
+  const editorContent = content !== undefined ? content : internalContent;
+  
   const quillRef = useRef<ReactQuill>(null);
   const autoSaveTimer = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast()
@@ -91,8 +95,13 @@ const EnhancedRichContentEditor: React.FC<EnhancedRichContentEditorProps> = ({
     }
 
     setWordCount(calculateWordCount(value));
-    setEditorContent(value);
-    onChange(value);
+    
+    // Handle both controlled and uncontrolled modes
+    if (onChange) {
+      onChange(value);
+    } else {
+      setInternalContent(value);
+    }
 
     if (autoSave && onSave) {
       if (autoSaveTimer.current) {
