@@ -1,5 +1,3 @@
-
-
 import { useState, useRef, useEffect, useCallback } from 'react';
 import ReactQuill, { Quill } from 'react-quill';
 import 'quill/dist/quill.snow.css';
@@ -19,13 +17,29 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Save, Upload, ImageIcon, Loader2, Check, FileText, Eye, BarChart3 } from 'lucide-react';
 
-// Import new components
+// Import existing components
 import FindReplaceDialog from './FindReplaceDialog';
 import TableInsertDialog from './TableInsertDialog';
 import MediaEmbedDialog from './MediaEmbedDialog';
 import KeyboardShortcuts from './KeyboardShortcuts';
 import MarkdownPreview from './MarkdownPreview';
 import AccessibilityChecker from './AccessibilityChecker';
+
+// Import new table components
+import TableGridSelector from './TableGridSelector';
+import TableToolbar from './TableToolbar';
+import TableContextMenu from './TableContextMenu';
+import {
+  createTable,
+  tableToHTML,
+  parseHTMLTable,
+  exportTableToCSV,
+  addTableRow,
+  addTableColumn,
+  removeTableRow,
+  removeTableColumn,
+  TableData,
+} from './tableUtils';
 
 interface EnhancedRichContentEditorProps {
   initialContent?: string;
@@ -56,6 +70,11 @@ const EnhancedRichContentEditor = ({
   const [showAutoSaveTooltip, setShowAutoSaveTooltip] = useState(false);
   const [activeTab, setActiveTab] = useState('editor');
   
+  // Table-related state
+  const [selectedTable, setSelectedTable] = useState<TableData | null>(null);
+  const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
+  const [showTableToolbar, setShowTableToolbar] = useState(false);
+  
   // Dialog states
   const [showFindReplace, setShowFindReplace] = useState(false);
   const [showTableInsert, setShowTableInsert] = useState(false);
@@ -70,7 +89,7 @@ const EnhancedRichContentEditor = ({
     if (autoSave && content && content.trim() !== '') {
       const timeoutId = setTimeout(() => {
         handleAutoSave();
-      }, 2000); // Auto-save after 2 seconds of inactivity
+      }, 2000);
 
       return () => clearTimeout(timeoutId);
     }
@@ -100,7 +119,6 @@ const EnhancedRichContentEditor = ({
         setLastAutoSaved(now);
         setShowAutoSaveTooltip(true);
         
-        // Hide tooltip after 2 seconds
         setTimeout(() => setShowAutoSaveTooltip(false), 2000);
         
       } catch (error) {
@@ -109,7 +127,6 @@ const EnhancedRichContentEditor = ({
         setIsSaving(false);
       }
     } else if (onSave) {
-      // If no documentId but onSave callback exists, use that for auto-save
       try {
         setIsSaving(true);
         onSave(content, uploadedImages);
@@ -118,7 +135,6 @@ const EnhancedRichContentEditor = ({
         setLastAutoSaved(now);
         setShowAutoSaveTooltip(true);
         
-        // Hide tooltip after 2 seconds
         setTimeout(() => setShowAutoSaveTooltip(false), 2000);
         
       } catch (error) {
@@ -169,43 +185,140 @@ const EnhancedRichContentEditor = ({
     }
   };
 
-  // Table insertion - simple HTML table
-  const handleInsertTable = (rows: number, cols: number, hasHeader: boolean) => {
+  // Table functionality
+  const handleInsertTable = (rows: number, cols: number) => {
     const quill = quillRef.current?.getEditor();
     if (quill) {
-      // Create simple HTML table
-      let tableHTML = '<table border="1" style="border-collapse: collapse; width: 100%;">';
-      
-      for (let i = 0; i < rows; i++) {
-        tableHTML += '<tr>';
-        for (let j = 0; j < cols; j++) {
-          if (i === 0 && hasHeader) {
-            tableHTML += '<th style="border: 1px solid #ccc; padding: 8px;">Header</th>';
-          } else {
-            tableHTML += '<td style="border: 1px solid #ccc; padding: 8px;">Cell</td>';
-          }
-        }
-        tableHTML += '</tr>';
-      }
-      tableHTML += '</table><br>';
+      const table = createTable(rows, cols, true);
+      const tableHTML = tableToHTML(table);
       
       const range = quill.getSelection();
       const index = range ? range.index : quill.getLength();
       quill.clipboard.dangerouslyPasteHTML(index, tableHTML);
+      
+      toast({
+        title: 'Table Inserted',
+        description: `${rows}×${cols} table added successfully`,
+      });
     }
   };
 
-  // Media embedding
-  const handleMediaEmbed = (embedCode: string) => {
+  const handleGridSelect = (rows: number, cols: number) => {
+    handleInsertTable(rows, cols);
+  };
+
+  const detectTableSelection = useCallback(() => {
     const quill = quillRef.current?.getEditor();
-    if (quill) {
-      const range = quill.getSelection();
-      const index = range ? range.index : quill.getLength();
-      quill.clipboard.dangerouslyPasteHTML(index, embedCode);
+    if (!quill) return;
+
+    const selection = quill.getSelection();
+    if (!selection) return;
+
+    const [leaf] = quill.getLeaf(selection.index);
+    const tableElement = leaf?.domNode?.closest?.('table');
+    
+    if (tableElement) {
+      const tableData = parseHTMLTable(tableElement.outerHTML);
+      setSelectedTable(tableData);
+      setShowTableToolbar(true);
+    } else {
+      setSelectedTable(null);
+      setShowTableToolbar(false);
     }
+  }, []);
+
+  // Table operations
+  const handleAddRow = () => {
+    if (!selectedTable) return;
+    const updatedTable = addTableRow(selectedTable, selectedCell?.row || 0);
+    updateTableInEditor(updatedTable);
   };
 
-  // Image upload functionality (existing)
+  const handleRemoveRow = () => {
+    if (!selectedTable) return;
+    const updatedTable = removeTableRow(selectedTable, selectedCell?.row || 0);
+    updateTableInEditor(updatedTable);
+  };
+
+  const handleAddColumn = () => {
+    if (!selectedTable) return;
+    const updatedTable = addTableColumn(selectedTable, selectedCell?.col || 0);
+    updateTableInEditor(updatedTable);
+  };
+
+  const handleRemoveColumn = () => {
+    if (!selectedTable) return;
+    const updatedTable = removeTableColumn(selectedTable, selectedCell?.col || 0);
+    updateTableInEditor(updatedTable);
+  };
+
+  const updateTableInEditor = (updatedTable: TableData) => {
+    const quill = quillRef.current?.getEditor();
+    if (!quill || !selectedTable) return;
+
+    const tableHTML = tableToHTML(updatedTable);
+    const currentContent = quill.root.innerHTML;
+    const oldTableHTML = tableToHTML(selectedTable);
+    
+    const updatedContent = currentContent.replace(oldTableHTML, tableHTML);
+    quill.root.innerHTML = updatedContent;
+    setContent(updatedContent);
+    setSelectedTable(updatedTable);
+  };
+
+  const handleCellAlignment = (alignment: 'left' | 'center' | 'right') => {
+    if (!selectedTable || !selectedCell) return;
+    
+    const updatedTable = { ...selectedTable };
+    updatedTable.rows[selectedCell.row].cells[selectedCell.col].textAlign = alignment;
+    updateTableInEditor(updatedTable);
+  };
+
+  const handleCellColor = (color: string) => {
+    if (!selectedTable || !selectedCell) return;
+    
+    const updatedTable = { ...selectedTable };
+    updatedTable.rows[selectedCell.row].cells[selectedCell.col].backgroundColor = color;
+    updateTableInEditor(updatedTable);
+  };
+
+  const handleExportCSV = () => {
+    if (!selectedTable) return;
+    
+    const csvContent = exportTableToCSV(selectedTable);
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'table.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: 'Export Complete',
+      description: 'Table exported as CSV successfully',
+    });
+  };
+
+  const handleExportHTML = () => {
+    if (!selectedTable) return;
+    
+    const htmlContent = tableToHTML(selectedTable);
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'table.html';
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: 'Export Complete',
+      description: 'Table exported as HTML successfully',
+    });
+  };
+
+  // Existing image upload functionality
   const generateUniqueFileName = (file: File): string => {
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(2);
@@ -335,22 +448,27 @@ const EnhancedRichContentEditor = ({
     e.target.value = '';
   };
 
-  // Simplified Quill modules - only the built-in toolbar
+  // Enhanced Quill modules with table support
   const modules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-      [{ 'font': [] }],
-      [{ 'size': ['small', false, 'large', 'huge'] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'color': [] }, { 'background': [] }],
-      [{ 'script': 'sub'}, { 'script': 'super' }],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'indent': '-1'}, { 'indent': '+1' }],
-      [{ 'align': [] }],
-      ['blockquote', 'code-block'],
-      ['link', 'image'],
-      ['clean']
-    ],
+    toolbar: {
+      container: [
+        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+        [{ 'font': [] }],
+        [{ 'size': ['small', false, 'large', 'huge'] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ 'color': [] }, { 'background': [] }],
+        [{ 'script': 'sub'}, { 'script': 'super' }],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        [{ 'indent': '-1'}, { 'indent': '+1' }],
+        [{ 'align': [] }],
+        ['blockquote', 'code-block'],
+        ['link', 'image'],
+        ['clean']
+      ],
+      handlers: {
+        // Custom handlers can be added here
+      }
+    },
     clipboard: {
       matchVisual: false,
     },
@@ -371,20 +489,20 @@ const EnhancedRichContentEditor = ({
 
   // Word count calculation
   const getWordCount = () => {
-    const text = content.replace(/<[^>]*>/g, ''); // Remove HTML tags
+    const text = content.replace(/<[^>]*>/g, '');
     return text.trim().split(/\s+/).filter(word => word.length > 0).length;
   };
 
   const getReadingTime = () => {
     const wordCount = getWordCount();
-    const wordsPerMinute = 200; // Average reading speed
+    const wordsPerMinute = 200;
     return Math.ceil(wordCount / wordsPerMinute);
   };
 
   return (
     <TooltipProvider>
-      <Card className="w-full">
-        <CardHeader className="flex flex-row items-center justify-between">
+      <Card className="w-full h-full flex flex-col">
+        <CardHeader className="flex flex-row items-center justify-between flex-shrink-0">
           <CardTitle className="flex items-center gap-2">
             Enhanced Rich Text Editor
             {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -408,6 +526,10 @@ const EnhancedRichContentEditor = ({
                 {uploadedImages.length} image{uploadedImages.length !== 1 ? 's' : ''}
               </Badge>
             )}
+            
+            {/* Table Grid Selector */}
+            <TableGridSelector onSelectGrid={handleGridSelect} />
+            
             <input
               type="file"
               accept="image/*"
@@ -433,9 +555,9 @@ const EnhancedRichContentEditor = ({
           </div>
         </CardHeader>
         
-        <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+        <CardContent className="flex-1 flex flex-col min-h-0">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+            <TabsList className="grid w-full grid-cols-3 flex-shrink-0">
               <TabsTrigger value="editor" className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
                 Editor
@@ -450,45 +572,91 @@ const EnhancedRichContentEditor = ({
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="editor" className="space-y-4">
-              {/* Editor Area */}
-              <div
-                className={`relative transition-colors ${
-                  isDragOver 
-                    ? 'bg-primary/10 border-primary border-2 border-dashed rounded-lg' 
-                    : ''
-                }`}
-                onDrop={handleImageDrop}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-              >
-                {isDragOver && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-primary/5 rounded-lg z-10 pointer-events-none">
-                    <div className="text-center">
-                      <ImageIcon className="h-12 w-12 mx-auto mb-2 text-primary" />
-                      <p className="text-sm font-medium text-primary">Drop images here to upload</p>
-                    </div>
+            <TabsContent value="editor" className="flex-1 flex flex-col space-y-0">
+              <div className="flex-1 flex flex-col min-h-0">
+                {/* Table Toolbar - Shows when table is selected */}
+                {showTableToolbar && selectedTable && (
+                  <div className="flex-shrink-0 sticky top-0 z-10 bg-background border-b">
+                    <TableToolbar
+                      onAddRow={handleAddRow}
+                      onRemoveRow={handleRemoveRow}
+                      onAddColumn={handleAddColumn}
+                      onRemoveColumn={handleRemoveColumn}
+                      onAlignLeft={() => handleCellAlignment('left')}
+                      onAlignCenter={() => handleCellAlignment('center')}
+                      onAlignRight={() => handleCellAlignment('right')}
+                      onMergeCells={() => {}} // TODO: Implement merge
+                      onSplitCells={() => {}} // TODO: Implement split
+                      onColorChange={handleCellColor}
+                      onBorderChange={() => {}} // TODO: Implement border change
+                      onExportCSV={handleExportCSV}
+                      onExportHTML={handleExportHTML}
+                      selectedCellColor={selectedTable.rows[selectedCell?.row || 0]?.cells[selectedCell?.col || 0]?.backgroundColor}
+                    />
                   </div>
                 )}
                 
-                <ReactQuill
-                  ref={quillRef}
-                  theme="snow"
-                  value={content}
-                  onChange={handleContentChange}
-                  modules={modules}
-                  formats={formats}
-                  placeholder={placeholder}
-                  className="min-h-[400px] [&_.ql-editor]:min-h-[350px]"
-                />
+                {/* Editor Area */}
+                <div className="flex-1 min-h-0 relative">
+                  <div
+                    className={`h-full transition-colors ${
+                      isDragOver 
+                        ? 'bg-primary/10 border-primary border-2 border-dashed rounded-lg' 
+                        : ''
+                    }`}
+                    onDrop={handleImageDrop}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                  >
+                    {isDragOver && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-primary/5 rounded-lg z-10 pointer-events-none">
+                        <div className="text-center">
+                          <ImageIcon className="h-12 w-12 mx-auto mb-2 text-primary" />
+                          <p className="text-sm font-medium text-primary">Drop images here to upload</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <TableContextMenu
+                      onInsertRowAbove={handleAddRow}
+                      onInsertRowBelow={handleAddRow}
+                      onInsertColumnLeft={handleAddColumn}
+                      onInsertColumnRight={handleAddColumn}
+                      onDeleteRow={handleRemoveRow}
+                      onDeleteColumn={handleRemoveColumn}
+                      onDeleteTable={() => {}} // TODO: Implement table deletion
+                      onAlignLeft={() => handleCellAlignment('left')}
+                      onAlignCenter={() => handleCellAlignment('center')}
+                      onAlignRight={() => handleCellAlignment('right')}
+                      onMergeCells={() => {}} // TODO: Implement merge
+                      onSplitCells={() => {}} // TODO: Implement split
+                    >
+                      <div className="h-full">
+                        <ReactQuill
+                          ref={quillRef}
+                          theme="snow"
+                          value={content}
+                          onChange={handleContentChange}
+                          onSelectionChange={detectTableSelection}
+                          modules={modules}
+                          formats={formats}
+                          placeholder={placeholder}
+                          className="h-full [&_.ql-container]:h-full [&_.ql-editor]:h-full [&_.ql-editor]:overflow-auto [&_.ql-toolbar]:sticky [&_.ql-toolbar]:top-0 [&_.ql-toolbar]:z-10 [&_.ql-toolbar]:bg-background [&_.ql-toolbar]:border-b"
+                          style={{ height: '100%' }}
+                        />
+                      </div>
+                    </TableContextMenu>
+                  </div>
+                </div>
               </div>
               
               {/* Status Bar */}
-              <div className="flex items-center justify-between text-xs text-muted-foreground border-t pt-2">
+              <div className="flex-shrink-0 flex items-center justify-between text-xs text-muted-foreground border-t pt-2">
                 <div className="flex items-center gap-4">
                   <span>{getWordCount()} words</span>
                   <span>{getReadingTime()} min read</span>
                   <span>{content.length} characters</span>
+                  {selectedTable && <span>Table selected</span>}
                 </div>
                 {autoSave && (
                   <span>Auto-save enabled • Saves after 2 seconds of inactivity</span>
@@ -496,17 +664,17 @@ const EnhancedRichContentEditor = ({
               </div>
             </TabsContent>
             
-            <TabsContent value="preview" className="space-y-4">
-              <MarkdownPreview content={content} className="min-h-[400px] p-4 border rounded-lg bg-muted/30" />
+            <TabsContent value="preview" className="flex-1 overflow-auto">
+              <MarkdownPreview content={content} className="h-full p-4 border rounded-lg bg-muted/30" />
             </TabsContent>
             
-            <TabsContent value="analytics" className="space-y-4">
+            <TabsContent value="analytics" className="flex-1 overflow-auto">
               <AccessibilityChecker content={content} />
             </TabsContent>
           </Tabs>
 
           {isUploading && (
-            <div className="mt-4 p-3 bg-muted rounded-lg">
+            <div className="flex-shrink-0 mt-4 p-3 bg-muted rounded-lg">
               <div className="flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span className="text-sm">{uploadProgress}</span>
@@ -520,9 +688,9 @@ const EnhancedRichContentEditor = ({
       <FindReplaceDialog
         open={showFindReplace}
         onClose={() => setShowFindReplace(false)}
-        onFind={() => {}} // TODO: Implement find functionality
-        onReplace={() => {}} // TODO: Implement replace functionality
-        onReplaceAll={() => {}} // TODO: Implement replace all functionality
+        onFind={() => {}}
+        onReplace={() => {}}
+        onReplaceAll={() => {}}
         totalMatches={0}
         currentMatch={0}
       />
@@ -536,7 +704,14 @@ const EnhancedRichContentEditor = ({
       <MediaEmbedDialog
         open={showMediaEmbed}
         onClose={() => setShowMediaEmbed(false)}
-        onEmbed={handleMediaEmbed}
+        onEmbed={(embedCode: string) => {
+          const quill = quillRef.current?.getEditor();
+          if (quill) {
+            const range = quill.getSelection();
+            const index = range ? range.index : quill.getLength();
+            quill.clipboard.dangerouslyPasteHTML(index, embedCode);
+          }
+        }}
       />
       
       <KeyboardShortcuts
@@ -548,4 +723,3 @@ const EnhancedRichContentEditor = ({
 };
 
 export default EnhancedRichContentEditor;
-
