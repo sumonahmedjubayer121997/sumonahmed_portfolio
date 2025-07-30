@@ -1,28 +1,28 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import './EnhancedRichContentEditor.css';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
 import {
-  Heading1Icon, Heading2Icon, Heading3Icon,
-  ListOrderedIcon, ListUnorderedIcon, CodeIcon,
-  ImageIcon, LinkIcon, QuoteIcon, TableIcon,
-  AlignLeftIcon, AlignCenterIcon, AlignRightIcon,
-  Color, Eraser, Code2, Redo, Undo,
+  Heading1, Heading2, Heading3,
+  ListOrdered, List, Code,
+  Image, Link, Quote, Table,
+  AlignLeft, AlignCenter, AlignRight,
+  Palette, Eraser, Code2, Redo, Undo,
   TextCursor, Maximize2, Download, Copy,
   Columns, Rows, CopyPlus, LayoutDashboard,
   SeparatorHorizontal
 } from 'lucide-react';
-import ImageResize from 'quill-image-resize-module';
 import { useToast } from "@/components/ui/use-toast"
 import { exportTableToCSV, exportTableToHTML, insertTable, deleteTable, addRow, addColumn, deleteRow, deleteColumn } from './tableUtils';
-
-ReactQuill.Quill.register('modules/imageResize', ImageResize);
 
 interface EnhancedRichContentEditorProps {
   content: string;
   onChange: (value: string) => void;
+  initialContent?: string;
+  onSave?: (content: string) => void;
   placeholder?: string;
   className?: string;
   showWordCount?: boolean;
@@ -37,11 +37,14 @@ interface EnhancedRichContentEditorProps {
   theme?: "light" | "dark";
   showToolbar?: boolean;
   enableCollaborativeEditing?: boolean;
+  hideManualSave?: boolean;
 }
 
 const EnhancedRichContentEditor: React.FC<EnhancedRichContentEditorProps> = ({
   content,
   onChange,
+  initialContent,
+  onSave,
   placeholder = "Start writing your content...",
   className = "",
   showWordCount = true,
@@ -63,12 +66,14 @@ const EnhancedRichContentEditor: React.FC<EnhancedRichContentEditorProps> = ({
   enableCodeHighlight = true,
   theme = "light",
   showToolbar = true,
-  enableCollaborativeEditing = false
+  enableCollaborativeEditing = false,
+  hideManualSave = false
 }) => {
   const [wordCount, setWordCount] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [selectedRange, setSelectedRange] = useState<any>(null);
   const [isTableSelected, setIsTableSelected] = useState(false);
+  const [editorContent, setEditorContent] = useState(initialContent || content || '');
   const quillRef = useRef<ReactQuill>(null);
   const autoSaveTimer = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast()
@@ -80,19 +85,21 @@ const EnhancedRichContentEditor: React.FC<EnhancedRichContentEditorProps> = ({
     return words.length > 0 ? words.length : 0;
   };
 
-  const handleChange = (value: string, source: string) => {
+  const handleChange = (value: string, delta: any, source: string, editor: any) => {
     if (source === 'api') {
       return;
     }
 
     setWordCount(calculateWordCount(value));
+    setEditorContent(value);
     onChange(value);
 
-    if (autoSave) {
+    if (autoSave && onSave) {
       if (autoSaveTimer.current) {
         clearTimeout(autoSaveTimer.current);
       }
       autoSaveTimer.current = setTimeout(() => {
+        onSave(value);
         localStorage.setItem('savedContent', value);
         toast({
           title: "Auto Saved!",
@@ -111,7 +118,7 @@ const EnhancedRichContentEditor: React.FC<EnhancedRichContentEditorProps> = ({
       const tableRegex = /<table[\s\S]*?<\/table>/gi;
       setIsTableSelected(tableRegex.test(selectedText));
     }
-  }, [toast]);
+  }, []);
 
   const handleFullScreen = () => {
     setIsFullscreen(!isFullscreen);
@@ -135,7 +142,7 @@ const EnhancedRichContentEditor: React.FC<EnhancedRichContentEditorProps> = ({
       return;
     }
 
-    const tableElement = quill.container.querySelector('table');
+    const tableElement = quill.root.querySelector('table');
     if (!tableElement) {
       toast({
         title: "No Table Found",
@@ -187,7 +194,7 @@ const EnhancedRichContentEditor: React.FC<EnhancedRichContentEditorProps> = ({
       return;
     }
 
-    const tableElement = quill.container.querySelector('table');
+    const tableElement = quill.root.querySelector('table');
     if (!tableElement) {
       toast({
         title: "No Table Found",
@@ -213,58 +220,73 @@ const EnhancedRichContentEditor: React.FC<EnhancedRichContentEditorProps> = ({
       });
   };
 
-  const toolbarConfig = useMemo(() => {
-    const config: any = {
-      container: toolbarOptions,
+  const handleSave = () => {
+    if (onSave) {
+      onSave(editorContent);
+      toast({
+        title: "Saved!",
+        description: "Content has been saved successfully.",
+      })
+    }
+  };
+
+  const modules = useMemo(() => ({
+    toolbar: {
+      container: [
+        [{ 'header': [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        ['blockquote', 'code-block'],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        [{ 'indent': '-1'}, { 'indent': '+1' }],
+        ['link', 'image'],
+        [{ 'align': [] }],
+        [{ 'color': [] }, { 'background': [] }],
+        ['clean']
+      ],
       handlers: {
         table: () => {
           const quill = quillRef.current?.getEditor();
           if (quill) {
-            insertTable(quill);
+            insertTable(quill, 3, 3);
           }
         },
         image: () => {
           const quill = quillRef.current?.getEditor();
           if (quill) {
             const range = quill.getSelection();
-            const imageUrl = prompt('Enter image URL:');
-            if (imageUrl) {
-              quill.insertEmbed(range.index, 'image', imageUrl, 'user');
+            if (range) {
+              const imageUrl = prompt('Enter image URL:');
+              if (imageUrl) {
+                quill.insertEmbed(range.index, 'image', imageUrl, 'user');
+              }
             }
           }
         }
       }
-    };
-    return config;
-  }, [toolbarOptions]);
-
-  const toolbarHandlers = useMemo(() => ({
-    table: () => {
-      const quill = quillRef.current?.getEditor();
-      if (quill) {
-        insertTable(quill);
-      }
     },
-    image: () => {
-      const quill = quillRef.current?.getEditor();
-      if (quill) {
-        const range = quill.getSelection();
-        const imageUrl = prompt('Enter image URL:');
-        if (imageUrl) {
-          quill.insertEmbed(range.index, 'image', imageUrl, 'user');
-        }
-      }
+    clipboard: {
+      matchVisual: false,
     }
   }), []);
 
+  const formats = [
+    'header', 'font', 'size',
+    'bold', 'italic', 'underline', 'strike', 'blockquote',
+    'list', 'bullet', 'indent',
+    'link', 'image', 'video', 'table',
+    'align', 'color', 'background',
+    'code', 'code-block',
+    'script', 'formula'
+  ];
+
   return (
     <div className={`enhanced-rich-editor ${theme} ${className}`}>
-      {showToolbar && (
-        <div className="toolbar-container">
-          <ReactQuill.Quill.Toolbar
-            container={toolbarConfig.container}
-            handlers={toolbarHandlers}
-          />
+      {/* Save Button */}
+      {!hideManualSave && onSave && (
+        <div className="flex justify-end mb-2">
+          <Button onClick={handleSave} size="sm">
+            Save Content
+          </Button>
         </div>
       )}
       
@@ -279,31 +301,11 @@ const EnhancedRichContentEditor: React.FC<EnhancedRichContentEditorProps> = ({
         <ReactQuill
           ref={quillRef}
           theme="snow"
-          value={content}
+          value={editorContent}
           onChange={handleChange}
           onChangeSelection={handleSelectionChange}
-          modules={{
-            toolbar: {
-              container: toolbarConfig,
-              handlers: toolbarHandlers
-            },
-            clipboard: {
-              matchVisual: false,
-            },
-            imageResize: {
-              parchment: ReactQuill.Quill.import('parchment'),
-              modules: ['Resize', 'DisplaySize']
-            }
-          }}
-          formats={[
-            'header', 'font', 'size',
-            'bold', 'italic', 'underline', 'strike', 'blockquote',
-            'list', 'bullet', 'indent',
-            'link', 'image', 'video', 'table',
-            'align', 'color', 'background',
-            'code', 'code-block',
-            'script', 'formula'
-          ]}
+          modules={modules}
+          formats={formats}
           placeholder={placeholder}
           className={`
             custom-quill-editor 
@@ -381,7 +383,7 @@ const EnhancedRichContentEditor: React.FC<EnhancedRichContentEditorProps> = ({
                 <Download className="h-4 w-4" />
               </Button>
               <Button variant="ghost" size="icon" onClick={() => handleExport('html')}>
-                <CodeIcon className="h-4 w-4" />
+                <Code className="h-4 w-4" />
               </Button>
             </div>
           </div>
