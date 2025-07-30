@@ -500,7 +500,11 @@ const EnhancedRichContentEditor = ({
                     modules={modules}
                     formats={formats}
                     placeholder={placeholder}
-                    style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+                    style={{ 
+                      height: '100%', 
+                      display: 'flex', 
+                      flexDirection: 'column'
+                    }}
                   />
                 </div>
               </div>
@@ -540,6 +544,28 @@ const EnhancedRichContentEditor = ({
           )}
         </CardContent>
       </Card>
+
+      <style jsx global>{`
+        .ql-toolbar {
+          position: sticky !important;
+          top: 0 !important;
+          z-index: 10 !important;
+          background: white !important;
+          border-bottom: 1px solid #ccc !important;
+        }
+        
+        .ql-container {
+          flex: 1 !important;
+          overflow-y: auto !important;
+          height: auto !important;
+        }
+        
+        .ql-editor {
+          height: auto !important;
+          min-height: 300px !important;
+          overflow-y: visible !important;
+        }
+      `}</style>
 
       <FindReplaceDialog
         open={showFindReplace}
