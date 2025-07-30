@@ -1,183 +1,140 @@
-
-export interface TableCell {
-  content: string;
-  colspan: number;
-  rowspan: number;
-  backgroundColor?: string;
-  textAlign: 'left' | 'center' | 'right';
-  isHeader: boolean;
-}
-
-export interface TableRow {
-  cells: TableCell[];
-}
-
-export interface TableData {
-  rows: TableRow[];
-  borderWidth: number;
-  borderColor: string;
-  id: string;
-}
-
-// Generate unique table ID
-export const generateTableId = (): string => {
-  return `table_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+export const insertTable = (quill: any, rows: number, cols: number) => {
+  const tableModule = quill.getModule('table');
+  tableModule.insertTable(rows, cols);
 };
 
-// Create a new table with specified dimensions
-export const createTable = (rows: number, cols: number, hasHeader = true): TableData => {
-  const tableRows: TableRow[] = [];
-  
-  for (let i = 0; i < rows; i++) {
-    const cells: TableCell[] = [];
-    for (let j = 0; j < cols; j++) {
-      cells.push({
-        content: i === 0 && hasHeader ? 'Header' : 'Cell',
-        colspan: 1,
-        rowspan: 1,
-        textAlign: 'left',
-        isHeader: i === 0 && hasHeader,
-      });
-    }
-    tableRows.push({ cells });
-  }
-  
-  return {
-    rows: tableRows,
-    borderWidth: 1,
-    borderColor: '#cccccc',
-    id: generateTableId(),
-  };
+export const addRow = (quill: any) => {
+  const tableModule = quill.getModule('table');
+  tableModule.insertRow();
 };
 
-// Convert table to HTML
-export const tableToHTML = (table: TableData): string => {
-  const { rows, borderWidth, borderColor } = table;
-  
-  let html = `<table id="${table.id}" style="border-collapse: collapse; width: 100%; border: ${borderWidth}px solid ${borderColor};">`;
-  
-  rows.forEach((row) => {
-    html += '<tr>';
-    row.cells.forEach((cell) => {
-      const tag = cell.isHeader ? 'th' : 'td';
-      const style = [
-        `border: ${borderWidth}px solid ${borderColor}`,
-        'padding: 8px',
-        `text-align: ${cell.textAlign}`,
-        cell.backgroundColor ? `background-color: ${cell.backgroundColor}` : '',
-      ].filter(Boolean).join('; ');
-      
-      const attributes = [
-        cell.colspan > 1 ? `colspan="${cell.colspan}"` : '',
-        cell.rowspan > 1 ? `rowspan="${cell.rowspan}"` : '',
-        `style="${style}"`,
-      ].filter(Boolean).join(' ');
-      
-      html += `<${tag} ${attributes}>${cell.content}</${tag}>`;
+export const addColumn = (quill: any) => {
+  const tableModule = quill.getModule('table');
+  tableModule.insertColumn();
+};
+
+export const deleteRow = (quill: any) => {
+  const tableModule = quill.getModule('table');
+  tableModule.deleteRow();
+};
+
+export const deleteColumn = (quill: any) => {
+  const tableModule = quill.getModule('table');
+  tableModule.deleteColumn();
+};
+
+export const deleteTable = (quill: any) => {
+    const tableModule = quill.getModule('table');
+    tableModule.deleteTable();
+};
+
+export const mergeCells = (quill: any) => {
+    const tableModule = quill.getModule('table');
+    tableModule.mergeCells();
+};
+
+export const unmergeCells = (quill: any) => {
+    const tableModule = quill.getModule('table');
+    tableModule.unmergeCells();
+};
+
+export const getTable = (quill: any) => {
+    const tableModule = quill.getModule('table');
+    return tableModule.getTable();
+};
+
+export const getCells = (quill: any) => {
+    const tableModule = quill.getModule('table');
+    return tableModule.getCells();
+};
+
+export const setTableHeader = (quill: any) => {
+    const tableModule = quill.getModule('table');
+    tableModule.setTableHeader();
+};
+
+export const setTableBody = (quill: any) => {
+    const tableModule = quill.getModule('table');
+    tableModule.setTableBody();
+};
+
+export const toggleTableHeader = (quill: any) => {
+    const tableModule = quill.getModule('table');
+    tableModule.toggleTableHeader();
+};
+
+export const getTableHTML = (quill: any) => {
+    const tableModule = quill.getModule('table');
+    return tableModule.getTableHTML();
+};
+
+export const getTableCSV = (quill: any) => {
+    const tableModule = quill.getModule('table');
+    return tableModule.getTableCSV();
+};
+
+export const exportTableToCSV = (tableElement: Element): string => {
+  const rows = tableElement.querySelectorAll('tr');
+  const csvRows: string[] = [];
+
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('td, th');
+    const csvCells: string[] = [];
+    
+    cells.forEach(cell => {
+      const text = cell.textContent || '';
+      // Escape quotes and wrap in quotes if necessary
+      const escapedText = text.includes(',') || text.includes('"') || text.includes('\n') 
+        ? `"${text.replace(/"/g, '""')}"` 
+        : text;
+      csvCells.push(escapedText);
     });
-    html += '</tr>';
+    
+    csvRows.push(csvCells.join(','));
   });
-  
-  html += '</table><br>';
+
+  return csvRows.join('\n');
+};
+
+export const exportTableToHTML = (tableElement: Element): string => {
+  const rows = tableElement.querySelectorAll('tr');
+  let html = '<table border="1" style="border-collapse: collapse;">\n';
+
+  rows.forEach(row => {
+    html += '  <tr>\n';
+    const cells = row.querySelectorAll('td, th');
+    
+    cells.forEach(cell => {
+      const tagName = cell.tagName.toLowerCase();
+      const htmlElement = cell as HTMLElement;
+      const styleAttr = htmlElement.style ? ` style="${htmlElement.style.cssText}"` : '';
+      const cellContent = cell.innerHTML || '';
+      html += `    <${tagName}${styleAttr}>${cellContent}</${tagName}>\n`;
+    });
+    
+    html += '  </tr>\n';
+  });
+
+  html += '</table>';
   return html;
 };
 
-// Parse HTML table back to TableData
-export const parseHTMLTable = (html: string): TableData | null => {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
-  const table = doc.querySelector('table');
-  
-  if (!table) return null;
-  
-  const rows: TableRow[] = [];
-  const tableRows = table.querySelectorAll('tr');
-  
-  tableRows.forEach((tr) => {
-    const cells: TableCell[] = [];
-    const tableCells = tr.querySelectorAll('td, th');
-    
-    tableCells.forEach((cell) => {
-      cells.push({
-        content: cell.textContent || '',
-        colspan: parseInt(cell.getAttribute('colspan') || '1'),
-        rowspan: parseInt(cell.getAttribute('rowspan') || '1'),
-        backgroundColor: cell.style.backgroundColor || undefined,
-        textAlign: (cell.style.textAlign as any) || 'left',
-        isHeader: cell.tagName.toLowerCase() === 'th',
-      });
+export const tableToMarkdown = (tableElement: Element): string => {
+    let markdown = '';
+    const rows = tableElement.querySelectorAll('tr');
+
+    rows.forEach((row, rowIndex) => {
+        const cells = Array.from(row.querySelectorAll('th, td'));
+        const cellTexts = cells.map(cell => cell.textContent?.trim() || '');
+
+        markdown += '| ' + cellTexts.join(' | ') + ' |\n';
+
+        if (rowIndex === 0) {
+            // Add separator after the header row
+            const separator = '| ' + Array(cells.length).fill('---').join(' | ') + ' |\n';
+            markdown += separator;
+        }
     });
-    
-    rows.push({ cells });
-  });
-  
-  return {
-    rows,
-    borderWidth: 1,
-    borderColor: '#cccccc',
-    id: table.id || generateTableId(),
-  };
-};
 
-// Export table to CSV
-export const exportTableToCSV = (table: TableData): string => {
-  return table.rows.map(row => 
-    row.cells.map(cell => `"${cell.content.replace(/"/g, '""')}"`).join(',')
-  ).join('\n');
-};
-
-// Add row to table
-export const addTableRow = (table: TableData, index: number): TableData => {
-  const newRow: TableRow = {
-    cells: table.rows[0]?.cells.map(() => ({
-      content: 'Cell',
-      colspan: 1,
-      rowspan: 1,
-      textAlign: 'left' as const,
-      isHeader: false,
-    })) || [],
-  };
-  
-  const newRows = [...table.rows];
-  newRows.splice(index + 1, 0, newRow);
-  
-  return { ...table, rows: newRows };
-};
-
-// Add column to table
-export const addTableColumn = (table: TableData, index: number): TableData => {
-  const newRows = table.rows.map(row => ({
-    cells: [
-      ...row.cells.slice(0, index + 1),
-      {
-        content: 'Cell',
-        colspan: 1,
-        rowspan: 1,
-        textAlign: 'left' as const,
-        isHeader: false,
-      },
-      ...row.cells.slice(index + 1),
-    ],
-  }));
-  
-  return { ...table, rows: newRows };
-};
-
-// Remove row from table
-export const removeTableRow = (table: TableData, index: number): TableData => {
-  if (table.rows.length <= 1) return table;
-  
-  const newRows = table.rows.filter((_, i) => i !== index);
-  return { ...table, rows: newRows };
-};
-
-// Remove column from table
-export const removeTableColumn = (table: TableData, index: number): TableData => {
-  if (table.rows[0]?.cells.length <= 1) return table;
-  
-  const newRows = table.rows.map(row => ({
-    cells: row.cells.filter((_, i) => i !== index),
-  }));
-  
-  return { ...table, rows: newRows };
+    return markdown;
 };
