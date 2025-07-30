@@ -1,5 +1,3 @@
-
-
 import { useState, useRef, useEffect, useCallback } from 'react';
 import ReactQuill, { Quill } from 'react-quill';
 import 'quill/dist/quill.snow.css';
@@ -63,6 +61,7 @@ const EnhancedRichContentEditor = ({
   const [showShortcuts, setShowShortcuts] = useState(false);
   
   const quillRef = useRef<ReactQuill>(null);
+  const editorContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   // Auto-save functionality - trigger after 2 seconds of inactivity
@@ -76,9 +75,20 @@ const EnhancedRichContentEditor = ({
     }
   }, [content, autoSave]);
 
-  const handleContentChange = (value: string) => {
+  const handleContentChange = useCallback((value: string) => {
+    // Store current scroll position before content change
+    const editor = quillRef.current?.getEditor();
+    const scrollTop = editor?.scrollingContainer?.scrollTop || 0;
+    
     setContent(value);
-  };
+    
+    // Restore scroll position after content change
+    setTimeout(() => {
+      if (editor?.scrollingContainer) {
+        editor.scrollingContainer.scrollTop = scrollTop;
+      }
+    }, 0);
+  }, []);
 
   const handleAutoSave = async () => {
     if (!content || content.trim() === '') return;
@@ -129,7 +139,6 @@ const EnhancedRichContentEditor = ({
     }
   };
 
-  // Manual save functionality
   const handleManualSave = async () => {
     try {
       setIsSaving(true);
@@ -169,7 +178,6 @@ const EnhancedRichContentEditor = ({
     }
   };
 
-  // Table insertion - simple HTML table
   const handleInsertTable = (rows: number, cols: number, hasHeader: boolean) => {
     const quill = quillRef.current?.getEditor();
     if (quill) {
@@ -195,7 +203,6 @@ const EnhancedRichContentEditor = ({
     }
   };
 
-  // Media embedding
   const handleMediaEmbed = (embedCode: string) => {
     const quill = quillRef.current?.getEditor();
     if (quill) {
@@ -205,7 +212,6 @@ const EnhancedRichContentEditor = ({
     }
   };
 
-  // Image upload functionality (existing)
   const generateUniqueFileName = (file: File): string => {
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(2);
@@ -335,7 +341,6 @@ const EnhancedRichContentEditor = ({
     e.target.value = '';
   };
 
-  // Simplified Quill modules - only the built-in toolbar
   const modules = {
     toolbar: [
       [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
@@ -369,7 +374,6 @@ const EnhancedRichContentEditor = ({
     'link', 'image', 'width', 'height', 'style'
   ];
 
-  // Word count calculation
   const getWordCount = () => {
     const text = content.replace(/<[^>]*>/g, ''); // Remove HTML tags
     return text.trim().split(/\s+/).filter(word => word.length > 0).length;
@@ -383,8 +387,8 @@ const EnhancedRichContentEditor = ({
 
   return (
     <TooltipProvider>
-      <Card className="w-full">
-        <CardHeader className="flex flex-row items-center justify-between">
+      <Card className="w-full flex flex-col max-h-[90vh]">
+        <CardHeader className="flex flex-row items-center justify-between flex-shrink-0">
           <CardTitle className="flex items-center gap-2">
             Enhanced Rich Text Editor
             {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -433,9 +437,9 @@ const EnhancedRichContentEditor = ({
           </div>
         </CardHeader>
         
-        <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+        <CardContent className="flex-1 flex flex-col overflow-hidden">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col h-full">
+            <TabsList className="grid w-full grid-cols-3 flex-shrink-0">
               <TabsTrigger value="editor" className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
                 Editor
@@ -450,10 +454,10 @@ const EnhancedRichContentEditor = ({
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="editor" className="space-y-4">
-              {/* Editor Area */}
+            <TabsContent value="editor" className="flex-1 flex flex-col space-y-4 overflow-hidden">
               <div
-                className={`relative transition-colors ${
+                ref={editorContainerRef}
+                className={`relative flex-1 transition-colors overflow-hidden ${
                   isDragOver 
                     ? 'bg-primary/10 border-primary border-2 border-dashed rounded-lg' 
                     : ''
@@ -479,12 +483,14 @@ const EnhancedRichContentEditor = ({
                   modules={modules}
                   formats={formats}
                   placeholder={placeholder}
-                  className="min-h-[400px] [&_.ql-editor]:min-h-[350px]"
+                  className="h-full flex flex-col [&_.ql-container]:flex-1 [&_.ql-editor]:h-full [&_.ql-editor]:overflow-y-auto [&_.ql-editor]:scroll-smooth"
+                  style={{
+                    height: '100%',
+                  }}
                 />
               </div>
               
-              {/* Status Bar */}
-              <div className="flex items-center justify-between text-xs text-muted-foreground border-t pt-2">
+              <div className="flex items-center justify-between text-xs text-muted-foreground border-t pt-2 flex-shrink-0">
                 <div className="flex items-center gap-4">
                   <span>{getWordCount()} words</span>
                   <span>{getReadingTime()} min read</span>
@@ -496,17 +502,21 @@ const EnhancedRichContentEditor = ({
               </div>
             </TabsContent>
             
-            <TabsContent value="preview" className="space-y-4">
-              <MarkdownPreview content={content} className="min-h-[400px] p-4 border rounded-lg bg-muted/30" />
+            <TabsContent value="preview" className="flex-1 overflow-hidden">
+              <div className="h-full overflow-y-auto">
+                <MarkdownPreview content={content} className="min-h-full p-4 border rounded-lg bg-muted/30" />
+              </div>
             </TabsContent>
             
-            <TabsContent value="analytics" className="space-y-4">
-              <AccessibilityChecker content={content} />
+            <TabsContent value="analytics" className="flex-1 overflow-hidden">
+              <div className="h-full overflow-y-auto">
+                <AccessibilityChecker content={content} />
+              </div>
             </TabsContent>
           </Tabs>
 
           {isUploading && (
-            <div className="mt-4 p-3 bg-muted rounded-lg">
+            <div className="mt-4 p-3 bg-muted rounded-lg flex-shrink-0">
               <div className="flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span className="text-sm">{uploadProgress}</span>
@@ -516,7 +526,6 @@ const EnhancedRichContentEditor = ({
         </CardContent>
       </Card>
 
-      {/* Dialogs */}
       <FindReplaceDialog
         open={showFindReplace}
         onClose={() => setShowFindReplace(false)}
@@ -548,4 +557,3 @@ const EnhancedRichContentEditor = ({
 };
 
 export default EnhancedRichContentEditor;
-
