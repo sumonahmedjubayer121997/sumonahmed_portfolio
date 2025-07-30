@@ -33,6 +33,8 @@ interface EnhancedRichContentEditorProps {
   collectionName?: string;
   placeholder?: string;
   hideManualSave?: boolean;
+  content?: string;
+  onChange?: (content: string) => void;
 }
 
 const EnhancedRichContentEditor = ({
@@ -42,9 +44,11 @@ const EnhancedRichContentEditor = ({
   documentId,
   collectionName = 'content',
   placeholder = 'Start writing your content...',
-  hideManualSave = false
+  hideManualSave = false,
+  content,
+  onChange
 }: EnhancedRichContentEditorProps) => {
-  const [content, setContent] = useState(initialContent);
+  const [editorContent, setEditorContent] = useState(content || initialContent);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string>('');
@@ -64,34 +68,46 @@ const EnhancedRichContentEditor = ({
   const editorContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
+  // Update internal state when controlled content prop changes
+  useEffect(() => {
+    if (content !== undefined && content !== editorContent) {
+      setEditorContent(content);
+    }
+  }, [content]);
+
   // Auto-save functionality - trigger after 2 seconds of inactivity
   useEffect(() => {
-    if (autoSave && content && content.trim() !== '') {
+    if (autoSave && editorContent && editorContent.trim() !== '') {
       const timeoutId = setTimeout(() => {
         handleAutoSave();
       }, 2000); // Auto-save after 2 seconds of inactivity
 
       return () => clearTimeout(timeoutId);
     }
-  }, [content, autoSave]);
+  }, [editorContent, autoSave]);
 
   const handleContentChange = useCallback((value: string) => {
     // Store current scroll position before content change
     const editor = quillRef.current?.getEditor();
-    const scrollTop = editor?.scrollingContainer?.scrollTop || 0;
+    const scrollTop = editor?.root?.scrollTop || 0;
     
-    setContent(value);
+    setEditorContent(value);
+    
+    // Call controlled component onChange if provided
+    if (onChange) {
+      onChange(value);
+    }
     
     // Restore scroll position after content change
     setTimeout(() => {
-      if (editor?.scrollingContainer) {
-        editor.scrollingContainer.scrollTop = scrollTop;
+      if (editor?.root) {
+        editor.root.scrollTop = scrollTop;
       }
     }, 0);
-  }, []);
+  }, [onChange]);
 
   const handleAutoSave = async () => {
-    if (!content || content.trim() === '') return;
+    if (!editorContent || editorContent.trim() === '') return;
     
     if (documentId && collectionName) {
       try {
@@ -99,7 +115,7 @@ const EnhancedRichContentEditor = ({
         await saveAndUpdateDynamicContent(
           collectionName,
           {
-            content,
+            content: editorContent,
             images: uploadedImages,
             updated_at: new Date().toISOString(),
           },
@@ -122,7 +138,7 @@ const EnhancedRichContentEditor = ({
       // If no documentId but onSave callback exists, use that for auto-save
       try {
         setIsSaving(true);
-        onSave(content, uploadedImages);
+        onSave(editorContent, uploadedImages);
         
         const now = new Date();
         setLastAutoSaved(now);
@@ -144,7 +160,7 @@ const EnhancedRichContentEditor = ({
       setIsSaving(true);
       
       if (onSave) {
-        onSave(content, uploadedImages);
+        onSave(editorContent, uploadedImages);
         toast({
           title: 'Saved',
           description: 'Content saved successfully!',
@@ -155,7 +171,7 @@ const EnhancedRichContentEditor = ({
         await saveAndUpdateDynamicContent(
           collectionName,
           {
-            content,
+            content: editorContent,
             images: uploadedImages,
             updated_at: new Date().toISOString(),
           },
@@ -375,7 +391,7 @@ const EnhancedRichContentEditor = ({
   ];
 
   const getWordCount = () => {
-    const text = content.replace(/<[^>]*>/g, ''); // Remove HTML tags
+    const text = editorContent.replace(/<[^>]*>/g, ''); // Remove HTML tags
     return text.trim().split(/\s+/).filter(word => word.length > 0).length;
   };
 
@@ -387,7 +403,7 @@ const EnhancedRichContentEditor = ({
 
   return (
     <TooltipProvider>
-      <Card className="w-full flex flex-col max-h-[90vh]">
+      <Card className="w-full flex flex-col h-[600px]">
         <CardHeader className="flex flex-row items-center justify-between flex-shrink-0">
           <CardTitle className="flex items-center gap-2">
             Enhanced Rich Text Editor
@@ -437,7 +453,7 @@ const EnhancedRichContentEditor = ({
           </div>
         </CardHeader>
         
-        <CardContent className="flex-1 flex flex-col overflow-hidden">
+        <CardContent className="flex-1 flex flex-col overflow-hidden p-4">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col h-full">
             <TabsList className="grid w-full grid-cols-3 flex-shrink-0">
               <TabsTrigger value="editor" className="flex items-center gap-2">
@@ -454,7 +470,7 @@ const EnhancedRichContentEditor = ({
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="editor" className="flex-1 flex flex-col space-y-4 overflow-hidden">
+            <TabsContent value="editor" className="flex-1 flex flex-col space-y-4 overflow-hidden mt-4">
               <div
                 ref={editorContainerRef}
                 className={`relative flex-1 transition-colors overflow-hidden ${
@@ -475,26 +491,25 @@ const EnhancedRichContentEditor = ({
                   </div>
                 )}
                 
-                <ReactQuill
-                  ref={quillRef}
-                  theme="snow"
-                  value={content}
-                  onChange={handleContentChange}
-                  modules={modules}
-                  formats={formats}
-                  placeholder={placeholder}
-                  className="h-full flex flex-col [&_.ql-container]:flex-1 [&_.ql-editor]:h-full [&_.ql-editor]:overflow-y-auto [&_.ql-editor]:scroll-smooth"
-                  style={{
-                    height: '100%',
-                  }}
-                />
+                <div className="h-full flex flex-col">
+                  <ReactQuill
+                    ref={quillRef}
+                    theme="snow"
+                    value={editorContent}
+                    onChange={handleContentChange}
+                    modules={modules}
+                    formats={formats}
+                    placeholder={placeholder}
+                    style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+                  />
+                </div>
               </div>
               
               <div className="flex items-center justify-between text-xs text-muted-foreground border-t pt-2 flex-shrink-0">
                 <div className="flex items-center gap-4">
                   <span>{getWordCount()} words</span>
                   <span>{getReadingTime()} min read</span>
-                  <span>{content.length} characters</span>
+                  <span>{editorContent.length} characters</span>
                 </div>
                 {autoSave && (
                   <span>Auto-save enabled • Saves after 2 seconds of inactivity</span>
@@ -502,15 +517,15 @@ const EnhancedRichContentEditor = ({
               </div>
             </TabsContent>
             
-            <TabsContent value="preview" className="flex-1 overflow-hidden">
+            <TabsContent value="preview" className="flex-1 overflow-hidden mt-4">
               <div className="h-full overflow-y-auto">
-                <MarkdownPreview content={content} className="min-h-full p-4 border rounded-lg bg-muted/30" />
+                <MarkdownPreview content={editorContent} className="min-h-full p-4 border rounded-lg bg-muted/30" />
               </div>
             </TabsContent>
             
-            <TabsContent value="analytics" className="flex-1 overflow-hidden">
+            <TabsContent value="analytics" className="flex-1 overflow-hidden mt-4">
               <div className="h-full overflow-y-auto">
-                <AccessibilityChecker content={content} />
+                <AccessibilityChecker content={editorContent} />
               </div>
             </TabsContent>
           </Tabs>

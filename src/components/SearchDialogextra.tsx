@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { X, Send, MessageCircle, User, Briefcase, Code, Heart, Mail, Mic, MicOff } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
@@ -7,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { askOpenAI } from './api/openai';
 import { personalContext, isQueryAboutSumon } from './constants/personalContext';
-
 
 interface SearchDialogProps {
   isOpen: boolean;
@@ -26,11 +24,8 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [showQuickOptions, setShowQuickOptions] = useState(true);
   const [isListening, setIsListening] = useState(false);
-  const { theme } = useTheme();
-
-    const [query, setQuery] = useState('');
-  const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
+  const { theme } = useTheme();
 
   const handleSearch = async () => {
     if (!query.trim()) return;
@@ -42,9 +37,9 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
 
     try {
       const answer = await askOpenAI(prompt);
-      setResponse(answer);
+      addMessage('assistant', answer);
     } catch (err) {
-      setResponse('Something went wrong. Please try again.');
+      addMessage('assistant', 'Something went wrong. Please try again.');
     }
     setLoading(false);
   };
@@ -65,13 +60,13 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
     contact: "How can I contact you?"
   };
 
-  // const assistantResponses = {
-  //   me: "Hi there! 👋 I'm a passionate developer who loves creating innovative solutions. I enjoy working with modern technologies and building user-friendly applications. Want to know something specific about my background?",
-  //   projects: "I've worked on various exciting projects! 🚀 From web applications to mobile apps, each project taught me something new. Check out my portfolio section to see detailed case studies and live demos.",
-  //   skills: "I'm proficient in multiple technologies! 💻 Including React, TypeScript, Node.js, and more. I'm always learning new technologies to stay current with industry trends. What specific skill are you curious about?",
-  //   fun: "When I'm not coding, I love exploring new technologies, contributing to open source, and sharing knowledge with the developer community! 🎉 I believe in maintaining a good work-life balance.",
-  //   contact: "Let's connect! 📫 Feel free to reach out through email, LinkedIn, or check out my GitHub. I'm always open to discussing new opportunities or collaborating on interesting projects."
-  // };
+  const assistantResponses = {
+    me: "Hi there! 👋 I'm a passionate developer who loves creating innovative solutions. I enjoy working with modern technologies and building user-friendly applications. Want to know something specific about my background?",
+    projects: "I've worked on various exciting projects! 🚀 From web applications to mobile apps, each project taught me something new. Check out my portfolio section to see detailed case studies and live demos.",
+    skills: "I'm proficient in multiple technologies! 💻 Including React, TypeScript, Node.js, and more. I'm always learning new technologies to stay current with industry trends. What specific skill are you curious about?",
+    fun: "When I'm not coding, I love exploring new technologies, contributing to open source, and sharing knowledge with the developer community! 🎉 I believe in maintaining a good work-life balance.",
+    contact: "Let's connect! 📫 Feel free to reach out through email, LinkedIn, or check out my GitHub. I'm always open to discussing new opportunities or collaborating on interesting projects."
+  };
 
   const addMessage = (type: 'user' | 'assistant', content: string) => {
     const newMessage: Message = {
@@ -83,41 +78,22 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
     setMessages(prev => [...prev, newMessage]);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
 
     // Add user message
     addMessage('user', query);
 
-    // Process query and add assistant response
-    // setTimeout(() => {
-    //   const lowercaseQuery = query.toLowerCase();
-    //   let assistantResponse = '';
-
-    //   if (lowercaseQuery.includes('about') || lowercaseQuery.includes('who')) {
-    //     assistantResponse = assistantResponses.me;
-    //   } else if (lowercaseQuery.includes('project') || lowercaseQuery.includes('work') || lowercaseQuery.includes('portfolio')) {
-    //     assistantResponse = assistantResponses.projects;
-    //   } else if (lowercaseQuery.includes('skill') || lowercaseQuery.includes('tech') || lowercaseQuery.includes('experience')) {
-    //     assistantResponse = assistantResponses.skills;
-    //   } else if (lowercaseQuery.includes('fun') || lowercaseQuery.includes('hobby') || lowercaseQuery.includes('interest')) {
-    //     assistantResponse = assistantResponses.fun;
-    //   } else if (lowercaseQuery.includes('contact') || lowercaseQuery.includes('reach') || lowercaseQuery.includes('email')) {
-    //     assistantResponse = assistantResponses.contact;
-    //   } else {
-    //     assistantResponse = "Hey! How can I help? 😊 Feel free to ask about my work, skills, fun facts, or how to reach me. I'm here to help you learn more about my journey and experience!";
-    //   }
-
-    //   addMessage('assistant', assistantResponse);
-    // }, 500);
+    // Handle AI response
+    await handleSearch();
 
     setQuery('');
   };
 
   const handleQuickOption = (optionId: string) => {
     const userQuestion = userQuestions[optionId as keyof typeof userQuestions];
-    // const assistantResponse = assistantResponses[optionId as keyof typeof assistantResponses];
+    const assistantResponse = assistantResponses[optionId as keyof typeof assistantResponses];
     
     // Add user message first
     addMessage('user', userQuestion);
@@ -172,7 +148,6 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
                 <p className="text-sm text-muted-foreground">Ask me anything about my work and experience</p>
               </div>
             </div>
-           
           </div>
         </DialogHeader>
 
@@ -207,6 +182,18 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
                   </div>
                 </div>
               ))}
+              {loading && (
+                <div className="flex justify-start">
+                  <div className="flex gap-3 max-w-[80%]">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
+                      <MessageCircle className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="p-3 rounded-2xl bg-muted/30 border border-border/30 rounded-bl-md">
+                      <p className="text-sm leading-relaxed">Thinking...</p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -221,9 +208,9 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
                     placeholder="Ask me anything..."
                     className="pr-12 h-12 text-base bg-muted/50 border-border/50 focus:bg-background"
                     autoFocus
+                    disabled={loading}
                   />
 
-                  
                   {('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) && (
                     <Button
                       type="button"
@@ -242,7 +229,7 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
                   type="submit"
                   size="icon"
                   className="h-12 w-12 rounded-full bg-primary hover:bg-primary/90"
-                  disabled={!query.trim()}
+                  disabled={!query.trim() || loading}
                 >
                   <Send className="w-4 h-4" />
                 </Button>
