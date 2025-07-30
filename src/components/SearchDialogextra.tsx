@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { X, Send, MessageCircle, User, Briefcase, Code, Heart, Mail, Mic, MicOff } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
@@ -6,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { askOpenAI } from './api/openai';
 import { personalContext, isQueryAboutSumon } from './constants/personalContext';
+
 
 interface SearchDialogProps {
   isOpen: boolean;
@@ -24,9 +26,11 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [showQuickOptions, setShowQuickOptions] = useState(true);
   const [isListening, setIsListening] = useState(false);
+  const { theme } = useTheme();
+
+    const [query, setQuery] = useState('');
   const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
-  const { theme } = useTheme();
 
   const handleSearch = async () => {
     if (!query.trim()) return;
@@ -61,13 +65,13 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
     contact: "How can I contact you?"
   };
 
-  const assistantResponses = {
-    me: "Hi there! 👋 I'm a passionate developer who loves creating innovative solutions. I enjoy working with modern technologies and building user-friendly applications. Want to know something specific about my background?",
-    projects: "I've worked on various exciting projects! 🚀 From web applications to mobile apps, each project taught me something new. Check out my portfolio section to see detailed case studies and live demos.",
-    skills: "I'm proficient in multiple technologies! 💻 Including React, TypeScript, Node.js, and more. I'm always learning new technologies to stay current with industry trends. What specific skill are you curious about?",
-    fun: "When I'm not coding, I love exploring new technologies, contributing to open source, and sharing knowledge with the developer community! 🎉 I believe in maintaining a good work-life balance.",
-    contact: "Let's connect! 📫 Feel free to reach out through email, LinkedIn, or check out my GitHub. I'm always open to discussing new opportunities or collaborating on interesting projects."
-  };
+  // const assistantResponses = {
+  //   me: "Hi there! 👋 I'm a passionate developer who loves creating innovative solutions. I enjoy working with modern technologies and building user-friendly applications. Want to know something specific about my background?",
+  //   projects: "I've worked on various exciting projects! 🚀 From web applications to mobile apps, each project taught me something new. Check out my portfolio section to see detailed case studies and live demos.",
+  //   skills: "I'm proficient in multiple technologies! 💻 Including React, TypeScript, Node.js, and more. I'm always learning new technologies to stay current with industry trends. What specific skill are you curious about?",
+  //   fun: "When I'm not coding, I love exploring new technologies, contributing to open source, and sharing knowledge with the developer community! 🎉 I believe in maintaining a good work-life balance.",
+  //   contact: "Let's connect! 📫 Feel free to reach out through email, LinkedIn, or check out my GitHub. I'm always open to discussing new opportunities or collaborating on interesting projects."
+  // };
 
   const addMessage = (type: 'user' | 'assistant', content: string) => {
     const newMessage: Message = {
@@ -87,33 +91,33 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
     addMessage('user', query);
 
     // Process query and add assistant response
-    setTimeout(() => {
-      const lowercaseQuery = query.toLowerCase();
-      let assistantResponse = '';
+    // setTimeout(() => {
+    //   const lowercaseQuery = query.toLowerCase();
+    //   let assistantResponse = '';
 
-      if (lowercaseQuery.includes('about') || lowercaseQuery.includes('who')) {
-        assistantResponse = assistantResponses.me;
-      } else if (lowercaseQuery.includes('project') || lowercaseQuery.includes('work') || lowercaseQuery.includes('portfolio')) {
-        assistantResponse = assistantResponses.projects;
-      } else if (lowercaseQuery.includes('skill') || lowercaseQuery.includes('tech') || lowercaseQuery.includes('experience')) {
-        assistantResponse = assistantResponses.skills;
-      } else if (lowercaseQuery.includes('fun') || lowercaseQuery.includes('hobby') || lowercaseQuery.includes('interest')) {
-        assistantResponse = assistantResponses.fun;
-      } else if (lowercaseQuery.includes('contact') || lowercaseQuery.includes('reach') || lowercaseQuery.includes('email')) {
-        assistantResponse = assistantResponses.contact;
-      } else {
-        assistantResponse = "Hey! How can I help? 😊 Feel free to ask about my work, skills, fun facts, or how to reach me. I'm here to help you learn more about my journey and experience!";
-      }
+    //   if (lowercaseQuery.includes('about') || lowercaseQuery.includes('who')) {
+    //     assistantResponse = assistantResponses.me;
+    //   } else if (lowercaseQuery.includes('project') || lowercaseQuery.includes('work') || lowercaseQuery.includes('portfolio')) {
+    //     assistantResponse = assistantResponses.projects;
+    //   } else if (lowercaseQuery.includes('skill') || lowercaseQuery.includes('tech') || lowercaseQuery.includes('experience')) {
+    //     assistantResponse = assistantResponses.skills;
+    //   } else if (lowercaseQuery.includes('fun') || lowercaseQuery.includes('hobby') || lowercaseQuery.includes('interest')) {
+    //     assistantResponse = assistantResponses.fun;
+    //   } else if (lowercaseQuery.includes('contact') || lowercaseQuery.includes('reach') || lowercaseQuery.includes('email')) {
+    //     assistantResponse = assistantResponses.contact;
+    //   } else {
+    //     assistantResponse = "Hey! How can I help? 😊 Feel free to ask about my work, skills, fun facts, or how to reach me. I'm here to help you learn more about my journey and experience!";
+    //   }
 
-      addMessage('assistant', assistantResponse);
-    }, 500);
+    //   addMessage('assistant', assistantResponse);
+    // }, 500);
 
     setQuery('');
   };
 
   const handleQuickOption = (optionId: string) => {
     const userQuestion = userQuestions[optionId as keyof typeof userQuestions];
-    const assistantResponse = assistantResponses[optionId as keyof typeof assistantResponses];
+    // const assistantResponse = assistantResponses[optionId as keyof typeof assistantResponses];
     
     // Add user message first
     addMessage('user', userQuestion);
