@@ -249,6 +249,7 @@ export default function MLDevelopmentSteps({
 
 	const scrollToStep = (stepNumber: number) => {
 		const element = document.getElementById(`step-${stepNumber}`);
+		setActiveStep(step.step);
 		if (element) {
 			element.scrollIntoView({ behavior: 'smooth', block: 'center' });
 			// Set the clicked step as active (this will hide any previously active step)
@@ -426,8 +427,9 @@ export default function MLDevelopmentSteps({
 								<Tooltip key={step.step}>
 									<TooltipTrigger asChild>
 										<motion.button
-											onClick={() => scrollToStep(step.step) }
+											// onClick={() => scrollToStep(step.step) }
 											onClick={()=> setActiveStep(step.step)}
+											
 											className={`relative group p-3 rounded-lg border-2 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/20 ${
 												activeStep === step.step
 													? 'border-primary bg-primary/20 shadow-lg'
