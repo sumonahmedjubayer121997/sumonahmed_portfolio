@@ -234,6 +234,7 @@ export default function MLDevelopmentSteps({
 	const [filter, setFilter] = useState<string>("all");
 
 	const toggleStep = (stepNumber: number) => {
+		// If clicking the same step, collapse it. Otherwise, show only the clicked step
 		setActiveStep(prev => prev === stepNumber ? null : stepNumber);
 		setShowCode(null);
 	};
@@ -242,9 +243,8 @@ export default function MLDevelopmentSteps({
 		const element = document.getElementById(`step-${stepNumber}`);
 		if (element) {
 			element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-			if (activeStep !== stepNumber) {
-				setActiveStep(stepNumber);
-			}
+			// Set the clicked step as active (this will hide any previously active step)
+			setActiveStep(stepNumber);
 		}
 	};
 
@@ -313,9 +313,6 @@ export default function MLDevelopmentSteps({
 		return <div ref={ref}>{children}</div>;
 	};
 
-	// After the filter logic, ensure only the active step's details are rendered
-	const displaySteps = activeStep !== null ? filteredSteps.filter(s => s.step === activeStep) : filteredSteps;
-
 	return (
 		<TooltipProvider>
 			<div className={`w-full max-w-5xl mx-auto ${className}`}>
@@ -357,16 +354,6 @@ export default function MLDevelopmentSteps({
 							</div>
 						</div>
 					</motion.div>
-					{/* Icon Legend */}
-					<div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground mb-4">
-						<span>📥 Data Collection</span>
-						<span>🧹 Data Cleaning</span>
-						<span>📊 Analysis</span>
-						<span>⚙️ Feature Engineering</span>
-						<span>🤖 Model Training</span>
-						<span>📈 Evaluation</span>
-						<span>🚀 Deployment</span>
-					</div>
 				</div>
 
 				{/* Category Filter */}
@@ -488,11 +475,10 @@ export default function MLDevelopmentSteps({
 							}}
 							transition={{ duration: 0.5, ease: "easeOut" }}
 						/>
-						
 					</div>
 
 					<div className="space-y-6">
-						{displaySteps.map((step) => (
+						{filteredSteps.map((step) => (
 							<StepWrapper key={step.step} stepNumber={step.step}>
 								<div id={`step-${step.step}`} className="relative flex items-start group">
 									{/* Enhanced Timeline Dot */}
@@ -553,7 +539,7 @@ export default function MLDevelopmentSteps({
 											</div>
 										</button>
 
-										{/* Enhanced Expanded Content */}
+										{/* Enhanced Expanded Content - Only show for active step */}
 										<AnimatePresence initial={false}>
 											{activeStep === step.step && (
 												<motion.div
