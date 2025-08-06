@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -237,7 +238,7 @@ const DevelopmentPipelineEditor: React.FC<DevelopmentPipelineEditorProps> = ({
                           {step.priority}
                         </Badge>
                         <Badge className={`text-xs ${getStatusColor(step.status)}`}>
-                          {step.status.replace('-', ' ')}
+                          {step.status ? step.status.replace('-', ' ') : 'No status'}
                         </Badge>
                         {step.phase && (
                           <Badge variant="secondary" className="text-xs">
