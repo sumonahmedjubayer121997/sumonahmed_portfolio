@@ -142,7 +142,7 @@ const DevelopmentPipelineEditor: React.FC<DevelopmentPipelineEditorProps> = ({
       const iconKey = `si${normalizedName.charAt(0).toUpperCase() + normalizedName.slice(1)}`;
       const icon = (simpleIcons as any)[iconKey];
 
-      if (icon && icon.svg) {
+      if (icon && icon.svg && typeof icon.svg === 'string') {
         return (
           <div 
             className="w-5 h-5 flex-shrink-0"
