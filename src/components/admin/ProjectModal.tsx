@@ -180,7 +180,10 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
         createdAt: project.createdAt || new Date().toISOString()
       };
 
-      const { error } = await saveAndUpdateDynamicContent('projects', updatedProject, project.id);
+      // Remove the content object before saving as we've flattened it
+      const { content, ...dataToSave } = updatedProject;
+
+      const { error } = await saveAndUpdateDynamicContent('projects', dataToSave, project.id);
       
       if (error) {
         console.error('Auto-save error:', error);
@@ -234,7 +237,7 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
       setIsSaving(true);
       const now = new Date().toISOString();
       
-      // Create the project data in the format expected by the database
+      // Create the project data in the format expected by the database (flattened structure)
       const projectData = {
         title: formData.title,
         version: formData.version,
@@ -242,22 +245,25 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
         type: formData.type,
         duration: formData.duration,
         order: formData.order,
-        demoLink: formData.demoLink,
-        codeLink: formData.codeLink,
-        downloadLink: formData.downloadLink,
-        screenshots: formData.screenshots,
-        technologies: formData.technologies,
+        demoLink: formData.demoLink || '',
+        codeLink: formData.codeLink || '',
+        downloadLink: formData.downloadLink || '',
+        screenshots: formData.screenshots || [],
+        technologies: formData.technologies || [],
         // Flatten content object to match database structure
-        about: formData.content.about,
-        features: formData.content.features,
-        challenges: formData.content.challenges,
-        achievements: formData.content.achievements,
-        accessibility: formData.content.accessibility,
-        developmentPipeline: formData.developmentPipeline,
+        about: formData.content.about || '',
+        features: formData.content.features || '',
+        challenges: formData.content.challenges || '',
+        achievements: formData.content.achievements || '',
+        accessibility: formData.content.accessibility || '',
+        developmentPipeline: formData.developmentPipeline || [],
         visible: formData.visible,
         createdAt: project?.createdAt || now,
         updatedAt: now
       };
+
+      console.log('Saving project data:', projectData);
+      console.log('Is new project:', !project?.id);
 
       let result;
       if (project?.id) {
@@ -269,6 +275,7 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
         console.log('Project updated successfully with ID:', project.id);
       } else {
         // Create new project
+        console.log('Creating new project with data:', projectData);
         result = await saveDynamicContent('projects', projectData);
         if (result.error) {
           throw new Error(result.error);
@@ -313,27 +320,27 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
   return (
     <TooltipProvider>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="w-[95vw] max-w-7xl h-[95vh] p-0 flex flex-col overflow-hidden">
+        <DialogContent className="w-[95vw] max-w-7xl h-[95vh] max-h-[95vh] p-0 flex flex-col overflow-hidden">
           {/* Fixed Header */}
-          <DialogHeader className="flex-shrink-0 flex flex-row items-center justify-between p-6 pb-4 border-b bg-background">
-            <div className="flex items-center gap-3">
-              <DialogTitle className="text-xl font-semibold">
+          <DialogHeader className="flex-shrink-0 flex flex-row items-center justify-between p-4 sm:p-6 pb-3 sm:pb-4 border-b bg-background">
+            <div className="flex items-center gap-3 min-w-0">
+              <DialogTitle className="text-lg sm:text-xl font-semibold truncate">
                 {project ? 'Edit Project' : 'Add New Project'}
               </DialogTitle>
               {project?.id && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0">
                   {isAutoSaving && (
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground">
                       <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary" />
-                      <span>Saving...</span>
+                      <span className="hidden sm:inline">Saving...</span>
                     </div>
                   )}
                   {lastAutoSaved && (
                     <Tooltip open={showAutoSaveTooltip}>
                       <TooltipTrigger asChild>
-                        <div className="flex items-center gap-1 text-sm text-green-600">
+                        <div className="flex items-center gap-1 text-xs sm:text-sm text-green-600">
                           <Check className="h-3 w-3" />
-                          <span>Auto-saved</span>
+                          <span className="hidden sm:inline">Auto-saved</span>
                         </div>
                       </TooltipTrigger>
                       <TooltipContent side="bottom">
@@ -356,26 +363,26 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
 
           {/* Scrollable Content */}
           <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+            <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0 overflow-hidden">
                 {/* Fixed Tabs Navigation */}
-                <div className="flex-shrink-0 px-6 pt-2">
-                  <TabsList className="grid w-full grid-cols-5 mb-4">
-                    <TabsTrigger value="basic-info" className="text-xs sm:text-sm px-2 sm:px-3">
+                <div className="flex-shrink-0 px-4 sm:px-6 pt-2">
+                  <TabsList className="grid w-full grid-cols-5 mb-3 sm:mb-4 h-9 sm:h-10">
+                    <TabsTrigger value="basic-info" className="text-xs sm:text-sm px-1 sm:px-3 py-1 sm:py-2">
                       <span className="hidden sm:inline">Basic Info</span>
                       <span className="sm:hidden">Basic</span>
                     </TabsTrigger>
-                    <TabsTrigger value="media-tech" className="text-xs sm:text-sm px-2 sm:px-3">
+                    <TabsTrigger value="media-tech" className="text-xs sm:text-sm px-1 sm:px-3 py-1 sm:py-2">
                       <span className="hidden sm:inline">Media & Tech</span>
                       <span className="sm:hidden">Media</span>
                     </TabsTrigger>
-                    <TabsTrigger value="content" className="text-xs sm:text-sm px-2 sm:px-3">
+                    <TabsTrigger value="content" className="text-xs sm:text-sm px-1 sm:px-3 py-1 sm:py-2">
                       Content
                     </TabsTrigger>
-                    <TabsTrigger value="links" className="text-xs sm:text-sm px-2 sm:px-3">
+                    <TabsTrigger value="links" className="text-xs sm:text-sm px-1 sm:px-3 py-1 sm:py-2">
                       Links
                     </TabsTrigger>
-                    <TabsTrigger value="pipeline-dev" className="text-xs sm:text-sm px-2 sm:px-3">
+                    <TabsTrigger value="pipeline-dev" className="text-xs sm:text-sm px-1 sm:px-3 py-1 sm:py-2">
                       <span className="hidden sm:inline">Pipeline Dev</span>
                       <span className="sm:hidden">Pipeline</span>
                     </TabsTrigger>
@@ -383,8 +390,8 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
                 </div>
 
                 {/* Scrollable Tab Content */}
-                <ScrollArea className="flex-1 min-h-0">
-                  <div className="px-6 pb-4">
+                <ScrollArea className="flex-1 min-h-0 overflow-y-auto">
+                  <div className="px-4 sm:px-6 pb-4 space-y-6">
                     <TabsContent value="basic-info" className="mt-0 space-y-0">
                       <BasicInfoTab formData={formData} onChange={handleFieldChange} />
                     </TabsContent>
@@ -409,32 +416,37 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
               </Tabs>
 
               {/* Fixed Footer */}
-              <div className="flex-shrink-0 flex flex-col sm:flex-row justify-end gap-3 p-6 pt-4 border-t bg-background">
+              <div className="flex-shrink-0 flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 p-4 sm:p-6 pt-3 sm:pt-4 border-t bg-background">
                 <Button 
                   type="button" 
                   variant="secondary" 
                   onClick={onClose}
-                  className="w-full sm:w-auto order-2 sm:order-1"
+                  className="w-full sm:w-auto h-9 sm:h-10 text-sm"
                   disabled={isSaving}
                 >
                   Cancel
                 </Button>
                 <Button 
                   type="submit" 
-                  className="bg-green-600 hover:bg-green-700 text-white flex items-center justify-center gap-2 w-full sm:w-auto order-1 sm:order-2"
+                  className="bg-green-600 hover:bg-green-700 text-white flex items-center justify-center gap-2 w-full sm:w-auto h-9 sm:h-10 text-sm font-medium"
                   disabled={isSaving}
                 >
                   {isSaving ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                      <span>Saving...</span>
+                    </>
                   ) : (
-                    <Save className="h-4 w-4" />
+                    <>
+                      <Save className="h-4 w-4" />
+                      <span className="hidden sm:inline">
+                        {project ? 'Update Project' : 'Create Project'}
+                      </span>
+                      <span className="sm:hidden">
+                        {project ? 'Update' : 'Create'}
+                      </span>
+                    </>
                   )}
-                  <span className="hidden sm:inline">
-                    {isSaving ? 'Saving...' : (project ? 'Update Project' : 'Create Project')}
-                  </span>
-                  <span className="sm:hidden">
-                    {isSaving ? 'Saving...' : (project ? 'Update' : 'Create')}
-                  </span>
                 </Button>
               </div>
             </form>
