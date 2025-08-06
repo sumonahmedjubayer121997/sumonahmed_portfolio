@@ -1,3 +1,4 @@
+
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
@@ -11,6 +12,7 @@ import {
 } from "lucide-react";
 import Layout from "../../components/Layout";
 import TechIcon from "@/components/TechIcon";
+import ProjectSteps from "@/components/ProjectSteps";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,8 +46,6 @@ interface ProjectItem {
   longDescription?: string;
   visible?: boolean;
 }
-
-import ProjectFlowchart from "@/components/ProjectFlowchart";
 
 const ProjectDetail = () => {
   const { title } = useParams<{ title: string }>();
@@ -240,8 +240,8 @@ const ProjectDetail = () => {
               </Card>
             )}
 
-            {/* Development Process - New Interactive Flowchart */}
-            <ProjectFlowchart />
+            {/* Development Process */}
+            <ProjectSteps />
 
             {/* Features */}
             {project.features && (
