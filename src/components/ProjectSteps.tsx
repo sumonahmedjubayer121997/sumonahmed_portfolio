@@ -1,8 +1,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { ChevronRight, CheckCircle } from "lucide-react";
 
 const dummySteps = [
   {
@@ -36,37 +35,47 @@ export default function ProjectSteps({ steps = dummySteps, className = "" }: Pro
   };
 
   return (
-    <Card className={`p-6 ${className}`}>
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-          🛠️ Development Process
+    <div className={`w-full max-w-3xl mx-auto ${className}`}>
+      <div className="mb-8 text-center">
+        <h2 className="text-2xl font-semibold text-foreground mb-2">
+          Development Process
         </h2>
-        <p className="text-gray-600 dark:text-gray-400">
-          Explore the step-by-step process of how this project was built
+        <p className="text-sm text-muted-foreground">
+          Step-by-step journey of how this project was built
         </p>
       </div>
       
-      <div className="space-y-3">
+      <div className="space-y-2">
         {steps.map((step, index) => (
           <div
             key={index}
-            className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800 shadow-sm"
+            className="group relative"
           >
             <button
               onClick={() => toggle(index)}
-              className="w-full text-left px-4 py-4 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 flex items-center justify-between group"
+              className="w-full p-4 flex items-center gap-3 bg-card hover:bg-accent/50 border border-border rounded-lg transition-all duration-200 text-left"
             >
-              <span className="font-medium text-gray-900 dark:text-white">
-                <span className="inline-block w-6 h-6 rounded-full bg-primary text-primary-foreground text-sm font-bold mr-3 text-center leading-6">
-                  {index + 1}
-                </span>
-                {step.title}
-              </span>
-              <ChevronDown 
-                className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
-                  activeIndex === index ? 'rotate-180' : ''
-                }`}
-              />
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                {activeIndex === index ? (
+                  <CheckCircle className="w-4 h-4 text-primary" />
+                ) : (
+                  <span className="text-sm font-medium text-primary">{index + 1}</span>
+                )}
+              </div>
+              
+              <div className="flex-1 min-w-0">
+                <h3 className="font-medium text-foreground group-hover:text-primary transition-colors">
+                  {step.title}
+                </h3>
+              </div>
+              
+              <motion.div
+                animate={{ rotate: activeIndex === index ? 90 : 0 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="flex-shrink-0"
+              >
+                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground" />
+              </motion.div>
             </button>
 
             <AnimatePresence initial={false}>
@@ -91,8 +100,10 @@ export default function ProjectSteps({ steps = dummySteps, className = "" }: Pro
                   }}
                   className="overflow-hidden"
                 >
-                  <div className="px-4 py-4 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-                    <p className="leading-relaxed">{step.description}</p>
+                  <div className="px-4 py-4 ml-11 mr-4 text-sm text-muted-foreground leading-relaxed">
+                    <div className="border-l-2 border-primary/20 pl-4">
+                      {step.description}
+                    </div>
                   </div>
                 </motion.div>
               )}
@@ -100,6 +111,6 @@ export default function ProjectSteps({ steps = dummySteps, className = "" }: Pro
           </div>
         ))}
       </div>
-    </Card>
+    </div>
   );
 }
