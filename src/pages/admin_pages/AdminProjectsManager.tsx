@@ -139,6 +139,16 @@ const AdminProjectsManager: React.FC = () => {
     }
   };
 
+  const handleSaveProject = async (project: any) => {
+    try {
+      // The saving is already handled in the ProjectModal component
+      console.log('Project saved successfully:', project.title);
+    } catch (error) {
+      console.error('Error handling saved project:', error);
+      toast.error('Failed to save project');
+    }
+  };
+
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingProject(null);
@@ -271,10 +281,7 @@ const AdminProjectsManager: React.FC = () => {
           isOpen={isModalOpen}
           onClose={closeModal}
           project={editingProject}
-          onSave={(project) => {
-            // Handle save logic here
-            console.log('Saving project:', project);
-          }}
+          onSave={handleSaveProject}
         />
 
         {/* View Modal */}
