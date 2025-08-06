@@ -1,18 +1,15 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Clock, Zap, CheckCircle, Circle, AlertCircle } from "lucide-react";
-import { useInView } from "react-intersection-observer";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import MLStepNavigation from "./MLStepNavigation";
+import MLStepTimeline from "./MLStepTimeline";
 
 const mlSteps = [
 	{
 		step: 1,
 		icon: "📥",
 		title: "Data Collection",
-		category: "Data Acquisition",
+		category: "Data Acquisition", 
 		priority: "high",
 		duration: "2-3 days",
 		status: "completed" as const,
@@ -229,17 +226,13 @@ export default function MLDevelopmentSteps({
 	className = "" 
 }: MLDevelopmentStepsProps) {
 	const [activeStep, setActiveStep] = useState<number | null>(null);
-	const [visibleSteps, setVisibleSteps] = useState<Set<number>>(new Set()); // Start with no steps visible
-	const [showCode, setShowCode] = useState<number | null>(null);
+	const [visibleSteps, setVisibleSteps] = useState<Set<number>>(new Set());
 	const [filter, setFilter] = useState<string>("all");
 
 	const toggleStep = (stepNumber: number) => {
-		// If clicking the same step, collapse it. Otherwise, show only the clicked step
 		const newActiveStep = activeStep === stepNumber ? null : stepNumber;
 		setActiveStep(newActiveStep);
-		setShowCode(null);
 		
-		// Update visible steps to only show the active step's enhanced timeline dot
 		if (newActiveStep !== null) {
 			setVisibleSteps(new Set([newActiveStep]));
 		} else {
@@ -247,22 +240,8 @@ export default function MLDevelopmentSteps({
 		}
 	};
 
-	const scrollToStep = (stepNumber: number) => {
-		const element = document.getElementById(`step-${stepNumber}`);
-		setActiveStep(step.step);
-		if (element) {
-			element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-			// Set the clicked step as active (this will hide any previously active step)
-			setActiveStep(stepNumber);
-			// Update visible steps to only show the clicked step's enhanced timeline dot
-			setVisibleSteps(new Set([stepNumber]));
-		}
-	};
-
-	// Reset to default view (no active steps)
 	const resetView = () => {
 		setActiveStep(null);
-		setShowCode(null);
 		setVisibleSteps(new Set());
 	};
 
@@ -271,14 +250,6 @@ export default function MLDevelopmentSteps({
 			case "high": return "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400";
 			case "medium": return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400";
 			default: return "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400";
-		}
-	};
-
-	const getStatusIcon = (status: StepStatus) => {
-		switch (status) {
-			case "completed": return <CheckCircle className="w-4 h-4 text-green-500" />;
-			case "in-progress": return <Circle className="w-4 h-4 text-blue-500 animate-pulse" />;
-			case "optional": return <AlertCircle className="w-4 h-4 text-gray-400" />;
 		}
 	};
 
@@ -309,31 +280,6 @@ export default function MLDevelopmentSteps({
 
 	const categories = ["all", "preprocessing", "analysis", "modeling", "validation", "production"];
 
-	// Step wrapper with intersection observer
-	const StepWrapper = ({ children, stepNumber }: { children: React.ReactNode, stepNumber: number }) => {
-		const { ref, inView } = useInView({
-			threshold: 0.3,
-			triggerOnce: false,
-		});
-
-		useEffect(() => {
-			// Only auto-update visible steps if no step is manually active
-			if (activeStep === null) {
-				if (inView) {
-					setVisibleSteps(prev => new Set([...prev, stepNumber]));
-				} else {
-					setVisibleSteps(prev => {
-						const newSet = new Set(prev);
-						newSet.delete(stepNumber);
-						return newSet;
-					});
-				}
-			}
-		}, [inView, stepNumber, activeStep]);
-
-		return <div ref={ref}>{children}</div>;
-	};
-
 	return (
 		<TooltipProvider>
 			<div className={`w-full max-w-5xl mx-auto ${className}`}>
@@ -344,37 +290,6 @@ export default function MLDevelopmentSteps({
 					<p className="text-muted-foreground mb-6">
 						Interactive timeline of the machine learning development process
 					</p>
-					{/* <motion.div
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.6, delay: 0.2 }}
-						className="mt-8"
-					>
-						<div className="bg-card/50 backdrop-blur-sm rounded-xl p-4 border border-border/50 shadow-lg">
-							<h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-								<span className="text-primary">📋</span>
-								Pipeline Overview
-							</h3>
-							<div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-								{[
-									{ icon: '📥', label: 'Data Collection', color: 'bg-blue-500' },
-									{ icon: '🧹', label: 'Data Cleaning', color: 'bg-green-500' },
-									{ icon: '📊', label: 'Analysis', color: 'bg-purple-500' },
-									{ icon: '⚙️', label: 'Feature Eng.', color: 'bg-orange-500' },
-									{ icon: '🤖', label: 'Model Training', color: 'bg-red-500' },
-									{ icon: '📈', label: 'Evaluation', color: 'bg-indigo-500' },
-									{ icon: '🚀', label: 'Deployment', color: 'bg-pink-500' }
-								].map((item, index) => (
-									<div key={index} className="flex flex-col items-center p-2 rounded-lg hover:bg-accent/20 transition-colors">
-										<div className={`w-8 h-8 rounded-full ${item.color}/10 flex items-center justify-center mb-1 border border-${item.color}/20`}>
-											<span className="text-lg">{item.icon}</span>
-										</div>
-										<span className="text-xs text-muted-foreground text-center leading-tight">{item.label}</span>
-									</div>
-								))}
-							</div>
-						</div>
-					</motion.div> */}
 				</div>
 
 				{/* Category Filter */}
@@ -409,302 +324,26 @@ export default function MLDevelopmentSteps({
 					</div>
 				</div>
 
-				{/* Minimalist Navigation Section */}
-				<div className="mb-8">
-					<div className="bg-card/50 backdrop-blur-sm rounded-xl p-4 border border-border/50 shadow-lg">
-						<h3 className="text-sm font-semibold text-foreground mb-3 flex items-center justify-center gap-2">
-							<span className="text-primary">🗺️</span>
-							Development Pipeline Navigation
-							{activeStep === null && (
-								<span className="text-xs text-muted-foreground font-normal ml-2">
-									(Click any step to explore)
-								</span>
-							)}
-						</h3>
-						
-						<div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-							{filteredSteps.map((step, index) => (
-								<Tooltip key={step.step}>
-									<TooltipTrigger asChild>
-										<motion.button
-											// onClick={() => scrollToStep(step.step) }
-											onClick={()=> setActiveStep(step.step)}
-											
-											className={`relative group p-3 rounded-lg border-2 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/20 ${
-												activeStep === step.step
-													? 'border-primary bg-primary/20 shadow-lg'
-													: visibleSteps.has(step.step)
-													? 'border-primary bg-primary/10'
-													: 'border-border/50 bg-background/50 hover:border-primary/30 hover:bg-accent/20'
-											}`}
-											whileHover={{ y: -2 }}
-											whileTap={{ scale: 0.95 }}
-										>
-											{/* Step Number Badge */}
-											<div className="absolute -top-2 -left-2 w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold">
-												{step.step}
-											</div>
+				<MLStepNavigation
+					filteredSteps={filteredSteps}
+					activeStep={activeStep}
+					visibleSteps={visibleSteps}
+					onStepClick={toggleStep}
+					getPriorityColor={getPriorityColor}
+					getStatusColor={getStatusColor}
+					getToolTypeColor={getToolTypeColor}
+				/>
 
-											{/* Main Icon */}
-											<div className="flex flex-col items-center space-y-1">
-												<div className="text-2xl mb-1">
-													{step.icon}
-												</div>
-												<div className="text-xs font-medium text-foreground text-center leading-tight">
-													{step.title}
-												</div>
-											</div>
-
-											{/* Status Indicator */}
-											<div className="absolute -top-1 -right-1 p-0.5 bg-background rounded-full border border-border/30">
-												{getStatusIcon(step.status)}
-											</div>
-										</motion.button>
-									</TooltipTrigger>
-									
-									<TooltipContent side="bottom" className="max-w-80 p-4">
-										<div className="space-y-3">
-											<div className="text-center">
-												<div className="font-bold text-lg">{step.title}</div>
-												<div className="text-sm text-muted-foreground">{step.category}</div>
-											</div>
-											
-											<div className="text-sm">{step.description}</div>
-											
-											<div className="flex flex-wrap gap-1 justify-center">
-												<Badge variant="outline" className="text-xs">⏱️ {step.duration}</Badge>
-												<Badge className={`text-xs ${getPriorityColor(step.priority)}`}>{step.priority}</Badge>
-												<Badge className={`text-xs ${getStatusColor(step.status)}`}>{step.status.replace('-', ' ')}</Badge>
-											</div>
-											
-											{step.media && (
-												<div className="p-2 bg-primary/5 border border-primary/20 rounded text-xs font-medium text-primary text-center">
-													{step.media.content}
-												</div>
-											)}
-											
-											<div>
-												<div className="text-xs font-semibold mb-1">🛠️ Key Tools:</div>
-												<div className="flex flex-wrap gap-1">
-													{step.tools.slice(0, 3).map((tool, i) => (
-														<Badge key={i} className={`text-xs ${getToolTypeColor(tool.type)}`}>
-															{tool.name}
-														</Badge>
-													))}
-													{step.tools.length > 3 && (
-														<Badge variant="outline" className="text-xs">+{step.tools.length - 3}</Badge>
-													)}
-												</div>
-											</div>
-										</div>
-									</TooltipContent>
-
-								</Tooltip>
-							))}
-						</div>
-					</div>
-				</div>
-
-				{/* Timeline Steps */}
-				<div className="relative">
-					{/* Enhanced Timeline Line */}
-					<div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-border via-border to-border/20">
-						{/* Progress indicator */}
-						<motion.div
-							className="absolute top-0 left-0 w-full bg-gradient-to-b from-primary to-primary/60"
-							initial={{ height: 0 }}
-							animate={{ 
-								height: visibleSteps.size > 0 ? `${(Math.max(...visibleSteps) / filteredSteps.length) * 100}%` : 0 
-							}}
-							transition={{ duration: 0.5, ease: "easeOut" }}
-						/>
-					</div>
-
-					{/* Refractor this area */}
-
-
-					<div className="space-y-6">
-					    {filteredSteps
-  .filter(step => activeStep === step.step || visibleSteps.has(step.step))
-  .map((step) => (
-    <StepWrapper key={step.step} stepNumber={step.step}>
-								<div id={`step-${step.step}`} className="relative flex items-start group">
-									{/* Enhanced Timeline Dot */}
-									<div className={`relative z-10 flex-shrink-0 w-12 h-12 rounded-full border-4 border-background flex items-center justify-center text-2xl transition-all duration-300 ${
-										activeStep === step.step
-											? 'bg-primary shadow-xl shadow-primary/40 scale-125 ring-2 ring-primary/30' 
-											: visibleSteps.has(step.step)
-											? 'bg-primary shadow-lg shadow-primary/25 scale-110'
-											: 'bg-card shadow-md hover:shadow-lg hover:scale-105'
-									}`}>
-										<motion.span
-											animate={{ 
-												scale: activeStep === step.step ? 1.2 : visibleSteps.has(step.step) ? 1.1 : 1,
-												rotate: activeStep === step.step ? 360 : visibleSteps.has(step.step) ? 180 : 0 
-											}}
-											transition={{ duration: 0.4, ease: "easeOut" }}
-										>
-											{step.icon}
-										</motion.span>
-									</div>
-
-									{/* Enhanced Step Content */}
-									<div className="ml-6 flex-1">
-										<button
-											onClick={() => toggleStep(step.step)}
-											className={`group relative w-full p-5 bg-background/80 rounded-lg border border-border transition-shadow duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary/50 ${
-												activeStep === step.step
-													? 'shadow-lg ring-1 ring-primary'
-													: 'hover:shadow-md'
-											}`}
-											aria-expanded={activeStep === step.step}
-											aria-controls={`step-content-${step.step}`}
-										>
-											<div className="flex justify-between items-center">
-												<div className="flex-1">
-													<div className="flex flex-wrap gap-2 text-xs text-muted-foreground mb-2 opacity-70 group-hover:opacity-100 transition-opacity">
-														<Badge variant="outline" className="text-xs">Step {step.step}</Badge>
-														<Badge variant="secondary" className="text-xs uppercase">{step.category}</Badge>
-														<Badge className={`text-xs ${getPriorityColor(step.priority)}`}>{step.priority}</Badge>
-														<Badge variant="outline" className="text-xs flex items-center">{step.duration}</Badge>
-														<Badge className={`text-xs flex items-center ${getStatusColor(step.status)}`}>{step.status.replace('-', ' ')}</Badge>
-													</div>
-													<h3 className={`text-lg font-semibold truncate transition-colors ${
-														activeStep === step.step ? 'text-primary' : 'text-foreground'
-													}`}>
-														{step.title}
-													</h3>
-												</div>
-												<motion.div
-													animate={{ rotate: activeStep === step.step ? 180 : 0 }}
-													transition={{ duration: 0.3, ease: "easeOut" }}
-													className="ml-4"
-												>
-													<ChevronDown className={`w-6 h-6 transition-colors ${
-														activeStep === step.step ? 'text-primary' : 'text-muted-foreground'
-													}`} />
-												</motion.div>
-											</div>
-										</button>
-
-										{/* Enhanced Expanded Content - Only show for active step */}
-										<AnimatePresence initial={false}>
-											{activeStep === step.step && (
-												<motion.div
-													id={`step-content-${step.step}`}
-													initial={{ height: 0, opacity: 0 }}
-													animate={{ 
-														height: "auto", 
-														opacity: 1,
-														transition: {
-															height: { duration: 0.4, ease: "easeOut" },
-															opacity: { duration: 0.3, delay: 0.1 }
-														}
-													}}
-													exit={{ 
-														height: 0, 
-														opacity: 0,
-														transition: {
-															height: { duration: 0.3, ease: "easeIn" },
-															opacity: { duration: 0.2 }
-														}
-													}}
-													className="overflow-hidden"
-												>
-													<div className="mt-4 p-6 bg-muted/30 rounded-lg border border-muted space-y-6">
-														<p className="text-foreground leading-relaxed">
-															{step.description}
-														</p>
-														
-														{/* Media/Insight Box */}
-														{step.media && (
-															<div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
-																<p className="text-sm font-medium text-primary">
-																	{step.media.content}
-																</p>
-															</div>
-														)}
-														
-														{/* Enhanced Tools Section */}
-														<div>
-															<h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-																🛠️ Tools & Technologies
-															</h4>
-															<div className="grid gap-3 md:grid-cols-2">
-																{step.tools.map((tool, index) => (
-																	<div
-																		key={index}
-																		className="p-3 bg-background/50 rounded-lg border border-border/50 hover:bg-accent/20 transition-colors"
-																	>
-																		<div className="flex items-center gap-2 mb-1">
-																			<span className="font-medium text-primary text-sm">
-																				{tool.name}
-																			</span>
-																			<Badge className={`text-xs ${getToolTypeColor(tool.type)}`}>
-																				{tool.type}
-																			</Badge>
-																		</div>
-																		<div className="text-xs text-muted-foreground">
-																			✨ {tool.usage}
-																		</div>
-																	</div>
-																))}
-															</div>
-														</div>
-
-														{/* Code Example Section */}
-														<div>
-															<div className="flex items-center justify-between mb-3">
-																<h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
-																	💻 Code Example
-																</h4>
-																<button
-																	onClick={() => setShowCode(showCode === step.step ? null : step.step)}
-																	className="text-xs text-primary hover:text-primary/80 transition-colors"
-																	aria-expanded={showCode === step.step}
-																>
-																	{showCode === step.step ? 'Hide Code' : 'Show Code'}
-																</button>
-															</div>
-															
-															<AnimatePresence>
-																{showCode === step.step && (
-																	<motion.div
-																		initial={{ height: 0, opacity: 0 }}
-																		animate={{ height: "auto", opacity: 1 }}
-																		exit={{ height: 0, opacity: 0 }}
-																		transition={{ duration: 0.3 }}
-																		className="overflow-hidden"
-																	>
-																		<div className="rounded-lg overflow-hidden border border-border/50">
-																			<SyntaxHighlighter
-																				language="python"
-																				style={vscDarkPlus}
-																				customStyle={{
-																					margin: 0,
-																					fontSize: '12px',
-																					background: 'hsl(var(--muted))',
-																				}}
-																				showLineNumbers
-																			>
-																				{step.codeExample}
-																			</SyntaxHighlighter>
-																		</div>
-																	</motion.div>
-																)}
-															</AnimatePresence>
-														</div>
-													</div>
-												</motion.div>
-											)}
-										</AnimatePresence>
-									</div>
-								</div>
-							</StepWrapper>
-))}
-
-					</div>
-				</div>
+				<MLStepTimeline
+					filteredSteps={filteredSteps}
+					activeStep={activeStep}
+					visibleSteps={visibleSteps}
+					onToggleStep={toggleStep}
+					onSetVisibleSteps={setVisibleSteps}
+					getPriorityColor={getPriorityColor}
+					getStatusColor={getStatusColor}
+					getToolTypeColor={getToolTypeColor}
+				/>
 			</div>
 		</TooltipProvider>
 	);
