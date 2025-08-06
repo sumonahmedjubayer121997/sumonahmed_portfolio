@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import Layout from "../../components/Layout";
 import TechIcon from "@/components/TechIcon";
-import ProjectSteps from "@/components/ProjectSteps";
+import MLDevelopmentSteps from "@/components/MLDevelopmentSteps";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -240,8 +240,8 @@ const ProjectDetail = () => {
               </Card>
             )}
 
-            {/* Development Process */}
-            <ProjectSteps />
+            {/* ML Development Timeline */}
+            <MLDevelopmentSteps />
 
             {/* Features */}
             {project.features && (
