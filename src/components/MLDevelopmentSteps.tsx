@@ -385,132 +385,94 @@ export default function MLDevelopmentSteps({
           </div>
         </div>
 
-        {/* Enhanced Navigation Section */}
+        {/* Minimalist Navigation Section */}
         <div className="mb-8">
-          <div className="bg-gradient-to-r from-card/60 via-card/80 to-card/60 backdrop-blur-xl rounded-2xl p-6 border border-border/30 shadow-xl shadow-primary/5">
-            {/* Header */}
-            <div className="text-center mb-6">
-              <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center justify-center gap-2">
-                <span className="text-primary">🗺️</span>
-                Development Pipeline Navigation
-              </h3>
-              <p className="text-sm text-muted-foreground">Click on any step to jump directly to that section</p>
-            </div>
+          <div className="bg-card/50 backdrop-blur-sm rounded-xl p-4 border border-border/50 shadow-lg">
+            <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center justify-center gap-2">
+              <span className="text-primary">🗺️</span>
+              Development Pipeline Navigation
+            </h3>
             
-            {/* Progress Bar */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-                <span>Progress</span>
-                <span>{Math.round((visibleSteps.size / filteredSteps.length) * 100)}% viewed</span>
-              </div>
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <motion.div
-                  className="h-full bg-gradient-to-r from-primary to-primary/70"
-                  initial={{ width: 0 }}
-                  animate={{ 
-                    width: `${(visibleSteps.size / filteredSteps.length) * 100}%`
-                  }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                />
-              </div>
-            </div>
-
-            {/* Navigation Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
               {filteredSteps.map((step, index) => (
                 <Tooltip key={step.step}>
                   <TooltipTrigger asChild>
                     <motion.button
                       onClick={() => scrollToStep(step.step)}
-                      className={`relative group p-4 rounded-xl border-2 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/20 ${
+                      className={`relative group p-3 rounded-lg border-2 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/20 ${
                         visibleSteps.has(step.step)
-                          ? 'border-primary bg-primary/10 shadow-lg shadow-primary/20'
+                          ? 'border-primary bg-primary/10'
                           : activeStep === step.step
-                          ? 'border-primary/60 bg-primary/5 shadow-md'
+                          ? 'border-primary/60 bg-primary/5'
                           : 'border-border/50 bg-background/50 hover:border-primary/30 hover:bg-accent/20'
                       }`}
                       whileHover={{ y: -2 }}
                       whileTap={{ scale: 0.95 }}
-                      aria-label={`Go to ${step.title}`}
                     >
                       {/* Step Number Badge */}
-                      <div className="absolute -top-2 -left-2 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold shadow-lg">
+                      <div className="absolute -top-2 -left-2 w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold">
                         {step.step}
                       </div>
 
                       {/* Main Icon */}
-                      <div className="flex flex-col items-center space-y-2">
-                        <motion.div
-                          className="text-3xl"
-                          animate={{ 
-                            scale: visibleSteps.has(step.step) ? 1.1 : 1,
-                            rotate: visibleSteps.has(step.step) ? [0, 10, -10, 0] : 0
-                          }}
-                          transition={{ duration: 0.3 }}
-                        >
+                      <div className="flex flex-col items-center space-y-1">
+                        <div className="text-2xl mb-1">
                           {step.icon}
-                        </motion.div>
-                        
-                        {/* Step Title */}
-                        <div className="text-center">
-                          <div className="text-xs font-medium text-foreground leading-tight">
-                            {step.title}
-                          </div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            {step.category}
-                          </div>
+                        </div>
+                        <div className="text-xs font-medium text-foreground text-center leading-tight">
+                          {step.title}
                         </div>
                       </div>
 
                       {/* Status Indicator */}
-                      <div className="absolute -top-1 -right-1 p-1 bg-background rounded-full border border-border/30">
+                      <div className="absolute -top-1 -right-1 p-0.5 bg-background rounded-full border border-border/30">
                         {getStatusIcon(step.status)}
                       </div>
-
-                      {/* Connection Line */}
-                      {index < filteredSteps.length - 1 && (
-                        <div className="hidden lg:block absolute top-1/2 -right-2 w-4 h-0.5 bg-gradient-to-r from-border to-transparent transform -translate-y-1/2" />
-                      )}
-
-                      {/* Hover Effect */}
-                      <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </motion.button>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-48">
-                    <div className="text-center space-y-1">
-                      <div className="font-medium">{step.title}</div>
-                      <div className="text-xs text-muted-foreground">{step.category}</div>
-                      <div className="text-xs text-primary">⏱️ {step.duration}</div>
-                      <div className="flex items-center justify-center gap-1 text-xs">
-                        {getStatusIcon(step.status)}
-                        <span className="capitalize">{step.status.replace('-', ' ')}</span>
+                  <TooltipContent side="bottom" className="max-w-80 p-4">
+                    <div className="space-y-3">
+                      <div className="text-center">
+                        <div className="font-bold text-lg">{step.title}</div>
+                        <div className="text-sm text-muted-foreground">{step.category}</div>
+                      </div>
+                      
+                      <div className="text-sm">{step.description}</div>
+                      
+                      <div className="flex flex-wrap gap-1 justify-center">
+                        <Badge variant="outline" className="text-xs">⏱️ {step.duration}</Badge>
+                        <Badge className={`text-xs ${getPriorityColor(step.priority)}`}>{step.priority}</Badge>
+                        <Badge className={`text-xs ${getStatusColor(step.status)}`}>{step.status.replace('-', ' ')}</Badge>
+                      </div>
+                      
+                      {step.media && (
+                        <div className="p-2 bg-primary/5 border border-primary/20 rounded text-xs font-medium text-primary text-center">
+                          {step.media.content}
+                        </div>
+                      )}
+                      
+                      <div>
+                        <div className="text-xs font-semibold mb-1">🛠️ Key Tools:</div>
+                        <div className="flex flex-wrap gap-1">
+                          {step.tools.slice(0, 3).map((tool, i) => (
+                            <Badge key={i} className={`text-xs ${getToolTypeColor(tool.type)}`}>
+                              {tool.name}
+                            </Badge>
+                          ))}
+                          {step.tools.length > 3 && (
+                            <Badge variant="outline" className="text-xs">+{step.tools.length - 3}</Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </TooltipContent>
                 </Tooltip>
               ))}
             </div>
-
-            {/* Legend */}
-            <div className="mt-6 pt-4 border-t border-border/30">
-              <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <CheckCircle className="w-3 h-3 text-green-500" />
-                  <span>Completed</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Circle className="w-3 h-3 text-blue-500" />
-                  <span>In Progress</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3 text-gray-400" />
-                  <span>Optional</span>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
+        {/* Timeline Steps */}
         <div className="relative">
           {/* Enhanced Timeline Line */}
           <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-border via-border to-border/20">
