@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -60,7 +59,7 @@ interface PipelineStep {
 interface ProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  project?: Project;
+  project?: any; // Can be either Project or ProjectItem
   onSave: (project: Project) => void;
 }
 
@@ -103,6 +102,37 @@ const formSchema = z.object({
 });
 
 export default function ProjectModal({ isOpen, onClose, project, onSave }: ProjectModalProps) {
+  // Transform project data to handle both ProjectItem and Project types
+  const getProjectContent = () => {
+    if (!project) return {
+      about: '',
+      features: '',
+      challenges: '',
+      achievements: '',
+      accessibility: ''
+    };
+    
+    // Handle ProjectItem format
+    if ('about' in project) {
+      return {
+        about: project.about || '',
+        features: project.features || '',
+        challenges: project.challenges || '',
+        achievements: project.achievements || '',
+        accessibility: project.accessibility || ''
+      };
+    }
+    
+    // Handle Project format
+    return project.content || {
+      about: '',
+      features: '',
+      challenges: '',
+      achievements: '',
+      accessibility: ''
+    };
+  };
+
   const [formData, setFormData] = useState({
     title: project?.title || '',
     version: project?.version || '',
@@ -115,13 +145,7 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
     downloadLink: project?.downloadLink || '',
     screenshots: project?.screenshots || [],
     technologies: project?.technologies || [],
-    content: {
-      about: project?.content?.about || '',
-      features: project?.content?.features || '',
-      challenges: project?.content?.challenges || '',
-      achievements: project?.content?.achievements || '',
-      accessibility: project?.content?.accessibility || ''
-    },
+    content: getProjectContent(),
     developmentPipeline: project?.developmentPipeline || []
   });
 
@@ -137,13 +161,7 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
       demoLink: project?.demoLink || "",
       codeLink: project?.codeLink || "",
       downloadLink: project?.downloadLink || "",
-      content: {
-        about: project?.content?.about || "",
-        features: project?.content?.features || "",
-        challenges: project?.content?.challenges || "",
-        achievements: project?.content?.achievements || "",
-        accessibility: project?.content?.accessibility || "",
-      },
+      content: getProjectContent(),
       screenshots: project?.screenshots || [],
       technologies: project?.technologies || [],
       developmentPipeline: project?.developmentPipeline || []
@@ -154,7 +172,6 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const newProject: Project = {
-      ...values,
       id: project?.id,
       title: formData.title,
       version: formData.version,

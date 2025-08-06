@@ -21,7 +21,7 @@ const commonTechnologies = [
 ];
 
 const TechnologySelector: React.FC<TechnologySelectorProps> = ({
-  selectedTechnologies,
+  selectedTechnologies = [],
   onTechnologiesChange
 }) => {
   const [inputValue, setInputValue] = useState('');
