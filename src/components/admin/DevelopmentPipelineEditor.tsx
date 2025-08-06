@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,7 +38,7 @@ interface DevelopmentPipelineEditorProps {
 }
 
 const DevelopmentPipelineEditor: React.FC<DevelopmentPipelineEditorProps> = ({
-  steps,
+  steps = [],
   onChange
 }) => {
   const [editingStep, setEditingStep] = useState<string | null>(null);
@@ -113,7 +112,7 @@ const DevelopmentPipelineEditor: React.FC<DevelopmentPipelineEditorProps> = ({
     };
     
     updateStep(stepId, 'tools', [
-      ...steps.find(s => s.id === stepId)?.tools || [],
+      ...(steps.find(s => s.id === stepId)?.tools || []),
       newTool
     ]);
   };
@@ -122,7 +121,7 @@ const DevelopmentPipelineEditor: React.FC<DevelopmentPipelineEditorProps> = ({
     const step = steps.find(s => s.id === stepId);
     if (!step) return;
     
-    const updatedTools = [...step.tools];
+    const updatedTools = [...(step.tools || [])];
     updatedTools[toolIndex] = { ...updatedTools[toolIndex], [field]: value };
     updateStep(stepId, 'tools', updatedTools);
   };
@@ -131,7 +130,7 @@ const DevelopmentPipelineEditor: React.FC<DevelopmentPipelineEditorProps> = ({
     const step = steps.find(s => s.id === stepId);
     if (!step) return;
     
-    const updatedTools = step.tools.filter((_, index) => index !== toolIndex);
+    const updatedTools = (step.tools || []).filter((_, index) => index !== toolIndex);
     updateStep(stepId, 'tools', updatedTools);
   };
 
@@ -212,7 +211,7 @@ const DevelopmentPipelineEditor: React.FC<DevelopmentPipelineEditorProps> = ({
         </Button>
       </div>
 
-      {steps.length === 0 ? (
+      {!steps || steps.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
           <p>No pipeline steps defined yet.</p>
           <p className="text-sm">Click "Add Step" to create your first development step.</p>
@@ -395,7 +394,7 @@ const DevelopmentPipelineEditor: React.FC<DevelopmentPipelineEditorProps> = ({
                       </Button>
                     </div>
                     
-                    {step.tools.length === 0 ? (
+                    {!step.tools || step.tools.length === 0 ? (
                       <p className="text-sm text-muted-foreground">
                         No tools added yet. Click "Add Tool" to add technologies used in this step.
                       </p>
@@ -479,6 +478,39 @@ const DevelopmentPipelineEditor: React.FC<DevelopmentPipelineEditorProps> = ({
       )}
     </div>
   );
+};
+
+const getPriorityColor = (priority: string) => {
+  switch (priority) {
+    case 'high': return 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400';
+    case 'medium': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400';
+    case 'low': return 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400';
+    default: return 'bg-gray-100 text-gray-700 dark:bg-gray-900/20 dark:text-gray-400';
+  }
+};
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'completed': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
+    case 'in-progress': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400';
+    case 'optional': return 'bg-gray-100 text-gray-600 dark:bg-gray-800/20 dark:text-gray-400';
+    default: return 'bg-gray-100 text-gray-600 dark:bg-gray-800/20 dark:text-gray-400';
+  }
+};
+
+const getToolTagColor = (tag: string) => {
+  const colors = {
+    language: 'bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400',
+    library: 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400',
+    framework: 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400',
+    database: 'bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400',
+    tool: 'bg-pink-100 text-pink-700 dark:bg-pink-900/20 dark:text-pink-400',
+    service: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-400',
+    query: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/20 dark:text-cyan-400',
+    integration: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400',
+    default: 'bg-gray-100 text-gray-700 dark:bg-gray-900/20 dark:text-gray-400'
+  };
+  return colors[tag as keyof typeof colors] || colors.default;
 };
 
 export default DevelopmentPipelineEditor;
