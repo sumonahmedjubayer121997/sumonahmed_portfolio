@@ -1,7 +1,10 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Clock, Zap } from "lucide-react";
+import { useInView } from "react-intersection-observer";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 const mlSteps = [
   {
@@ -9,56 +12,172 @@ const mlSteps = [
     icon: "📥",
     title: "Data Collection",
     category: "Data Acquisition",
+    priority: "high",
+    duration: "2-3 days",
     description: "Gathered raw data from multiple sources including APIs, databases, and CSV files. Implemented data validation and quality checks to ensure data integrity.",
-    tools: ["Python", "Pandas", "SQL", "API Integration"]
+    tools: [
+      { name: "Python", usage: "Primary programming language for data collection scripts" },
+      { name: "Pandas", usage: "Data manipulation and CSV handling" },
+      { name: "SQL", usage: "Database queries and data extraction" },
+      { name: "API Integration", usage: "REST API data fetching and pagination" }
+    ],
+    codeExample: `import pandas as pd
+import requests
+
+# Fetch data from API
+response = requests.get('https://api.example.com/data')
+raw_data = response.json()
+
+# Load and combine datasets
+df = pd.read_csv('dataset.csv')
+df_combined = pd.concat([df, pd.DataFrame(raw_data)])`
   },
   {
     step: 2,
     icon: "🧹",
     title: "Data Cleaning",
     category: "Preprocessing",
+    priority: "high",
+    duration: "3-4 days",
     description: "Handled missing values, removed duplicates, and standardized data formats. Applied outlier detection and treatment strategies to improve data quality.",
-    tools: ["Pandas", "NumPy", "Scikit-learn", "Matplotlib"]
+    tools: [
+      { name: "Pandas", usage: "Data cleaning and preprocessing operations" },
+      { name: "NumPy", usage: "Numerical operations and array manipulations" },
+      { name: "Scikit-learn", usage: "Outlier detection and data preprocessing" },
+      { name: "Matplotlib", usage: "Visualization of data quality issues" }
+    ],
+    codeExample: `# Handle missing values
+df.fillna(method='forward', inplace=True)
+
+# Remove duplicates
+df.drop_duplicates(inplace=True)
+
+# Detect and handle outliers
+from scipy import stats
+z_scores = np.abs(stats.zscore(df.select_dtypes(include=[np.number])))
+df_clean = df[(z_scores < 3).all(axis=1)]`
   },
   {
     step: 3,
     icon: "📊",
     title: "Exploratory Data Analysis",
     category: "Analysis",
+    priority: "medium",
+    duration: "2-3 days",
     description: "Visualized feature distributions, correlations, and patterns. Created comprehensive statistical summaries and identified key insights driving model decisions.",
-    tools: ["Matplotlib", "Seaborn", "Plotly", "Pandas Profiling"]
+    tools: [
+      { name: "Matplotlib", usage: "Statistical plots and data visualization" },
+      { name: "Seaborn", usage: "Advanced statistical visualizations" },
+      { name: "Plotly", usage: "Interactive charts and dashboards" },
+      { name: "Pandas Profiling", usage: "Automated EDA reports" }
+    ],
+    codeExample: `import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Correlation heatmap
+plt.figure(figsize=(12, 8))
+sns.heatmap(df.corr(), annot=True, cmap='coolwarm')
+
+# Feature distributions
+df.hist(bins=30, figsize=(15, 10))
+plt.tight_layout()`
   },
   {
     step: 4,
     icon: "⚙️",
     title: "Feature Engineering",
     category: "Preprocessing",
+    priority: "high",
+    duration: "3-5 days",
     description: "Created new features through transformations, encoding categorical variables, and scaling numerical features. Applied dimensionality reduction techniques where appropriate.",
-    tools: ["Scikit-learn", "Feature-engine", "Category Encoders"]
+    tools: [
+      { name: "Scikit-learn", usage: "Feature scaling and encoding transformations" },
+      { name: "Feature-engine", usage: "Advanced feature engineering pipelines" },
+      { name: "Category Encoders", usage: "Categorical variable encoding strategies" }
+    ],
+    codeExample: `from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.feature_selection import SelectKBest, f_classif
+
+# Feature scaling
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X_numeric)
+
+# Feature selection
+selector = SelectKBest(f_classif, k=10)
+X_selected = selector.fit_transform(X_scaled, y)`
   },
   {
     step: 5,
     icon: "🤖",
     title: "Model Building",
     category: "Modeling",
+    priority: "high",
+    duration: "4-6 days",
     description: "Experimented with multiple algorithms including ensemble methods, neural networks, and traditional ML models. Implemented cross-validation and hyperparameter tuning.",
-    tools: ["Scikit-learn", "XGBoost", "TensorFlow", "Optuna"]
+    tools: [
+      { name: "Scikit-learn", usage: "Traditional ML algorithms and model selection" },
+      { name: "XGBoost", usage: "Gradient boosting for high performance" },
+      { name: "TensorFlow", usage: "Deep learning model development" },
+      { name: "Optuna", usage: "Hyperparameter optimization" }
+    ],
+    codeExample: `from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
+
+# Model training with hyperparameter tuning
+rf = RandomForestClassifier()
+params = {'n_estimators': [100, 200], 'max_depth': [10, 20]}
+grid_search = GridSearchCV(rf, params, cv=5)
+grid_search.fit(X_train, y_train)`
   },
   {
     step: 6,
     icon: "📈",
     title: "Model Evaluation",
     category: "Validation",
+    priority: "high",
+    duration: "2-3 days",
     description: "Assessed model performance using appropriate metrics, conducted A/B testing, and validated results on holdout datasets. Generated comprehensive evaluation reports.",
-    tools: ["Scikit-learn", "MLflow", "Weights & Biases", "Custom Metrics"]
+    tools: [
+      { name: "Scikit-learn", usage: "Model evaluation metrics and validation" },
+      { name: "MLflow", usage: "Experiment tracking and model versioning" },
+      { name: "Weights & Biases", usage: "Advanced experiment monitoring" },
+      { name: "Custom Metrics", usage: "Domain-specific evaluation criteria" }
+    ],
+    codeExample: `from sklearn.metrics import classification_report, confusion_matrix
+
+# Model evaluation
+y_pred = model.predict(X_test)
+print(classification_report(y_test, y_pred))
+
+# Cross-validation scores
+scores = cross_val_score(model, X, y, cv=5)
+print(f"CV Score: {scores.mean():.3f} (+/- {scores.std() * 2:.3f})")`
   },
   {
     step: 7,
     icon: "🚀",
     title: "Model Deployment",
     category: "Production",
+    priority: "medium",
+    duration: "3-4 days",
     description: "Deployed the final model to production with monitoring and logging. Set up automated retraining pipelines and performance tracking dashboards.",
-    tools: ["FastAPI", "Docker", "AWS/GCP", "MLflow", "Prometheus"]
+    tools: [
+      { name: "FastAPI", usage: "REST API development for model serving" },
+      { name: "Docker", usage: "Containerization and deployment" },
+      { name: "AWS/GCP", usage: "Cloud infrastructure and scaling" },
+      { name: "MLflow", usage: "Model registry and deployment tracking" },
+      { name: "Prometheus", usage: "Performance monitoring and alerting" }
+    ],
+    codeExample: `from fastapi import FastAPI
+import joblib
+
+app = FastAPI()
+model = joblib.load('model.pkl')
+
+@app.post("/predict")
+async def predict(data: dict):
+    prediction = model.predict([list(data.values())])
+    return {"prediction": prediction[0]}`
   }
 ];
 
@@ -72,13 +191,56 @@ export default function MLDevelopmentSteps({
   className = "" 
 }: MLDevelopmentStepsProps) {
   const [activeStep, setActiveStep] = useState<number | null>(null);
+  const [visibleSteps, setVisibleSteps] = useState<Set<number>>(new Set());
+  const [showCode, setShowCode] = useState<number | null>(null);
 
   const toggleStep = (stepNumber: number) => {
     setActiveStep(prev => prev === stepNumber ? null : stepNumber);
+    setShowCode(null); // Reset code view when switching steps
+  };
+
+  const scrollToStep = (stepNumber: number) => {
+    const element = document.getElementById(`step-${stepNumber}`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (activeStep !== stepNumber) {
+        setActiveStep(stepNumber);
+      }
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "high": return "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400";
+      case "medium": return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400";
+      default: return "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400";
+    }
+  };
+
+  // Step components with intersection observer
+  const StepWrapper = ({ children, stepNumber }: { children: React.ReactNode, stepNumber: number }) => {
+    const { ref, inView } = useInView({
+      threshold: 0.3,
+      triggerOnce: false,
+    });
+
+    useEffect(() => {
+      if (inView) {
+        setVisibleSteps(prev => new Set([...prev, stepNumber]));
+      } else {
+        setVisibleSteps(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(stepNumber);
+          return newSet;
+        });
+      }
+    }, [inView, stepNumber]);
+
+    return <div ref={ref}>{children}</div>;
   };
 
   return (
-    <div className={`w-full max-w-4xl mx-auto ${className}`}>
+    <div className={`w-full max-w-5xl mx-auto ${className}`}>
       <div className="mb-8 text-center">
         <h2 className="text-3xl font-bold text-foreground mb-3">
           ML Development Pipeline
@@ -88,122 +250,221 @@ export default function MLDevelopmentSteps({
         </p>
       </div>
 
+      {/* Navigation Icons */}
+      <div className="flex justify-center mb-8 bg-card/50 backdrop-blur-sm rounded-lg p-4 border border-border/50">
+        <div className="flex items-center space-x-1 overflow-x-auto">
+          {steps.map((step) => (
+            <button
+              key={step.step}
+              onClick={() => scrollToStep(step.step)}
+              className={`flex-shrink-0 w-12 h-12 rounded-full border-2 flex items-center justify-center text-xl transition-all duration-300 ${
+                visibleSteps.has(step.step)
+                  ? 'border-primary bg-primary shadow-lg shadow-primary/25 scale-110'
+                  : activeStep === step.step
+                  ? 'border-primary/60 bg-primary/10 scale-105'
+                  : 'border-border bg-background hover:border-primary/30 hover:bg-accent/30'
+              }`}
+              title={step.title}
+            >
+              <motion.span
+                animate={{ 
+                  scale: visibleSteps.has(step.step) ? 1.1 : 1,
+                }}
+                transition={{ duration: 0.3 }}
+              >
+                {step.icon}
+              </motion.span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="relative">
-        {/* Vertical Timeline Line */}
-        <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary via-primary/50 to-primary/20"></div>
+        {/* Enhanced Timeline Line */}
+        <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-border via-border to-border/20">
+          {/* Progress indicator */}
+          <motion.div
+            className="absolute top-0 left-0 w-full bg-gradient-to-b from-primary to-primary/60"
+            initial={{ height: 0 }}
+            animate={{ 
+              height: visibleSteps.size > 0 ? `${(Math.max(...visibleSteps) / steps.length) * 100}%` : 0 
+            }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          />
+        </div>
 
         <div className="space-y-6">
           {steps.map((step) => (
-            <div key={step.step} className="relative flex items-start group">
-              {/* Timeline Dot */}
-              <div className={`relative z-10 flex-shrink-0 w-12 h-12 rounded-full border-4 border-background flex items-center justify-center text-2xl transition-all duration-300 ${
-                activeStep === step.step 
-                  ? 'bg-primary shadow-lg shadow-primary/25 scale-110' 
-                  : 'bg-card shadow-md hover:shadow-lg hover:scale-105'
-              }`}>
-                <motion.span
-                  animate={{ 
-                    scale: activeStep === step.step ? 1.1 : 1,
-                    rotate: activeStep === step.step ? 360 : 0 
-                  }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
-                >
-                  {step.icon}
-                </motion.span>
-              </div>
+            <StepWrapper key={step.step} stepNumber={step.step}>
+              <div id={`step-${step.step}`} className="relative flex items-start group">
+                {/* Enhanced Timeline Dot */}
+                <div className={`relative z-10 flex-shrink-0 w-12 h-12 rounded-full border-4 border-background flex items-center justify-center text-2xl transition-all duration-300 ${
+                  visibleSteps.has(step.step)
+                    ? 'bg-primary shadow-lg shadow-primary/25 scale-110' 
+                    : activeStep === step.step
+                    ? 'bg-primary/80 shadow-lg shadow-primary/20 scale-105'
+                    : 'bg-card shadow-md hover:shadow-lg hover:scale-105'
+                }`}>
+                  <motion.span
+                    animate={{ 
+                      scale: visibleSteps.has(step.step) ? 1.1 : 1,
+                      rotate: visibleSteps.has(step.step) ? 360 : 0 
+                    }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                  >
+                    {step.icon}
+                  </motion.span>
+                </div>
 
-              {/* Step Content */}
-              <div className="ml-6 flex-1">
-                <button
-                  onClick={() => toggleStep(step.step)}
-                  className={`w-full text-left p-6 rounded-xl border transition-all duration-300 ${
-                    activeStep === step.step
-                      ? 'bg-primary/5 border-primary/20 shadow-lg'
-                      : 'bg-card border-border hover:bg-accent/30 hover:border-accent-foreground/20 shadow-sm hover:shadow-md'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          activeStep === step.step
-                            ? 'bg-primary/20 text-primary'
-                            : 'bg-muted text-muted-foreground'
+                {/* Enhanced Step Content */}
+                <div className="ml-6 flex-1">
+                  <button
+                    onClick={() => toggleStep(step.step)}
+                    className={`w-full text-left p-6 rounded-xl border transition-all duration-300 ${
+                      activeStep === step.step
+                        ? 'bg-primary/5 border-primary/20 shadow-lg'
+                        : 'bg-card border-border hover:bg-accent/30 hover:border-accent-foreground/20 shadow-sm hover:shadow-md'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-3 flex-wrap">
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                            activeStep === step.step
+                              ? 'bg-primary/20 text-primary'
+                              : 'bg-muted text-muted-foreground'
+                          }`}>
+                            Step {step.step}
+                          </span>
+                          <span className="text-xs text-muted-foreground uppercase tracking-wide">
+                            {step.category}
+                          </span>
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(step.priority)}`}>
+                            <Zap className="w-3 h-3 inline mr-1" />
+                            {step.priority}
+                          </span>
+                          <span className="text-xs text-muted-foreground flex items-center">
+                            <Clock className="w-3 h-3 mr-1" />
+                            {step.duration}
+                          </span>
+                        </div>
+                        <h3 className={`text-xl font-semibold transition-colors ${
+                          activeStep === step.step ? 'text-primary' : 'text-foreground'
                         }`}>
-                          Step {step.step}
-                        </span>
-                        <span className="text-xs text-muted-foreground uppercase tracking-wide">
-                          {step.category}
-                        </span>
+                          {step.title}
+                        </h3>
                       </div>
-                      <h3 className={`text-xl font-semibold transition-colors ${
-                        activeStep === step.step ? 'text-primary' : 'text-foreground'
-                      }`}>
-                        {step.title}
-                      </h3>
+                      
+                      <motion.div
+                        animate={{ rotate: activeStep === step.step ? 180 : 0 }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
+                        className="flex-shrink-0"
+                      >
+                        <ChevronDown className={`w-5 h-5 transition-colors ${
+                          activeStep === step.step ? 'text-primary' : 'text-muted-foreground'
+                        }`} />
+                      </motion.div>
                     </div>
-                    
-                    <motion.div
-                      animate={{ rotate: activeStep === step.step ? 180 : 0 }}
-                      transition={{ duration: 0.3, ease: "easeOut" }}
-                      className="flex-shrink-0"
-                    >
-                      <ChevronDown className={`w-5 h-5 transition-colors ${
-                        activeStep === step.step ? 'text-primary' : 'text-muted-foreground'
-                      }`} />
-                    </motion.div>
-                  </div>
-                </button>
+                  </button>
 
-                {/* Expanded Content */}
-                <AnimatePresence initial={false}>
-                  {activeStep === step.step && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ 
-                        height: "auto", 
-                        opacity: 1,
-                        transition: {
-                          height: { duration: 0.4, ease: "easeOut" },
-                          opacity: { duration: 0.3, delay: 0.1 }
-                        }
-                      }}
-                      exit={{ 
-                        height: 0, 
-                        opacity: 0,
-                        transition: {
-                          height: { duration: 0.3, ease: "easeIn" },
-                          opacity: { duration: 0.2 }
-                        }
-                      }}
-                      className="overflow-hidden"
-                    >
-                      <div className="mt-4 p-6 bg-muted/30 rounded-lg border border-muted">
-                        <p className="text-foreground leading-relaxed mb-4">
-                          {step.description}
-                        </p>
-                        
-                        <div>
-                          <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
-                            🛠️ Tools & Technologies
-                          </h4>
-                          <div className="flex flex-wrap gap-2">
-                            {step.tools.map((tool, index) => (
-                              <span
-                                key={index}
-                                className="px-3 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full"
+                  {/* Enhanced Expanded Content */}
+                  <AnimatePresence initial={false}>
+                    {activeStep === step.step && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ 
+                          height: "auto", 
+                          opacity: 1,
+                          transition: {
+                            height: { duration: 0.4, ease: "easeOut" },
+                            opacity: { duration: 0.3, delay: 0.1 }
+                          }
+                        }}
+                        exit={{ 
+                          height: 0, 
+                          opacity: 0,
+                          transition: {
+                            height: { duration: 0.3, ease: "easeIn" },
+                            opacity: { duration: 0.2 }
+                          }
+                        }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-4 p-6 bg-muted/30 rounded-lg border border-muted space-y-6">
+                          <p className="text-foreground leading-relaxed">
+                            {step.description}
+                          </p>
+                          
+                          {/* Enhanced Tools Section */}
+                          <div>
+                            <h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                              🛠️ Tools & Technologies
+                            </h4>
+                            <div className="grid gap-3 md:grid-cols-2">
+                              {step.tools.map((tool, index) => (
+                                <div
+                                  key={index}
+                                  className="p-3 bg-background/50 rounded-lg border border-border/50 hover:bg-accent/20 transition-colors"
+                                >
+                                  <div className="font-medium text-primary text-sm mb-1">
+                                    {tool.name}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {tool.usage}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Code Example Section */}
+                          <div>
+                            <div className="flex items-center justify-between mb-3">
+                              <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                💻 Code Example
+                              </h4>
+                              <button
+                                onClick={() => setShowCode(showCode === step.step ? null : step.step)}
+                                className="text-xs text-primary hover:text-primary/80 transition-colors"
                               >
-                                {tool}
-                              </span>
-                            ))}
+                                {showCode === step.step ? 'Hide Code' : 'Show Code'}
+                              </button>
+                            </div>
+                            
+                            <AnimatePresence>
+                              {showCode === step.step && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.3 }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="rounded-lg overflow-hidden border border-border/50">
+                                    <SyntaxHighlighter
+                                      language="python"
+                                      style={vscDarkPlus}
+                                      customStyle={{
+                                        margin: 0,
+                                        fontSize: '12px',
+                                        background: 'hsl(var(--muted))',
+                                      }}
+                                      showLineNumbers
+                                    >
+                                      {step.codeExample}
+                                    </SyntaxHighlighter>
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
                           </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
-            </div>
+            </StepWrapper>
           ))}
         </div>
       </div>
