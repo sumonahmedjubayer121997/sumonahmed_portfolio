@@ -1,18 +1,17 @@
+
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import ScreenshotUploader from './ScreenshotUploader';
-import TechnologySelector from './TechnologySelector';
-import DevelopmentPipelineEditor from './DevelopmentPipelineEditor';
+import { X } from 'lucide-react';
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+// Import tab components
+import BasicInfoTab from './project-modal/BasicInfoTab';
+import MediaTechTab from './project-modal/MediaTechTab';
+import ContentTab from './project-modal/ContentTab';
+import LinksTab from './project-modal/LinksTab';
+import PipelineDevTab from './project-modal/PipelineDevTab';
 
 interface Project {
   id?: string;
@@ -34,74 +33,19 @@ interface Project {
     achievements: string;
     accessibility: string;
   };
-  developmentPipeline: PipelineStep[];
-}
-
-type StepStatus = "completed" | "in-progress" | "optional";
-
-interface PipelineStep {
-  step: number;
-  icon: string;
-  title: string;
-  category: string;
-  priority: string;
-  duration: string;
-  status: StepStatus;
-  description: string;
-  tools: Array<{ name: string; usage: string; type: string }>;
-  codeExample: string;
-  media: {
-    type: string;
-    content: string;
-  };
+  developmentPipeline: any[];
 }
 
 interface ProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  project?: any; // Can be either Project or ProjectItem
+  project?: any;
   onSave: (project: Project) => void;
 }
 
-const formSchema = z.object({
-  title: z.string().min(2, {
-    message: "Title must be at least 2 characters.",
-  }),
-  version: z.string().min(1, {
-    message: "Version must be at least 1 character.",
-  }),
-  status: z.enum(['active', 'inactive', 'archived']),
-  type: z.enum(['web', 'mobile', 'desktop']),
-  duration: z.string().min(2, {
-    message: "Duration must be at least 2 characters.",
-  }),
-  order: z.number(),
-  demoLink: z.string().url({ message: "Invalid URL" }),
-  codeLink: z.string().url({ message: "Invalid URL" }),
-  downloadLink: z.string().url({ message: "Invalid URL" }),
-  screenshots: z.array(z.string()).optional(),
-  technologies: z.array(z.string()).optional(),
-  content: z.object({
-    about: z.string().min(10, {
-      message: "About must be at least 10 characters.",
-    }),
-    features: z.string().min(10, {
-      message: "Features must be at least 10 characters.",
-    }),
-    challenges: z.string().min(10, {
-      message: "Challenges must be at least 10 characters.",
-    }),
-    achievements: z.string().min(10, {
-      message: "Achievements must be at least 10 characters.",
-    }),
-    accessibility: z.string().min(10, {
-      message: "Accessibility must be at least 10 characters.",
-    }),
-  }),
-  developmentPipeline: z.array(z.any()).optional(),
-});
-
 export default function ProjectModal({ isOpen, onClose, project, onSave }: ProjectModalProps) {
+  const [activeTab, setActiveTab] = useState('basic-info');
+
   // Transform project data to handle both ProjectItem and Project types
   const getProjectContent = () => {
     if (!project) return {
@@ -149,28 +93,35 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
     developmentPipeline: project?.developmentPipeline || []
   });
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: project?.title || "",
-      version: project?.version || "",
-      status: project?.status || "active",
-      type: project?.type || "web",
-      duration: project?.duration || "",
-      order: project?.order || 0,
-      demoLink: project?.demoLink || "",
-      codeLink: project?.codeLink || "",
-      downloadLink: project?.downloadLink || "",
-      content: getProjectContent(),
-      screenshots: project?.screenshots || [],
-      technologies: project?.technologies || [],
-      developmentPipeline: project?.developmentPipeline || []
-    },
-  });
+  const handleFieldChange = (field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
-  const { handleSubmit } = form;
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate required fields
+    if (!formData.title?.trim()) {
+      toast.error('Title is required');
+      setActiveTab('basic-info');
+      return;
+    }
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    if (!formData.version?.trim()) {
+      toast.error('Version is required');
+      setActiveTab('basic-info');
+      return;
+    }
+
+    if (!formData.duration?.trim()) {
+      toast.error('Duration is required');
+      setActiveTab('basic-info');
+      return;
+    }
+
     const newProject: Project = {
       id: project?.id,
       title: formData.title,
@@ -195,241 +146,64 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
     onClose();
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleContentChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      content: {
-        ...prev.content,
-        [name]: value
-      }
-    }));
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{project ? 'Edit Project' : 'Add New Project'}</DialogTitle>
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader className="flex flex-row items-center justify-between pb-4 border-b">
+          <DialogTitle className="text-xl font-semibold">
+            {project ? 'Edit Project' : 'Add New Project'}
+          </DialogTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="h-8 w-8 p-0"
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Basic Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="title">Title</Label>
-              <Input
-                type="text"
-                id="title"
-                name="title"
-                value={formData.title}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="version">Version</Label>
-              <Input
-                type="text"
-                id="version"
-                name="version"
-                value={formData.version}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="status">Status</Label>
-              <Select
-                value={formData.status}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as any }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="archived">Archived</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="type">Type</Label>
-              <Select
-                value={formData.type}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, type: value as any }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="web">Web</SelectItem>
-                  <SelectItem value="mobile">Mobile</SelectItem>
-                  <SelectItem value="desktop">Desktop</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="duration">Duration</Label>
-              <Input
-                type="text"
-                id="duration"
-                name="duration"
-                value={formData.duration}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="order">Order</Label>
-              <Input
-                type="number"
-                id="order"
-                name="order"
-                value={formData.order}
-                onChange={(e) => setFormData(prev => ({ ...prev, order: parseInt(e.target.value) }))}
-                required
-              />
-            </div>
-          </div>
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+            <TabsList className="grid w-full grid-cols-5 mb-6">
+              <TabsTrigger value="basic-info" className="text-sm">Basic Info</TabsTrigger>
+              <TabsTrigger value="media-tech" className="text-sm">Media & Tech</TabsTrigger>
+              <TabsTrigger value="content" className="text-sm">Content</TabsTrigger>
+              <TabsTrigger value="links" className="text-sm">Links</TabsTrigger>
+              <TabsTrigger value="pipeline-dev" className="text-sm">Pipeline Dev</TabsTrigger>
+            </TabsList>
 
-          {/* Links Section */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Links</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="demoLink">Demo Link</Label>
-                <Input
-                  type="url"
-                  id="demoLink"
-                  name="demoLink"
-                  value={formData.demoLink}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div>
-                <Label htmlFor="codeLink">Code Link</Label>
-                <Input
-                  type="url"
-                  id="codeLink"
-                  name="codeLink"
-                  value={formData.codeLink}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div>
-                <Label htmlFor="downloadLink">Download Link</Label>
-                <Input
-                  type="url"
-                  id="downloadLink"
-                  name="downloadLink"
-                  value={formData.downloadLink}
-                  onChange={handleInputChange}
-                />
-              </div>
-            </div>
-          </div>
+            <div className="flex-1 overflow-y-auto">
+              <TabsContent value="basic-info" className="mt-0">
+                <BasicInfoTab formData={formData} onChange={handleFieldChange} />
+              </TabsContent>
 
-          {/* Screenshots Section */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Screenshots</h3>
-            <ScreenshotUploader
-              screenshots={formData.screenshots}
-              onScreenshotsChange={(newScreenshots) => setFormData(prev => ({ ...prev, screenshots: newScreenshots }))}
-            />
-          </div>
+              <TabsContent value="media-tech" className="mt-0">
+                <MediaTechTab formData={formData} onChange={handleFieldChange} />
+              </TabsContent>
 
-          {/* Technologies Section */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Technologies</h3>
-            <TechnologySelector
-              selectedTechnologies={formData.technologies}
-              onTechnologiesChange={(newTechnologies) => setFormData(prev => ({ ...prev, technologies: newTechnologies }))}
-            />
-          </div>
+              <TabsContent value="content" className="mt-0">
+                <ContentTab formData={formData} onChange={handleFieldChange} />
+              </TabsContent>
 
-          {/* Content Sections */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Content</h3>
-            <div>
-              <Label htmlFor="about">About</Label>
-              <Textarea
-                id="about"
-                name="about"
-                value={formData.content.about}
-                onChange={handleContentChange}
-                rows={3}
-              />
-            </div>
-            <div>
-              <Label htmlFor="features">Features</Label>
-              <Textarea
-                id="features"
-                name="features"
-                value={formData.content.features}
-                onChange={handleContentChange}
-                rows={3}
-              />
-            </div>
-            <div>
-              <Label htmlFor="challenges">Challenges</Label>
-              <Textarea
-                id="challenges"
-                name="challenges"
-                value={formData.content.challenges}
-                onChange={handleContentChange}
-                rows={3}
-              />
-            </div>
-            <div>
-              <Label htmlFor="achievements">Achievements</Label>
-              <Textarea
-                id="achievements"
-                name="achievements"
-                value={formData.content.achievements}
-                onChange={handleContentChange}
-                rows={3}
-              />
-            </div>
-            <div>
-              <Label htmlFor="accessibility">Accessibility</Label>
-              <Textarea
-                id="accessibility"
-                name="accessibility"
-                value={formData.content.accessibility}
-                onChange={handleContentChange}
-                rows={3}
-              />
-            </div>
-          </div>
+              <TabsContent value="links" className="mt-0">
+                <LinksTab formData={formData} onChange={handleFieldChange} />
+              </TabsContent>
 
-          {/* Development Pipeline Section */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Development Pipeline (Optional)</h3>
-            <p className="text-sm text-muted-foreground">
-              Add custom development steps for this project. Leave empty to use the default ML pipeline.
-            </p>
-            <DevelopmentPipelineEditor
-              steps={formData.developmentPipeline}
-              onChange={(steps) => setFormData(prev => ({ ...prev, developmentPipeline: steps }))}
-            />
-          </div>
+              <TabsContent value="pipeline-dev" className="mt-0">
+                <PipelineDevTab formData={formData} onChange={handleFieldChange} />
+              </TabsContent>
+            </div>
+          </Tabs>
 
           {/* Form Actions */}
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-2 pt-4 border-t bg-background">
             <Button type="button" variant="secondary" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit">{project ? 'Update' : 'Create'}</Button>
+            <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">
+              {project ? 'Update Project' : 'Create Project'}
+            </Button>
           </div>
         </form>
       </DialogContent>
