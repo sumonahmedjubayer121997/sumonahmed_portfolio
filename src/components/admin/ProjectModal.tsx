@@ -310,7 +310,7 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
         about: formData.content.about || '',
         features: formData.content.features || '',
         challenges: formData.content.challenges || '',
-        achievements: formData.achievements || '',
+        achievements: formData.content.achievements || '',
         accessibility: formData.content.accessibility || '',
         developmentPipeline: formData.developmentPipeline || [],
         visible: formData.visible,
