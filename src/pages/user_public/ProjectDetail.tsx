@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Layout from "../../components/Layout";
 import TechIcon from "@/components/TechIcon";
+import ProjectSteps from "@/components/ProjectSteps";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -238,6 +239,9 @@ const ProjectDetail = () => {
                 </CardContent>
               </Card>
             )}
+
+            {/* Development Process */}
+            <ProjectSteps />
 
             {/* Features */}
             {project.features && (
