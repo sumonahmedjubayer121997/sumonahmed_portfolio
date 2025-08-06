@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -56,6 +57,9 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
   const [showAutoSaveTooltip, setShowAutoSaveTooltip] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [autoSaveTimeoutId, setAutoSaveTimeoutId] = useState<NodeJS.Timeout | null>(null);
+
+  // Determine if this is a new project
+  const isNewProject = !project?.id;
 
   // Transform project data to handle both ProjectItem and Project types
   const getProjectContent = () => {
@@ -151,7 +155,7 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
     }
   }, [project, isOpen]);
 
-  // Enhanced Auto-save functionality with proper dependency management
+  // Enhanced Auto-save functionality - ONLY for existing projects
   useEffect(() => {
     // Clear existing timeout
     if (autoSaveTimeoutId) {
@@ -159,7 +163,7 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
     }
 
     // Only auto-save for existing projects when modal is open
-    if (!isOpen || !project?.id) {
+    if (!isOpen || isNewProject || isSaving) {
       setAutoSaveTimeoutId(null);
       return;
     }
@@ -197,16 +201,17 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
     JSON.stringify(formData.developmentPipeline),
     formData.visible,
     isOpen,
-    project?.id
+    isNewProject,
+    isSaving
   ]);
 
   const handleAutoSave = async () => {
-    if (!project?.id || isAutoSaving) return; // Don't auto-save new projects or if already saving
+    if (isNewProject || isAutoSaving || isSaving) return;
 
     try {
       setIsAutoSaving(true);
       
-      console.log('Auto-saving project...', project.id);
+      console.log('Auto-saving existing project...', project.id);
       
       const updatedProject = {
         title: formData.title,
@@ -305,7 +310,7 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
         about: formData.content.about || '',
         features: formData.content.features || '',
         challenges: formData.content.challenges || '',
-        achievements: formData.content.achievements || '',
+        achievements: formData.achievements || '',
         accessibility: formData.content.accessibility || '',
         developmentPipeline: formData.developmentPipeline || [],
         visible: formData.visible,
@@ -314,17 +319,10 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
       };
 
       console.log('Saving project data:', projectData);
-      console.log('Is new project:', !project?.id);
+      console.log('Is new project:', isNewProject);
 
       let result;
-      if (project?.id) {
-        // Update existing project
-        result = await saveAndUpdateDynamicContent('projects', projectData, project.id);
-        if (result.error) {
-          throw new Error(result.error);
-        }
-        console.log('Project updated successfully with ID:', project.id);
-      } else {
+      if (isNewProject) {
         // Create new project
         console.log('Creating new project with data:', projectData);
         result = await saveDynamicContent('projects', projectData);
@@ -332,37 +330,41 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
           throw new Error(result.error);
         }
         console.log('New project created successfully with ID:', result.id);
+        
+        // Create the project object to return for new projects
+        const newProject: Project = {
+          id: result.id,
+          ...projectData,
+          content: formData.content
+        };
+        
+        onSave(newProject);
+        toast.success("Project created successfully.");
+        
+      } else {
+        // Update existing project
+        result = await saveAndUpdateDynamicContent('projects', projectData, project.id);
+        if (result.error) {
+          throw new Error(result.error);
+        }
+        console.log('Project updated successfully with ID:', project.id);
+        
+        // Create the project object to return for existing projects
+        const updatedProject: Project = {
+          id: project.id,
+          ...projectData,
+          content: formData.content
+        };
+        
+        onSave(updatedProject);
+        toast.success("Project updated successfully.");
       }
 
-      // Create the project object to return
-      const newProject: Project = {
-        id: project?.id || result.id,
-        title: formData.title,
-        version: formData.version,
-        status: formData.status as 'active' | 'inactive' | 'archived',
-        type: formData.type as 'web' | 'mobile' | 'desktop',
-        duration: formData.duration,
-        order: formData.order,
-        demoLink: formData.demoLink,
-        codeLink: formData.codeLink,
-        downloadLink: formData.downloadLink,
-        screenshots: formData.screenshots,
-        technologies: formData.technologies,
-        content: formData.content,
-        developmentPipeline: formData.developmentPipeline,
-        visible: formData.visible,
-        createdAt: project?.createdAt || now,
-        updatedAt: now
-      };
-
-      onSave(newProject);
-      toast.success(
-        project ? "Project updated successfully." : "Project created successfully."
-      );
       onClose();
+      
     } catch (error) {
       console.error('Save failed:', error);
-      toast.error(`Failed to ${project ? 'update' : 'create'} project. Please try again.`);
+      toast.error(`Failed to ${isNewProject ? 'create' : 'update'} project. Please try again.`);
     } finally {
       setIsSaving(false);
     }
@@ -376,9 +378,9 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
           <DialogHeader className="flex-shrink-0 flex flex-row items-center justify-between p-4 sm:p-6 pb-3 sm:pb-4 border-b bg-background">
             <div className="flex items-center gap-3 min-w-0">
               <DialogTitle className="text-lg sm:text-xl font-semibold truncate">
-                {project ? 'Edit Project' : 'Add New Project'}
+                {isNewProject ? 'Add New Project' : 'Edit Project'}
               </DialogTitle>
-              {project?.id && (
+              {!isNewProject && (
                 <div className="flex items-center gap-2 flex-shrink-0">
                   {isAutoSaving && (
                     <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground">
@@ -471,10 +473,10 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
               {/* Fixed Footer */}
               <div className="flex-shrink-0 flex flex-col-reverse sm:flex-row justify-between items-center gap-2 sm:gap-3 p-4 sm:p-6 pt-3 sm:pt-4 border-t bg-background">
                 <div className="text-xs text-muted-foreground text-center sm:text-left">
-                  {project?.id ? (
-                    <span>Changes are automatically saved every 2 seconds</span>
-                  ) : (
+                  {isNewProject ? (
                     <span>New projects must be saved manually</span>
+                  ) : (
+                    <span>Changes are automatically saved every 2 seconds</span>
                   )}
                 </div>
                 <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
@@ -501,10 +503,10 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
                       <>
                         <Save className="h-4 w-4" />
                         <span className="hidden sm:inline">
-                          {project ? 'Update Project' : 'Create Project'}
+                          {isNewProject ? 'Create Project' : 'Update Project'}
                         </span>
                         <span className="sm:hidden">
-                          {project ? 'Update' : 'Create'}
+                          {isNewProject ? 'Create' : 'Update'}
                         </span>
                       </>
                     )}
