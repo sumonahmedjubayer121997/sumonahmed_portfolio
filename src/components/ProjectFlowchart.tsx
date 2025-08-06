@@ -9,6 +9,7 @@ import {
   useNodesState,
   useEdgesState,
   MarkerType,
+  BackgroundVariant,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import FlowchartNode from './FlowchartNode';
@@ -121,7 +122,7 @@ export default function ProjectFlowchart({ steps = dummySteps, className = "" }:
             />
             <Background 
               color="hsl(var(--muted-foreground))" 
-              variant="dots" 
+              variant={BackgroundVariant.Dots}
               gap={20} 
               size={1}
               className="opacity-30"
