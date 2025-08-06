@@ -270,7 +270,11 @@ const AdminProjectsManager: React.FC = () => {
         <ProjectModal
           isOpen={isModalOpen}
           onClose={closeModal}
-          editingProject={editingProject}
+          project={editingProject}
+          onSave={(project) => {
+            // Handle save logic here
+            console.log('Saving project:', project);
+          }}
         />
 
         {/* View Modal */}

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -152,21 +153,28 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
   const { handleSubmit } = form;
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    const newProject = {
+    const newProject: Project = {
       ...values,
       id: project?.id,
+      title: formData.title,
+      version: formData.version,
+      status: formData.status,
+      type: formData.type,
+      duration: formData.duration,
+      order: formData.order,
+      demoLink: formData.demoLink,
+      codeLink: formData.codeLink,
+      downloadLink: formData.downloadLink,
       screenshots: formData.screenshots,
       technologies: formData.technologies,
+      content: formData.content,
       developmentPipeline: formData.developmentPipeline
     };
 
     onSave(newProject);
-    toast({
-      title: project ? "Project updated." : "Project created.",
-      description: project
-        ? "Your project has been updated successfully."
-        : "Your project has been created successfully.",
-    });
+    toast.success(
+      project ? "Project updated successfully." : "Project created successfully."
+    );
     onClose();
   };
 
@@ -319,7 +327,7 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
             <h3 className="text-lg font-semibold">Screenshots</h3>
             <ScreenshotUploader
               screenshots={formData.screenshots}
-              onChange={(newScreenshots) => setFormData(prev => ({ ...prev, screenshots: newScreenshots }))}
+              onScreenshotsChange={(newScreenshots) => setFormData(prev => ({ ...prev, screenshots: newScreenshots }))}
             />
           </div>
 
@@ -327,8 +335,8 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Technologies</h3>
             <TechnologySelector
-              technologies={formData.technologies}
-              onChange={(newTechnologies) => setFormData(prev => ({ ...prev, technologies: newTechnologies }))}
+              selectedTechnologies={formData.technologies}
+              onTechnologiesChange={(newTechnologies) => setFormData(prev => ({ ...prev, technologies: newTechnologies }))}
             />
           </div>
 
@@ -400,7 +408,7 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
           </div>
 
           {/* Form Actions */}
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
             <Button type="button" variant="secondary" onClick={onClose}>
               Cancel
             </Button>
