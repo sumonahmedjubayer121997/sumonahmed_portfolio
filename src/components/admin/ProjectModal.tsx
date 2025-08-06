@@ -15,7 +15,7 @@ import ContentTab from './project-modal/ContentTab';
 import LinksTab from './project-modal/LinksTab';
 import PipelineDevTab from './project-modal/PipelineDevTab';
 
-import { saveAndUpdateDynamicContent } from '@/integrations/firebase/firestore';
+import { saveAndUpdateDynamicContent, saveDynamicContent } from '@/integrations/firebase/firestore';
 
 interface Project {
   id?: string;
@@ -55,6 +55,7 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
   const [isAutoSaving, setIsAutoSaving] = useState(false);
   const [lastAutoSaved, setLastAutoSaved] = useState<Date | null>(null);
   const [showAutoSaveTooltip, setShowAutoSaveTooltip] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Transform project data to handle both ProjectItem and Project types
   const getProjectContent = () => {
@@ -169,12 +170,22 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
       
       const updatedProject = {
         ...formData,
-        id: project.id,
+        // Transform content back to the format expected by the database
+        about: formData.content.about,
+        features: formData.content.features,
+        challenges: formData.content.challenges,
+        achievements: formData.content.achievements,
+        accessibility: formData.content.accessibility,
         updatedAt: new Date().toISOString(),
         createdAt: project.createdAt || new Date().toISOString()
       };
 
-      await saveAndUpdateDynamicContent('projects', updatedProject, project.id);
+      const { error } = await saveAndUpdateDynamicContent('projects', updatedProject, project.id);
+      
+      if (error) {
+        console.error('Auto-save error:', error);
+        return;
+      }
       
       const now = new Date();
       setLastAutoSaved(now);
@@ -220,9 +231,54 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
     }
 
     try {
+      setIsSaving(true);
       const now = new Date().toISOString();
+      
+      // Create the project data in the format expected by the database
+      const projectData = {
+        title: formData.title,
+        version: formData.version,
+        status: formData.status,
+        type: formData.type,
+        duration: formData.duration,
+        order: formData.order,
+        demoLink: formData.demoLink,
+        codeLink: formData.codeLink,
+        downloadLink: formData.downloadLink,
+        screenshots: formData.screenshots,
+        technologies: formData.technologies,
+        // Flatten content object to match database structure
+        about: formData.content.about,
+        features: formData.content.features,
+        challenges: formData.content.challenges,
+        achievements: formData.content.achievements,
+        accessibility: formData.content.accessibility,
+        developmentPipeline: formData.developmentPipeline,
+        visible: formData.visible,
+        createdAt: project?.createdAt || now,
+        updatedAt: now
+      };
+
+      let result;
+      if (project?.id) {
+        // Update existing project
+        result = await saveAndUpdateDynamicContent('projects', projectData, project.id);
+        if (result.error) {
+          throw new Error(result.error);
+        }
+        console.log('Project updated successfully with ID:', project.id);
+      } else {
+        // Create new project
+        result = await saveDynamicContent('projects', projectData);
+        if (result.error) {
+          throw new Error(result.error);
+        }
+        console.log('New project created successfully with ID:', result.id);
+      }
+
+      // Create the project object to return
       const newProject: Project = {
-        id: project?.id,
+        id: project?.id || result.id,
         title: formData.title,
         version: formData.version,
         status: formData.status as 'active' | 'inactive' | 'archived',
@@ -241,14 +297,6 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
         updatedAt: now
       };
 
-      // Save to Firebase
-      if (project?.id) {
-        await saveAndUpdateDynamicContent('projects', newProject, project.id);
-      } else {
-        const result = await saveAndUpdateDynamicContent('projects', newProject);
-        newProject.id = result.id;
-      }
-
       onSave(newProject);
       toast.success(
         project ? "Project updated successfully." : "Project created successfully."
@@ -256,7 +304,9 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
       onClose();
     } catch (error) {
       console.error('Save failed:', error);
-      toast.error('Failed to save project. Please try again.');
+      toast.error(`Failed to ${project ? 'update' : 'create'} project. Please try again.`);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -365,19 +415,25 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
                   variant="secondary" 
                   onClick={onClose}
                   className="w-full sm:w-auto order-2 sm:order-1"
+                  disabled={isSaving}
                 >
                   Cancel
                 </Button>
                 <Button 
                   type="submit" 
                   className="bg-green-600 hover:bg-green-700 text-white flex items-center justify-center gap-2 w-full sm:w-auto order-1 sm:order-2"
+                  disabled={isSaving}
                 >
-                  <Save className="h-4 w-4" />
+                  {isSaving ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
                   <span className="hidden sm:inline">
-                    {project ? 'Update Project' : 'Create Project'}
+                    {isSaving ? 'Saving...' : (project ? 'Update Project' : 'Create Project')}
                   </span>
                   <span className="sm:hidden">
-                    {project ? 'Update' : 'Create'}
+                    {isSaving ? 'Saving...' : (project ? 'Update' : 'Create')}
                   </span>
                 </Button>
               </div>
