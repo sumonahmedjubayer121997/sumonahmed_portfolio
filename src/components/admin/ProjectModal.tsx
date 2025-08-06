@@ -244,8 +244,8 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
       if (project?.id) {
         await saveAndUpdateDynamicContent('projects', newProject, project.id);
       } else {
-        const { data } = await saveAndUpdateDynamicContent('projects', newProject);
-        newProject.id = data?.id;
+        const result = await saveAndUpdateDynamicContent('projects', newProject);
+        newProject.id = result.id;
       }
 
       onSave(newProject);
