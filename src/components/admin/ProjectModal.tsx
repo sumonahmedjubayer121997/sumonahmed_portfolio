@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -56,6 +55,7 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
   const [lastAutoSaved, setLastAutoSaved] = useState<Date | null>(null);
   const [showAutoSaveTooltip, setShowAutoSaveTooltip] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [autoSaveTimeoutId, setAutoSaveTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
   // Transform project data to handle both ProjectItem and Project types
   const getProjectContent = () => {
@@ -151,51 +151,102 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
     }
   }, [project, isOpen]);
 
-  // Auto-save functionality
+  // Enhanced Auto-save functionality with proper dependency management
   useEffect(() => {
-    if (!isOpen || !project?.id) return; // Only auto-save for existing projects
+    // Clear existing timeout
+    if (autoSaveTimeoutId) {
+      clearTimeout(autoSaveTimeoutId);
+    }
 
+    // Only auto-save for existing projects when modal is open
+    if (!isOpen || !project?.id) {
+      setAutoSaveTimeoutId(null);
+      return;
+    }
+
+    // Set new timeout for auto-save
     const timeoutId = setTimeout(() => {
       handleAutoSave();
     }, 2000); // Auto-save after 2 seconds of inactivity
 
-    return () => clearTimeout(timeoutId);
-  }, [formData, isOpen, project?.id]);
+    setAutoSaveTimeoutId(timeoutId);
+
+    // Cleanup function
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [
+    formData.title,
+    formData.version,
+    formData.status,
+    formData.type,
+    formData.duration,
+    formData.order,
+    formData.demoLink,
+    formData.codeLink,
+    formData.downloadLink,
+    JSON.stringify(formData.screenshots),
+    JSON.stringify(formData.technologies),
+    formData.content.about,
+    formData.content.features,
+    formData.content.challenges,
+    formData.content.achievements,
+    formData.content.accessibility,
+    JSON.stringify(formData.developmentPipeline),
+    formData.visible,
+    isOpen,
+    project?.id
+  ]);
 
   const handleAutoSave = async () => {
-    if (!project?.id) return; // Don't auto-save new projects
+    if (!project?.id || isAutoSaving) return; // Don't auto-save new projects or if already saving
 
     try {
       setIsAutoSaving(true);
       
+      console.log('Auto-saving project...', project.id);
+      
       const updatedProject = {
-        ...formData,
-        // Transform content back to the format expected by the database
-        about: formData.content.about,
-        features: formData.content.features,
-        challenges: formData.content.challenges,
-        achievements: formData.content.achievements,
-        accessibility: formData.content.accessibility,
+        title: formData.title,
+        version: formData.version,
+        status: formData.status,
+        type: formData.type,
+        duration: formData.duration,
+        order: formData.order,
+        demoLink: formData.demoLink || '',
+        codeLink: formData.codeLink || '',
+        downloadLink: formData.downloadLink || '',
+        screenshots: formData.screenshots || [],
+        technologies: formData.technologies || [],
+        // Flatten content object to match database structure
+        about: formData.content.about || '',
+        features: formData.content.features || '',
+        challenges: formData.content.challenges || '',
+        achievements: formData.content.achievements || '',
+        accessibility: formData.content.accessibility || '',
+        developmentPipeline: formData.developmentPipeline || [],
+        visible: formData.visible,
         updatedAt: new Date().toISOString(),
         createdAt: project.createdAt || new Date().toISOString()
       };
 
-      // Remove the content object before saving as we've flattened it
-      const { content, ...dataToSave } = updatedProject;
-
-      const { error } = await saveAndUpdateDynamicContent('projects', dataToSave, project.id);
+      const { error } = await saveAndUpdateDynamicContent('projects', updatedProject, project.id);
       
       if (error) {
         console.error('Auto-save error:', error);
         return;
       }
       
+      console.log('Auto-save successful');
+      
       const now = new Date();
       setLastAutoSaved(now);
       setShowAutoSaveTooltip(true);
       
-      // Hide tooltip after 2 seconds
-      setTimeout(() => setShowAutoSaveTooltip(false), 2000);
+      // Hide tooltip after 3 seconds
+      setTimeout(() => setShowAutoSaveTooltip(false), 3000);
       
     } catch (error) {
       console.error('Auto-save failed:', error);
@@ -332,19 +383,21 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
                   {isAutoSaving && (
                     <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground">
                       <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary" />
-                      <span className="hidden sm:inline">Saving...</span>
+                      <span className="hidden sm:inline">Auto-saving...</span>
+                      <span className="sm:hidden">Saving...</span>
                     </div>
                   )}
-                  {lastAutoSaved && (
+                  {lastAutoSaved && !isAutoSaving && (
                     <Tooltip open={showAutoSaveTooltip}>
                       <TooltipTrigger asChild>
-                        <div className="flex items-center gap-1 text-xs sm:text-sm text-green-600">
+                        <div className="flex items-center gap-1 text-xs sm:text-sm text-green-600 cursor-help">
                           <Check className="h-3 w-3" />
                           <span className="hidden sm:inline">Auto-saved</span>
+                          <span className="sm:hidden">Saved</span>
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent side="bottom">
-                        <p>Last saved at {lastAutoSaved.toLocaleTimeString()}</p>
+                      <TooltipContent side="bottom" className="bg-green-100 text-green-800 border-green-300">
+                        <p>Last auto-saved at {lastAutoSaved.toLocaleTimeString()}</p>
                       </TooltipContent>
                     </Tooltip>
                   )}
@@ -416,38 +469,47 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
               </Tabs>
 
               {/* Fixed Footer */}
-              <div className="flex-shrink-0 flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 p-4 sm:p-6 pt-3 sm:pt-4 border-t bg-background">
-                <Button 
-                  type="button" 
-                  variant="secondary" 
-                  onClick={onClose}
-                  className="w-full sm:w-auto h-9 sm:h-10 text-sm"
-                  disabled={isSaving}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit" 
-                  className="bg-green-600 hover:bg-green-700 text-white flex items-center justify-center gap-2 w-full sm:w-auto h-9 sm:h-10 text-sm font-medium"
-                  disabled={isSaving}
-                >
-                  {isSaving ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                      <span>Saving...</span>
-                    </>
+              <div className="flex-shrink-0 flex flex-col-reverse sm:flex-row justify-between items-center gap-2 sm:gap-3 p-4 sm:p-6 pt-3 sm:pt-4 border-t bg-background">
+                <div className="text-xs text-muted-foreground text-center sm:text-left">
+                  {project?.id ? (
+                    <span>Changes are automatically saved every 2 seconds</span>
                   ) : (
-                    <>
-                      <Save className="h-4 w-4" />
-                      <span className="hidden sm:inline">
-                        {project ? 'Update Project' : 'Create Project'}
-                      </span>
-                      <span className="sm:hidden">
-                        {project ? 'Update' : 'Create'}
-                      </span>
-                    </>
+                    <span>New projects must be saved manually</span>
                   )}
-                </Button>
+                </div>
+                <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
+                  <Button 
+                    type="button" 
+                    variant="secondary" 
+                    onClick={onClose}
+                    className="w-full sm:w-auto h-9 sm:h-10 text-sm"
+                    disabled={isSaving}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    className="bg-green-600 hover:bg-green-700 text-white flex items-center justify-center gap-2 w-full sm:w-auto h-9 sm:h-10 text-sm font-medium"
+                    disabled={isSaving}
+                  >
+                    {isSaving ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4" />
+                        <span className="hidden sm:inline">
+                          {project ? 'Update Project' : 'Create Project'}
+                        </span>
+                        <span className="sm:hidden">
+                          {project ? 'Update' : 'Create'}
+                        </span>
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
             </form>
           </div>
