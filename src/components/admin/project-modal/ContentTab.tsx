@@ -24,11 +24,11 @@ export default function ContentTab({ formData, onChange }: ContentTabProps) {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {contentSections.map((section) => (
-        <div key={section.key} className="space-y-2">
+        <div key={section.key} className="space-y-3">
           <Label className="text-base font-semibold">{section.label}</Label>
-          <div className="border rounded-lg overflow-hidden">
+          <div className="border rounded-lg overflow-hidden min-h-[300px]">
             <EnhancedRichContentEditor
               content={formData.content[section.key] || ''}
               onChange={(value) => handleContentChange(section.key, value)}

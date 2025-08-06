@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { X, Check, Save } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -262,8 +263,9 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
   return (
     <TooltipProvider>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
-          <DialogHeader className="flex flex-row items-center justify-between pb-4 border-b flex-shrink-0">
+        <DialogContent className="w-[95vw] max-w-7xl h-[95vh] p-0 flex flex-col overflow-hidden">
+          {/* Fixed Header */}
+          <DialogHeader className="flex-shrink-0 flex flex-row items-center justify-between p-6 pb-4 border-b bg-background">
             <div className="flex items-center gap-3">
               <DialogTitle className="text-xl font-semibold">
                 {project ? 'Edit Project' : 'Add New Project'}
@@ -296,56 +298,91 @@ export default function ProjectModal({ isOpen, onClose, project, onSave }: Proje
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 flex-shrink-0"
             >
               <X className="h-4 w-4" />
             </Button>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-              <TabsList className="grid w-full grid-cols-5 mb-6 flex-shrink-0">
-                <TabsTrigger value="basic-info" className="text-sm">Basic Info</TabsTrigger>
-                <TabsTrigger value="media-tech" className="text-sm">Media & Tech</TabsTrigger>
-                <TabsTrigger value="content" className="text-sm">Content</TabsTrigger>
-                <TabsTrigger value="links" className="text-sm">Links</TabsTrigger>
-                <TabsTrigger value="pipeline-dev" className="text-sm">Pipeline Dev</TabsTrigger>
-              </TabsList>
+          {/* Scrollable Content */}
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+                {/* Fixed Tabs Navigation */}
+                <div className="flex-shrink-0 px-6 pt-2">
+                  <TabsList className="grid w-full grid-cols-5 mb-4">
+                    <TabsTrigger value="basic-info" className="text-xs sm:text-sm px-2 sm:px-3">
+                      <span className="hidden sm:inline">Basic Info</span>
+                      <span className="sm:hidden">Basic</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="media-tech" className="text-xs sm:text-sm px-2 sm:px-3">
+                      <span className="hidden sm:inline">Media & Tech</span>
+                      <span className="sm:hidden">Media</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="content" className="text-xs sm:text-sm px-2 sm:px-3">
+                      Content
+                    </TabsTrigger>
+                    <TabsTrigger value="links" className="text-xs sm:text-sm px-2 sm:px-3">
+                      Links
+                    </TabsTrigger>
+                    <TabsTrigger value="pipeline-dev" className="text-xs sm:text-sm px-2 sm:px-3">
+                      <span className="hidden sm:inline">Pipeline Dev</span>
+                      <span className="sm:hidden">Pipeline</span>
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
 
-              <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                <TabsContent value="basic-info" className="mt-0 p-1">
-                  <BasicInfoTab formData={formData} onChange={handleFieldChange} />
-                </TabsContent>
+                {/* Scrollable Tab Content */}
+                <ScrollArea className="flex-1 min-h-0">
+                  <div className="px-6 pb-4">
+                    <TabsContent value="basic-info" className="mt-0 space-y-0">
+                      <BasicInfoTab formData={formData} onChange={handleFieldChange} />
+                    </TabsContent>
 
-                <TabsContent value="media-tech" className="mt-0 p-1">
-                  <MediaTechTab formData={formData} onChange={handleFieldChange} />
-                </TabsContent>
+                    <TabsContent value="media-tech" className="mt-0 space-y-0">
+                      <MediaTechTab formData={formData} onChange={handleFieldChange} />
+                    </TabsContent>
 
-                <TabsContent value="content" className="mt-0 p-1">
-                  <ContentTab formData={formData} onChange={handleFieldChange} />
-                </TabsContent>
+                    <TabsContent value="content" className="mt-0 space-y-0">
+                      <ContentTab formData={formData} onChange={handleFieldChange} />
+                    </TabsContent>
 
-                <TabsContent value="links" className="mt-0 p-1">
-                  <LinksTab formData={formData} onChange={handleFieldChange} />
-                </TabsContent>
+                    <TabsContent value="links" className="mt-0 space-y-0">
+                      <LinksTab formData={formData} onChange={handleFieldChange} />
+                    </TabsContent>
 
-                <TabsContent value="pipeline-dev" className="mt-0 p-1">
-                  <PipelineDevTab formData={formData} onChange={handleFieldChange} />
-                </TabsContent>
+                    <TabsContent value="pipeline-dev" className="mt-0 space-y-0">
+                      <PipelineDevTab formData={formData} onChange={handleFieldChange} />
+                    </TabsContent>
+                  </div>
+                </ScrollArea>
+              </Tabs>
+
+              {/* Fixed Footer */}
+              <div className="flex-shrink-0 flex flex-col sm:flex-row justify-end gap-3 p-6 pt-4 border-t bg-background">
+                <Button 
+                  type="button" 
+                  variant="secondary" 
+                  onClick={onClose}
+                  className="w-full sm:w-auto order-2 sm:order-1"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="bg-green-600 hover:bg-green-700 text-white flex items-center justify-center gap-2 w-full sm:w-auto order-1 sm:order-2"
+                >
+                  <Save className="h-4 w-4" />
+                  <span className="hidden sm:inline">
+                    {project ? 'Update Project' : 'Create Project'}
+                  </span>
+                  <span className="sm:hidden">
+                    {project ? 'Update' : 'Create'}
+                  </span>
+                </Button>
               </div>
-            </Tabs>
-
-            {/* Form Actions */}
-            <div className="flex justify-end gap-2 pt-4 border-t bg-background flex-shrink-0">
-              <Button type="button" variant="secondary" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2">
-                <Save className="h-4 w-4" />
-                {project ? 'Update Project' : 'Create Project'}
-              </Button>
-            </div>
-          </form>
+            </form>
+          </div>
         </DialogContent>
       </Dialog>
     </TooltipProvider>
