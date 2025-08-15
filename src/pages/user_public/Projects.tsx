@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import DOMPurify from "dompurify";
 import Title from "./uif/Title";
 
-
 interface ProjectItem {
   id: string;
   title: string;
@@ -155,10 +154,10 @@ const Projects = () => {
 
         {/* Header Section */}
         <div className="mb-12 relative z-10">
-          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             Projects
           </h1>
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-600 dark:text-gray-300 text-lg">
             A timeline of my personal and client-based projects.
           </p>
         </div>
@@ -166,13 +165,13 @@ const Projects = () => {
         {/* Project Cards Section */}
         {loading ? (
           <div className="flex justify-center items-center py-12">
-            <div className="text-lg text-gray-600 ">
+            <div className="text-lg text-gray-600 dark:text-gray-300">
               Loading projects...
             </div>
           </div>
         ) : projects.length === 0 ? (
           <div className="flex justify-center items-center py-12">
-            <div className="text-lg text-gray-600">
+            <div className="text-lg text-gray-600 dark:text-gray-300">
               No projects found
             </div>
           </div>
@@ -216,9 +215,9 @@ const Projects = () => {
                         ))}
                       </div>
                     </div>
-                    <p className="mt-2 text-gray-600 text-sm">
+                    <p className="mt-2 text-gray-600 dark:text-gray-300 text-sm">
                       <div
-                        className="mt-2 text-gray-600 text-sm break-words whitespace-pre-wrap overflow-hidden"
+                        className="mt-2 text-gray-600 dark:text-gray-300 text-sm break-words whitespace-pre-wrap overflow-hidden"
                         dangerouslySetInnerHTML={{
                           __html: (() => {
                             const rawHtml =
