@@ -156,7 +156,7 @@ const ProjectDetail = () => {
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
         {/* Hero Section */}
         <div className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5"></div>
+          <div className="absolute inset-0  from-primary/5 via-transparent to-accent/5"></div>
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-12 lg:py-16">
             {/* Navigation */}
             <div className="mb-8">

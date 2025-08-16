@@ -164,9 +164,43 @@ const Projects = () => {
 
         {/* Project Cards Section */}
         {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="text-lg text-gray-600 dark:text-gray-300">
-              Loading projects...
+          <div className="flex flex-col justify-center items-center py-20 relative z-10">
+            {/* Animated loading spinner */}
+            <div className="relative mb-6">
+              <div className="w-12 h-12 border-4 border-gray-200 dark:border-gray-700 rounded-full animate-spin"></div>
+              <div className="absolute top-0 left-0 w-12 h-12 border-4 border-transparent border-t-purple-500 rounded-full animate-spin"></div>
+            </div>
+
+            {/* Loading text with fade animation */}
+            <div className="text-center">
+              <div className="text-lg font-medium text-gray-900 dark:text-white mb-2 animate-pulse">
+                Loading Projects
+              </div>
+              <div className="flex space-x-1 justify-center">
+                <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"></div>
+                <div
+                  className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
+                  style={{ animationDelay: "0.1s" }}
+                ></div>
+                <div
+                  className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
+                  style={{ animationDelay: "0.2s" }}
+                ></div>
+              </div>
+            </div>
+
+            {/* Optional skeleton cards preview */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-5xl mx-auto mt-12 w-full opacity-30">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="bg-gray-200 dark:bg-gray-700 rounded-lg h-52 mb-4"></div>
+                  <div className="space-y-2">
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         ) : projects.length === 0 ? (
