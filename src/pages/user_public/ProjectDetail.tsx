@@ -114,10 +114,87 @@ const ProjectDetail = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="max-w-4xl mx-auto px-6 py-12 text-center">
-          <div className="flex flex-col items-center space-y-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-            <p className="text-muted-foreground">Loading project...</p>
+        <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+          <div className="max-w-4xl mx-auto px-6 py-20 text-center relative">
+            {/* Animated background elements */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-purple-500/10 rounded-full animate-pulse"></div>
+              <div
+                className="absolute bottom-1/3 right-1/4 w-24 h-24 bg-blue-500/10 rounded-full animate-pulse"
+                style={{ animationDelay: "1s" }}
+              ></div>
+              <div
+                className="absolute top-1/2 right-1/3 w-16 h-16 bg-green-500/10 rounded-full animate-pulse"
+                style={{ animationDelay: "2s" }}
+              ></div>
+            </div>
+
+            <div className="flex flex-col items-center space-y-8 relative z-10">
+              {/* Enhanced loading spinner */}
+              <div className="relative">
+                <div className="w-16 h-16 border-4 border-gray-200 dark:border-gray-700 rounded-full animate-spin"></div>
+                <div className="absolute top-0 left-0 w-16 h-16 border-4 border-transparent border-t-purple-500 border-r-blue-500 rounded-full animate-spin"></div>
+                <div
+                  className="absolute top-2 left-2 w-12 h-12 border-2 border-transparent border-t-green-500 rounded-full animate-spin"
+                  style={{
+                    animationDirection: "reverse",
+                    animationDuration: "1.5s",
+                  }}
+                ></div>
+              </div>
+
+              {/* Loading text with typewriter effect */}
+              <div className="text-center space-y-3">
+                <h2 className="text-2xl font-bold text-foreground animate-pulse">
+                  Loading Project Details
+                </h2>
+                <div className="flex items-center justify-center space-x-1">
+                  <span className="text-muted-foreground">
+                    Preparing experience
+                  </span>
+                  <div className="flex space-x-1">
+                    <div className="w-1 h-1 bg-purple-500 rounded-full animate-bounce"></div>
+                    <div
+                      className="w-1 h-1 bg-purple-500 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.1s" }}
+                    ></div>
+                    <div
+                      className="w-1 h-1 bg-purple-500 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.2s" }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Skeleton content preview */}
+              <div className="w-full max-w-2xl space-y-6 mt-12 opacity-40">
+                {/* Title skeleton */}
+                <div className="space-y-3">
+                  <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse w-3/4 mx-auto"></div>
+                  <div className="flex justify-center space-x-2">
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse w-16"></div>
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse w-20"></div>
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse w-14"></div>
+                  </div>
+                </div>
+
+                {/* Image skeleton */}
+                <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
+
+                {/* Content skeleton */}
+                <div className="space-y-3">
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-full"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-5/6"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-4/5"></div>
+                </div>
+
+                {/* Button skeletons */}
+                <div className="flex justify-center space-x-4 pt-6">
+                  <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse w-24"></div>
+                  <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse w-28"></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </Layout>
